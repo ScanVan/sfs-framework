@@ -20,3 +20,6 @@
  */
 
 # include <iostream>
+
+# include "framework-viewpoint.hpp"
+# include "framework-transform.hpp"

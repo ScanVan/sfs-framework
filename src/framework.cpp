@@ -23,7 +23,9 @@
 
 int main( int argc, char ** argv ) {
 
-    std::cout << "bootstrap" << std::endl;
+    std::vector < viewpoint > pipe_viewpoint;
+
+    std::vector < transform > pipe_transform;
 
     return( 0 );
 
