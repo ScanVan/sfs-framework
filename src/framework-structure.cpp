@@ -19,18 +19,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# include "framework.hpp"
-
-int main( int argc, char ** argv ) {
-
-    std::vector< viewpoint > pipe_viewpoint;
-
-    std::vector< transform > pipe_transform;
-
-    std::vector< match > pipe_match;
-
-    std::vector< structure > pipe_structure;
-
-    return( 0 );
-
-}
+# include "framework-structure.hpp"

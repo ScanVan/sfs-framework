@@ -24,3 +24,4 @@
 # include "framework-viewpoint.hpp"
 # include "framework-transform.hpp"
 # include "framework-matche.hpp"
+# include "framework-structure.hpp"

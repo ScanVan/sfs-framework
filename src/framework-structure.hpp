@@ -19,18 +19,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# include "framework.hpp"
+#include <Eigen/Dense>
 
-int main( int argc, char ** argv ) {
+class structure {
 
-    std::vector< viewpoint > pipe_viewpoint;
+    private:
 
-    std::vector< transform > pipe_transform;
+        Eigen::Vector3d     position;   /* position in the common frame */
+        std::vector< long > vplink;     /* links to viewpoint */
+        std::vector< long > ftlink;     /* links to viewpoint feature */
 
-    std::vector< match > pipe_match;
-
-    std::vector< structure > pipe_structure;
-
-    return( 0 );
-
-}
+};
