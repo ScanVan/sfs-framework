@@ -19,6 +19,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+# ifndef __FRAMEWORK_TRANSFORM__
+# define __FRAMEWORK_TRANSFORM__
+
 #include <Eigen/Dense>
 
 class transform {
@@ -30,3 +33,5 @@ class transform {
         Eigen::Vector3d     translation /* translation vector */
 
 };
+
+# endif

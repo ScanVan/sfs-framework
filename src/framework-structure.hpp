@@ -19,6 +19,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+# ifndef __FRAMEWORK_STRUCTURE__
+# define __FRAMEWORK_STRUCTURE__
+
 #include <Eigen/Dense>
 
 class structure {
@@ -30,3 +33,5 @@ class structure {
         std::vector< long > ftlink;     /* links to viewpoint feature */
 
 };
+
+# endif

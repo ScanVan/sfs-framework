@@ -19,6 +19,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+# ifndef __FRAMEWORK_MATCH__
+# define __FRAMEWORK_MATCH__
+
 #include <string>
 #include <Eigen/Dense>
 #include <opencv4/opencv2/core/types.hpp>
@@ -38,3 +41,5 @@ class match {
         std::vector< long > ftlink_b; /* matched features links */
 
 };
+
+# endif

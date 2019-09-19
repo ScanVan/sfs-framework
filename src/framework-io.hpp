@@ -19,6 +19,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+# ifndef __FRAMEWORK_IO__
+# define __FRAMEWORK_IO__
+
 #include <string>
 
 class io {
@@ -29,3 +32,5 @@ class io {
         std::string record_path; /* path to camera record path */
 
 };
+
+# endif

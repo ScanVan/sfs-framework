@@ -19,6 +19,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+# ifndef __FRAMEWORK_VIEWPOINT__
+# define __FRAMEWORK_VIEWPOINT__
+
 #include <string>
 #include <Eigen/Dense>
 #include <opencv4/opencv2/core/types.hpp>
@@ -40,3 +43,5 @@ class viewpoint {
         Eigen::Vector3d                 position;   /* position of the viewpoint in the common frame */
 
 };
+
+# endif

@@ -19,6 +19,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+# ifndef __FRAMEWORK_PARAMETER__
+# define __FRAMEWORK_PARAMETER__
+
 class parameter {
 
     private:
@@ -29,3 +32,5 @@ class parameter {
         double filtering_radmax; /* filtering : 50 */
 
 };
+
+# endif

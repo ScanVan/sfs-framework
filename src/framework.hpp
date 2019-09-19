@@ -19,6 +19,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+# ifndef __FRAMEWORK__
+# define __FRAMEWORK__
+
 # include <iostream>
 
 # include "framework-viewpoint.hpp"
@@ -27,3 +30,5 @@
 # include "framework-structure.hpp"
 # include "framework-io.hpp"
 # include "framework-parameter.hpp"
+
+# endif
