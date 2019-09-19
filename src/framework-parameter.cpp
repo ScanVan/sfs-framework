@@ -19,11 +19,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# include <iostream>
-
-# include "framework-viewpoint.hpp"
-# include "framework-transform.hpp"
-# include "framework-matche.hpp"
-# include "framework-structure.hpp"
-# include "framework-io.hpp"
 # include "framework-parameter.hpp"

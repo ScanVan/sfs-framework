@@ -33,6 +33,8 @@ int main( int argc, char ** argv ) {
 
     io pipe_io;
 
+    parameter pipe_parameter;
+
     return( 0 );
 
 }
