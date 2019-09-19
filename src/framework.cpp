@@ -19,12 +19,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-    # include "sfs-main.hpp"
+# include "framework.hpp"
 
-    int main( int argc, char ** argv ) {
+int main( int argc, char ** argv ) {
 
-        std::cout << "bootstrap" << std::endl;
+    std::cout << "bootstrap" << std::endl;
 
-        return( 0 );
+    return( 0 );
 
-    }
+}
