@@ -27,6 +27,8 @@ int main( int argc, char ** argv ) {
 
     std::vector < transform > pipe_transform;
 
+    std::vector < match > pipe_match;
+
     return( 0 );
 
 }

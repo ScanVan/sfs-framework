@@ -19,8 +19,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# include <iostream>
+#include <string>
+#include <Eigen/Dense>
+#include <opencv4/opencv2/core/types.hpp>
+#include <opencv4/opencv2/core.hpp>
+#include <opencv4/opencv2/features2d.hpp>
+#include <opencv4/opencv2/imgcodecs.hpp>
+#include <opencv4/opencv2/opencv.hpp>
 
-# include "framework-viewpoint.hpp"
-# include "framework-transform.hpp"
-# include "framework-matche.hpp"
+class match {
+
+    private:
+
+        long                vplink_a; /* index of the first viewpoint */
+        long                vplink_b; /* index of the second viewpoint */
+
+        std::vector< long > ftlink_a; /* matched features links */
+        std::vector< long > ftlink_b; /* matched features links */
+
+};
