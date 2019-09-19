@@ -2,7 +2,7 @@
  *  sfs-framework
  *
  *      Nils Hamel - nils.hamel@bluewin.ch
- *      Charles Papon -
+ *      Charles Papon - charles.papon.90@gmail.com
  *      Copyright (c) 2019 DHLAB, EPFL & HES-SO Valais-Wallis
  *
  *  This program is free software: you can redistribute it and/or modify
