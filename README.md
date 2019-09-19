@@ -21,4 +21,4 @@ and the following external dependencies :
 
 * opencv 4.1.1
 
-The code documentation is built using doxygen. See [COPYRIGHT.md] for third parties redistribution.
+The code documentation is built using doxygen. See [COPYRIGHT](COPYRIGHT.md) file for third parties redistribution.
