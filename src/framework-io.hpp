@@ -19,20 +19,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# include "framework.hpp"
+#include <string>
 
-int main( int argc, char ** argv ) {
+class io {
 
-    std::vector< viewpoint > pipe_viewpoint;
+    private:
 
-    std::vector< transform > pipe_transform;
+        std::string model_path;  /* path to model computation storage */
+        std::string record_path; /* path to camera record path */
 
-    std::vector< match > pipe_match;
-
-    std::vector< structure > pipe_structure;
-
-    io pipe_io;
-
-    return( 0 );
-
-}
+};
