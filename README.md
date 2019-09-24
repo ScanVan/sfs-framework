@@ -24,7 +24,7 @@ and the following external dependencies :
 The code documentation is built using doxygen. See [COPYRIGHT](COPYRIGHT.md) file for third parties redistribution.
 
 
-## Usage
+## Raw usage
 
 ```bash
 mkdir build
@@ -34,7 +34,13 @@ make
 make run
 ```
 
-If you want to compile in debug mode => 
-'cmake -DCMAKE_BUILD_TYPE=Debug ..'  instead of 'cmake ..'
+## Eclipse debug
+
+```bash
+cd ..
+mkdir sfs-framework.git-debug
+cd sfs-framework.git-debug
+cmake -G "Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j$(nproc) ../sfs-framework.git
+```
 
 
