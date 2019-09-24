@@ -22,3 +22,19 @@ and the following external dependencies :
 * opencv 4.1.1
 
 The code documentation is built using doxygen. See [COPYRIGHT](COPYRIGHT.md) file for third parties redistribution.
+
+
+## Usage
+
+```bash
+mkdir build
+cd build
+cmake ..
+make
+make run
+```
+
+If you want to compile in debug mode => 
+'cmake -DCMAKE_BUILD_TYPE=Debug ..'  instead of 'cmake ..'
+
+
