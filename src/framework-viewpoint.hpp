@@ -30,17 +30,33 @@
 #include <opencv4/opencv2/imgcodecs.hpp>
 #include <opencv4/opencv2/opencv.hpp>
 
-class viewpoint {
+
+class Viewpoint {
+private:
+	cv::Mat image;
+	std::vector<cv::KeyPoint> features;
+	cv::Mat descriptor;
+public:
+	void setImage(cv::Mat &image){this->image = image;}
+	cv::Mat* getImage(){return &this->image;}
+	void setFeatures(std::vector<cv::KeyPoint> &image){this->features = features;}
+	std::vector<cv::KeyPoint>* getFeatures(){return &this->features;}
+	void setDescriptor(cv::Mat &image){this->descriptor = descriptor;}
+	cv::Mat* getDescriptor(){return &this->descriptor;}
+
+//	GETSET(cv::Mat, Image);
+//	GETSET(std::vector<cv::KeyPoint> , Features);
+//	GETSET(cv::Mat, Descriptor);
 
     private:
 
         std::string                     uid;        /* name of the view point - ex : 20181010-144724-156648 */
-        cv::Mat                         image;      /* image pixel data - maybe not needed */
-        std::vector< KeyPoint >         features;   /* features 2D */
-        cv::OutputArray                 descriptor; /* features descriptors */
-        std::vector< Eigen::Vector3d >  direction;  /* features direction in the viewpoint frame - unit vectors */
-        std::vector< double >           radius;     /* features radius according to the corresponding direction */
-        Eigen::Vector3d                 position;   /* position of the viewpoint in the common frame */
+//        cv::Mat                         image;      /* image pixel data - maybe not needed */
+//        std::vector< cv::KeyPoint >     features;   /* features 2D */
+//        cv::OutputArray                 descriptor; /* features descriptors */
+//        std::vector< Eigen::Vector3d >  direction;  /* features direction in the viewpoint frame - unit vectors */
+//        std::vector< double >           radius;     /* features radius according to the corresponding direction */
+//        Eigen::Vector3d                 position;   /* position of the viewpoint in the common frame */
 
 };
 

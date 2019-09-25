@@ -24,11 +24,18 @@
 
 # include <iostream>
 
-# include "framework-viewpoint.hpp"
-# include "framework-transform.hpp"
-# include "framework-matche.hpp"
-# include "framework-structure.hpp"
-# include "framework-io.hpp"
-# include "framework-parameter.hpp"
 
+
+#define GETSET(type, var) \
+	private: \
+		type _##var; \
+	public: \
+		type get##var() \
+		{\
+		  return _##var; \
+		}\
+		void set##var(type val) \
+		{\
+		  _##var = val; \
+		}
 # endif

@@ -19,19 +19,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# ifndef __FRAMEWORK_TRANSFORM__
-# define __FRAMEWORK_TRANSFORM__
+# ifndef __FRAMEWORK_VIEWPOINTSOURCE__
+# define __FRAMEWORK_VIEWPOINTSOURCE__
 
-#include <Eigen/Dense>
 
-class transform {
+#include <opencv4/opencv2/core/types.hpp>
+#include <opencv4/opencv2/core.hpp>
+#include <stdint.h>
+#include <vector>
 
-    private:
+#include "framework-viewpoint.hpp"
 
-        Eigen::Matrix3d     correlation; /* correlation matrix */
-        Eigen::Matrix3d     rotation; /* rotation matrix */
-        Eigen::Vector3d     translation; /* translation vector */
+class ViewPointSource{
+public:
+	ViewPointSource() {}
+	virtual ~ViewPointSource() {}
+	virtual std::shared_ptr<Viewpoint> next() = 0;
+	virtual bool hasNext() = 0;
+};
 
+class ViewPointSourceFs : public ViewPointSource{
+private:
+	std::vector<std::string> files;
+	uint32_t fileIndex;
+
+public:
+	ViewPointSourceFs(std::vector<std::string> files);
+	ViewPointSourceFs(std::string folder);
+	virtual ~ViewPointSourceFs() {}
+	virtual std::shared_ptr<Viewpoint> next();
+	virtual bool hasNext();
 };
 
 # endif

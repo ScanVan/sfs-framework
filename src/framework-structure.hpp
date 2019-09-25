@@ -23,6 +23,7 @@
 # define __FRAMEWORK_STRUCTURE__
 
 #include <Eigen/Dense>
+#include <vector>
 
 class structure {
 
