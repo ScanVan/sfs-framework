@@ -22,7 +22,13 @@
 #include "framework-database.hpp"
 
 void Database::computeModels(){
-    for(int i(0); i<this->viewpoints.size(); i++){
-        this->viewpoints[i].computeModel();
+    for(int i(0); i<viewpoints.size(); i++){
+        viewpoints[i]->computeModel();
+    }
+}
+
+void Database::computeCorrelations(){
+    for(int i(0); i<structures.size(); i++){
+        structures[i]->computeCorrelation(viewpoints,transforms);
     }
 }

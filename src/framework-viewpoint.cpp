@@ -21,8 +21,12 @@
 
 #include "framework-viewpoint.hpp"
 
-void Viewpoint::computeModel(void) {
+Eigen::Vector3d * Viewpoint::getModelPoint(int pointIndex){
+    return & model[pointIndex];
+}
+
+void Viewpoint::computeModel() {
     for(int i(0); i < features.size(); i++){
-        model[i]=direction[i]*radius[i];
+        model[i]=position+orientation*(direction[i]*radius[i]);
     }
 }

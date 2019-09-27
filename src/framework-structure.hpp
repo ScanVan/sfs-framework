@@ -25,12 +25,16 @@
 #include <Eigen/Dense>
 #include <vector>
 
+#include "framework-transform.hpp"
+#include "framework-viewpoint.hpp"
+
 class Structure {
 private:
     Eigen::Vector3d position;
     std::vector< long > vplink;
     std::vector< long > ftlink;
-
+public:
+    void computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & viewpoints, std::vector<std::shared_ptr<Transform>> & transforms);
 };
 
 # endif

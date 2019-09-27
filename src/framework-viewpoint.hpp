@@ -19,8 +19,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# ifndef __FRAMEWORK_VIEWPOINT__
-# define __FRAMEWORK_VIEWPOINT__
+#ifndef __FRAMEWORK_VIEWPOINT__
+#define __FRAMEWORK_VIEWPOINT__
 
 #include <string>
 #include <Eigen/Dense>
@@ -41,6 +41,7 @@ private:
     std::vector< Eigen::Vector3d > model;
     std::vector< double > radius;
     std::vector< double > disparity;
+    Eigen::Matrix3d orientation;
     Eigen::Vector3d position;
 public:
 	void setImage(cv::Mat &image){this->image = image;}
@@ -49,7 +50,8 @@ public:
 	std::vector<cv::KeyPoint>* getFeatures(){return &this->features;}
 	void setDescriptor(cv::Mat &image){this->descriptor = descriptor;}
 	cv::Mat* getDescriptor(){return &this->descriptor;}
-    void computeModel(void);
+    Eigen::Vector3d * getModelPoint(int pointIndex);
+    void computeModel();
 //	GETSET(cv::Mat, Image);
 //	GETSET(std::vector<cv::KeyPoint> , Features);
 //	GETSET(cv::Mat, Descriptor);

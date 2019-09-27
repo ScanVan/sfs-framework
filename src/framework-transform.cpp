@@ -19,4 +19,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# include "framework-transform.hpp"
+#include "framework-transform.hpp"
+
+void Transform::pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * second){
+    Eigen::Matrix3d local((*first)*(*second).transpose());
+    correlation += local;
+}

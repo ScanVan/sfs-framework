@@ -20,3 +20,15 @@
  */
 
 # include "framework-structure.hpp"
+
+void Structure::computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & viewpoints, std::vector<std::shared_ptr<Transform>> & transforms){
+    for(int i(0); i<vplink.size(); i++){
+        for(int j(0); j<vplink.size(); j++){
+            if (vplink[i]-vplink[j] == 1){
+                int vpa(vplink[i]), vpb(vplink[j]);
+                int fta(ftlink[i]), ftb(ftlink[j]);
+                transforms[vpb]->pushCorrelation(viewpoints[vpb]->getModelPoint(ftb), viewpoints[vpa]->getModelPoint(fta));
+            }
+        }
+    }
+}

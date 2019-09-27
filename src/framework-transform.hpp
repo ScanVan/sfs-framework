@@ -19,19 +19,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# ifndef __FRAMEWORK_TRANSFORM__
-# define __FRAMEWORK_TRANSFORM__
+#ifndef __FRAMEWORK_TRANSFORM__
+#define __FRAMEWORK_TRANSFORM__
 
 #include <Eigen/Dense>
 
 class Transform {
-
-    private:
-
-        Eigen::Matrix3d     correlation; /* correlation matrix */
-        Eigen::Matrix3d     rotation; /* rotation matrix */
-        Eigen::Vector3d     translation; /* translation vector */
-
+private:
+    Eigen::Matrix3d correlation;
+    Eigen::Matrix3d rotation;
+    Eigen::Vector3d translation;
+public:
+    void pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * second);
+    void computePose();
 };
 
 # endif

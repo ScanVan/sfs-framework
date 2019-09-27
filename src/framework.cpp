@@ -62,6 +62,7 @@ int main(){
         while ( loopFlag == true ) {
 
             database.computeModels();
+            database.computeCorrelations();
 
             loopError = 0.0; // getError()
             if ( fabs( loopError - pushError ) < database.getParameter()->getError() ) {
