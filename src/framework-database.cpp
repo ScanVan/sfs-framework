@@ -19,10 +19,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "framework-viewpoint.hpp"
+#include "framework-database.hpp"
 
-void Viewpoint::computeModel(void) {
-    for(int i(0); i < features.size(); i++){
-        model[i]=direction[i]*radius[i];
+void Database::computeModels(){
+    for(int i(0); i<this->viewpoints.size(); i++){
+        this->viewpoints[i].computeModel();
     }
 }

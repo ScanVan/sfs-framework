@@ -61,8 +61,10 @@ int main(){
 
         while ( loopFlag == true ) {
 
+            database.computeModels();
+
             loopError = 0.0; // getError()
-            if ( fabs( loopError - pushError ) < database.getParameter().getError() ) {
+            if ( fabs( loopError - pushError ) < database.getParameter()->getError() ) {
                 loopFlag == false;
             }
 

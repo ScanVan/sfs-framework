@@ -42,3 +42,5 @@
 		  _##var = val; \
 		}
 # endif
+
+void algorithmComputeModels(Database & database);

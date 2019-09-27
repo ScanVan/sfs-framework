@@ -38,6 +38,7 @@ private:
 	std::vector<cv::KeyPoint> features;
 	cv::Mat descriptor;
     std::vector< Eigen::Vector3d > direction;
+    std::vector< Eigen::Vector3d > model;
     std::vector< double > radius;
     std::vector< double > disparity;
     Eigen::Vector3d position;
@@ -48,6 +49,7 @@ public:
 	std::vector<cv::KeyPoint>* getFeatures(){return &this->features;}
 	void setDescriptor(cv::Mat &image){this->descriptor = descriptor;}
 	cv::Mat* getDescriptor(){return &this->descriptor;}
+    void computeModel(void);
 //	GETSET(cv::Mat, Image);
 //	GETSET(std::vector<cv::KeyPoint> , Features);
 //	GETSET(cv::Mat, Descriptor);

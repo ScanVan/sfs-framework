@@ -31,7 +31,7 @@ private:
 public:
     Parameter(void) : iteration_error( 1e-8 ){}
     double getError(){
-        return( this->iteration_error );
+        return this->iteration_error;
     }
 };
 
