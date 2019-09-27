@@ -24,5 +24,11 @@ public:
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint){
 		viewpoints.push_back(viewpoint);
 	}
+    Io getIos() {
+        return( this->ios );
+    }
+    Parameter getParameter() {
+        return( this->parameters );
+    }
 };
 

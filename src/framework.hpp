@@ -19,10 +19,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# ifndef __FRAMEWORK__
-# define __FRAMEWORK__
+#ifndef __FRAMEWORK__
+#define __FRAMEWORK__
 
-# include <iostream>
+#include <iostream>
+#include <cmath>
 
 #include "framework-database.hpp"
 #include "framework-viewpointsource.hpp"

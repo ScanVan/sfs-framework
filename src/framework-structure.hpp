@@ -26,12 +26,10 @@
 #include <vector>
 
 class Structure {
-
-    private:
-
-        Eigen::Vector3d     position;   /* position in the common frame */
-        std::vector< long > vplink;     /* links to viewpoint */
-        std::vector< long > ftlink;     /* links to viewpoint feature */
+private:
+    Eigen::Vector3d position;
+    std::vector< long > vplink;
+    std::vector< long > ftlink;
 
 };
 

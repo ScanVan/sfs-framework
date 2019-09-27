@@ -19,17 +19,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# ifndef __FRAMEWORK_IO__
-# define __FRAMEWORK_IO__
+#ifndef __FRAMEWORK_IO__
+#define __FRAMEWORK_IO__
 
 #include <string>
 
 class Io {
 
-    private:
-
-        std::string model_path;  /* path to model computation storage */
-        std::string record_path; /* path to camera record path */
+private:
+    std::string model_path;
+    std::string record_path;
 
 };
 

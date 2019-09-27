@@ -19,18 +19,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# ifndef __FRAMEWORK_PARAMETER__
-# define __FRAMEWORK_PARAMETER__
+#ifndef __FRAMEWORK_PARAMETER__
+#define __FRAMEWORK_PARAMETER__
 
 class Parameter {
-
-    private:
-
-        double iteration_error;  /* stop condition on geometry estimation : 1e-8 */
-        double filtering_const;  /* consistency filtering : 5.0 */
-        double filtering_radmin; /* filtering : 1 */
-        double filtering_radmax; /* filtering : 50 */
-
+private:
+    double iteration_error;  /* stop condition on geometry estimation : 1e-8 */
+    double filtering_const;  /* consistency filtering : 5.0 */
+    double filtering_radmin; /* filtering : 1 */
+    double filtering_radmax; /* filtering : 50 */
+public:
+    Parameter(void) : iteration_error( 1e-8 ){}
+    double getError(){
+        return( this->iteration_error );
+    }
 };
 
 # endif

@@ -49,6 +49,30 @@ int main(){
 //		cv::waitKey(0);
 
 		lastViewpoint = newViewpoint;
+
+        // algorithm optimisation loop
+
+        bool loopFlag( true );
+
+        double loopError( 1.0 );
+        double pushError( 0.0 );
+
+        int loopIteration( 0 );
+
+        while ( loopFlag == true ) {
+
+            loopError = 0.0; // getError()
+            if ( fabs( loopError - pushError ) < database.getParameter().getError() ) {
+                loopFlag == false;
+            }
+
+            loopIteration ++;
+            std::cout << "algorithm iteration : " << loopIteration << std::endl;
+
+        }
+
+        // algorithm optimisation loop
+
 	}
 	return 0;
 }

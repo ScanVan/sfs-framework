@@ -33,9 +33,14 @@
 
 class Viewpoint {
 private:
+    std::string uid;
 	cv::Mat image;
 	std::vector<cv::KeyPoint> features;
 	cv::Mat descriptor;
+    std::vector< Eigen::Vector3d > direction;
+    std::vector< double > radius;
+    std::vector< double > disparity;
+    Eigen::Vector3d position;
 public:
 	void setImage(cv::Mat &image){this->image = image;}
 	cv::Mat* getImage(){return &this->image;}
@@ -43,21 +48,9 @@ public:
 	std::vector<cv::KeyPoint>* getFeatures(){return &this->features;}
 	void setDescriptor(cv::Mat &image){this->descriptor = descriptor;}
 	cv::Mat* getDescriptor(){return &this->descriptor;}
-
 //	GETSET(cv::Mat, Image);
 //	GETSET(std::vector<cv::KeyPoint> , Features);
 //	GETSET(cv::Mat, Descriptor);
-
-    private:
-
-        std::string                     uid;        /* name of the view point - ex : 20181010-144724-156648 */
-//        cv::Mat                         image;      /* image pixel data - maybe not needed */
-//        std::vector< cv::KeyPoint >     features;   /* features 2D */
-//        cv::OutputArray                 descriptor; /* features descriptors */
-//        std::vector< Eigen::Vector3d >  direction;  /* features direction in the viewpoint frame - unit vectors */
-//        std::vector< double >           radius;     /* features radius according to the corresponding direction */
-//        Eigen::Vector3d                 position;   /* position of the viewpoint in the common frame */
-
 };
 
 # endif
