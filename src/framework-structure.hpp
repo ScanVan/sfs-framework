@@ -25,7 +25,7 @@
 #include <Eigen/Dense>
 #include <vector>
 
-class structure {
+class Structure {
 
     private:
 

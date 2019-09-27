@@ -24,7 +24,7 @@
 
 #include <Eigen/Dense>
 
-class transform {
+class Transform {
 
     private:
 

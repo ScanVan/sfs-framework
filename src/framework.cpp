@@ -21,16 +21,6 @@
 
 #include "framework.hpp"
 
-#include "framework-viewpoint.hpp"
-#include "framework-transform.hpp"
-#include "framework-match.hpp"
-#include "framework-structure.hpp"
-#include "framework-io.hpp"
-#include "framework-parameter.hpp"
-#include "framework-viewpointsource.hpp"
-#include "framework-database.hpp"
-#include "framework-sparsefeature.hpp"
-
 int main(){
 	std::cout << "Hello world!" << std::endl;
 	auto source = ViewPointSourceFs("/media/dolu/SCANVAN10TB/record/camera_40008603-40009302/20190319-103441_SionCar1");
@@ -62,23 +52,3 @@ int main(){
 	}
 	return 0;
 }
-
-
-
-//int main( int argc, char ** argv ) {
-//
-//    std::vector< Viewpoint > pipe_viewpoint;
-//
-//    std::vector< transform > pipe_transform;
-//
-//    std::vector< match > pipe_match;
-//
-//    std::vector< structure > pipe_structure;
-//
-//    io pipe_io;
-//
-//    parameter pipe_parameter;
-//
-//    return( 0 );
-//
-//}

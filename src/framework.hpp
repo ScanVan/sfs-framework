@@ -24,7 +24,9 @@
 
 # include <iostream>
 
-
+#include "framework-database.hpp"
+#include "framework-viewpointsource.hpp"
+#include "framework-sparsefeature.hpp"
 
 #define GETSET(type, var) \
 	private: \

@@ -22,7 +22,7 @@
 # ifndef __FRAMEWORK_PARAMETER__
 # define __FRAMEWORK_PARAMETER__
 
-class parameter {
+class Parameter {
 
     private:
 

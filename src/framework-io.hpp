@@ -24,7 +24,7 @@
 
 #include <string>
 
-class io {
+class Io {
 
     private:
 

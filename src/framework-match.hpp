@@ -30,7 +30,7 @@
 #include <opencv4/opencv2/imgcodecs.hpp>
 #include <opencv4/opencv2/opencv.hpp>
 
-class match {
+class Match {
 
     private:
 
