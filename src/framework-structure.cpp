@@ -35,3 +35,11 @@ void Structure::computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & vie
         }
     }
 }
+
+void Structure::computeOptimalPosition(std::vector<std::shared_ptr<Viewpoint>> & viewpoints ){
+
+
+    for(int i(0); i<vplink.size(); i++){
+
+    }
+}

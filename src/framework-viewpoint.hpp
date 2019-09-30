@@ -51,8 +51,6 @@ public:
 	void setDescriptor(cv::Mat &image){this->descriptor = descriptor;}
 	cv::Mat* getDescriptor(){return &this->descriptor;}
 	void setPosition(Eigen::Vector3d position){this->position = position;}
-	Eigen::Vector3d * getPosition(){return &this->position;}
-
     Eigen::Vector3d * getModelPoint(int pointIndex);
     Eigen::Vector3d * getCentroid();
     Eigen::Matrix3d * getOrientation();

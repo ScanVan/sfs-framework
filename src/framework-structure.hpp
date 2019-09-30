@@ -34,6 +34,7 @@ private:
     std::vector< long > ftlink;
 public:
     void computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & viewpoints, std::vector<std::shared_ptr<Transform>> & transforms);
+    void computeOptimalPosition(std::vector<std::shared_ptr<Viewpoint>> & viewpoints );
 };
 
 # endif
