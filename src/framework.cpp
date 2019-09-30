@@ -21,6 +21,8 @@
 
 #include "framework.hpp"
 
+#include "framework-stillcompute.hpp"
+
 int main(){
 	std::cout << "Hello world!" << std::endl;
 	auto source = ViewPointSourceFs("/media/dolu/SCANVAN10TB/record/camera_40008603-40009302/20190319-103441_SionCar1");
@@ -32,24 +34,50 @@ int main(){
 	while(source.hasNext()){
 		//Collect the next view point and add it into the database
 		auto newViewpoint = source.next();
-		if((index++) % 8 != 0) continue; //For debug purposes
+//		if((index++) % 8 != 0) continue; //For debug purposes
 		database.addViewpoint(newViewpoint);
 
 		//Process the viewpoint sparse features
 		akazeFeatures(newViewpoint->getImage(), &mask, newViewpoint->getFeatures(), newViewpoint->getDescriptor());
 
 		//Check if the image is moving enough using features
-
+		if(lastViewpoint){
+			std::vector<cv::DMatch> matches;
+			gmsMatcher (
+				lastViewpoint->getFeatures(),
+				lastViewpoint->getDescriptor(),
+				lastViewpoint->getImage()->size(),
+				newViewpoint->getFeatures(),
+				newViewpoint->getDescriptor(),
+				newViewpoint->getImage()->size(),
+				&matches
+			);
+			double score = computeStillDistance(
+				lastViewpoint->getFeatures(),
+				newViewpoint->getFeatures(),
+				&matches,
+				lastViewpoint->getImage()->size()
+			);
+			std::cout << score << std::endl;
+			if(score < 0.0005){
+				continue; //Drop the image
+			}
+		}
 
 		//Extrapolate the position of the newViewpoint
+		if(lastViewpoint){
+			newViewpoint->setPosition(*lastViewpoint->getPosition());
+		} else {
+			newViewpoint->setPosition(Eigen::Vector3d(0,0,0));
+		}
 
-		std::cout << "X" << std::endl;
-//		cv::namedWindow("miaou", cv::WINDOW_NORMAL);
-//		cv::imshow("miaou", *viewpoint->getImage());
-//		cv::waitKey(0);
+//		std::cout << "X" << std::endl;
+		cv::namedWindow("miaou", cv::WINDOW_NORMAL);
+		cv::imshow("miaou", *newViewpoint->getImage());
+		cv::waitKey(0);
 
 		lastViewpoint = newViewpoint;
-
+//		continue;
         // algorithm optimisation loop
 
         bool loopFlag( true );

@@ -1,3 +1,5 @@
+
+
 #include <opencv4/opencv2/core.hpp>
 #include <opencv4/opencv2/features2d.hpp>
 
@@ -22,7 +24,7 @@ void gmsMatcher (	std::vector<cv::KeyPoint>* k1,
 					std::vector<cv::KeyPoint>* k2,
 					cv::Mat* d2,
 					cv::Size s2,
-					std::vector<cv::DMatch> matches) {
+					std::vector<cv::DMatch> *matches) {
     std::vector<cv::DMatch> matches_all;
     cv::BFMatcher matcher(cv::NORM_HAMMING, true);
     // Second param is boolean variable, crossCheck which is false by default. If it is true, Matcher returns only those matches with value (i,j) such that i-th descriptor in set A has j-th descriptor in set B as the best match and vice-versa. That is, the two features in both sets should match each other. It provides consistent result, and is a good alternative to ratio test proposed by D.Lowe in SIFT paper.
@@ -39,7 +41,10 @@ void gmsMatcher (	std::vector<cv::KeyPoint>* k1,
 		// if inliner, then push into valid matches
 		if (vbInliers[i] == true)
 		{
-			matches.push_back(matches_all[i]);
+			matches->push_back(matches_all[i]);
 		}
 	}
 }
+
+
+
