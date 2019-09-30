@@ -43,6 +43,7 @@ private:
     std::vector< double > disparity;
     Eigen::Matrix3d orientation;
     Eigen::Vector3d position;
+    Eigen::Vector3d centroid;
 public:
 	void setImage(cv::Mat &image){this->image = image;}
 	cv::Mat* getImage(){return &this->image;}
@@ -51,7 +52,9 @@ public:
 	void setDescriptor(cv::Mat &image){this->descriptor = descriptor;}
 	cv::Mat* getDescriptor(){return &this->descriptor;}
     Eigen::Vector3d * getModelPoint(int pointIndex);
+    Eigen::Vector3d * getCentroid();
     void computeModel();
+    void computeCentroid();
 //	GETSET(cv::Mat, Image);
 //	GETSET(std::vector<cv::KeyPoint> , Features);
 //	GETSET(cv::Mat, Descriptor);

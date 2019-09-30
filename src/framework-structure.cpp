@@ -27,7 +27,10 @@ void Structure::computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & vie
             if (vplink[i]-vplink[j] == 1){
                 int vpa(vplink[i]), vpb(vplink[j]);
                 int fta(ftlink[i]), ftb(ftlink[j]);
-                transforms[vpb]->pushCorrelation(viewpoints[vpb]->getModelPoint(ftb), viewpoints[vpa]->getModelPoint(fta));
+                transforms[vpb]->pushCorrelation(
+                    viewpoints[vpb]->getModelPoint(ftb), viewpoints[vpb]->getCentroid(),
+                    viewpoints[vpa]->getModelPoint(fta), viewpoints[vpa]->getCentroid()
+                );
             }
         }
     }

@@ -24,7 +24,6 @@
 
 #include <Eigen/Dense>
 #include <vector>
-
 #include "framework-transform.hpp"
 #include "framework-viewpoint.hpp"
 

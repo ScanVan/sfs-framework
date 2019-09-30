@@ -23,6 +23,7 @@
 #define __FRAMEWORK_TRANSFORM__
 
 #include <Eigen/Dense>
+#include "framework-viewpoint.hpp"
 
 class Transform {
 private:
@@ -30,8 +31,8 @@ private:
     Eigen::Matrix3d rotation;
     Eigen::Vector3d translation;
 public:
-    void pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * second);
-    void computePose();
+    void pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * fcentroid, Eigen::Vector3d * second, Eigen::Vector3d * scentroid);
+    void computePose(Viewpoint * first, Viewpoint * second);
 };
 
 # endif

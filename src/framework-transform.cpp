@@ -21,7 +21,18 @@
 
 #include "framework-transform.hpp"
 
-void Transform::pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * second){
-    Eigen::Matrix3d local((*first)*(*second).transpose());
+void Transform::pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * fcentroid, Eigen::Vector3d * second, Eigen::Vector3d * scentroid){
+    Eigen::Matrix3d local(((*first)-(*fcentroid))*((*second)-(*scentroid)).transpose());
     correlation += local;
+}
+
+void Transform::computePose(Viewpoint * first, Viewpoint * second){
+    Eigen::JacobiSVD<Eigen::Matrix3d> svd( correlation, Eigen::ComputeFullU | Eigen::ComputeFullV );
+    rotation=svd.matrixV()*svd.matrixU().transpose();
+    if (rotation.determinant()<0){
+        Eigen::Matrix3d correction(Eigen::Matrix3d::Identity());
+        correction(3,3)=-1;
+        rotation=(svd.matrixV()*correction)*svd.matrixU().transpose();
+    }
+    translation=(*second->getCentroid())-rotation*(*first->getCentroid());
 }

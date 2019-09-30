@@ -23,7 +23,6 @@
 
 #include <opencv4/opencv2/core.hpp>
 #include <vector>
-
 #include "framework-viewpoint.hpp"
 #include "framework-transform.hpp"
 #include "framework-match.hpp"

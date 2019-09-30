@@ -24,7 +24,6 @@
 
 #include <iostream>
 #include <cmath>
-
 #include "framework-database.hpp"
 #include "framework-viewpointsource.hpp"
 #include "framework-sparsefeature.hpp"

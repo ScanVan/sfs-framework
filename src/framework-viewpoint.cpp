@@ -22,11 +22,23 @@
 #include "framework-viewpoint.hpp"
 
 Eigen::Vector3d * Viewpoint::getModelPoint(int pointIndex){
-    return & model[pointIndex];
+    return &model[pointIndex];
+}
+
+Eigen::Vector3d * Viewpoint::getCentroid(){
+    return &centroid;
 }
 
 void Viewpoint::computeModel() {
     for(int i(0); i < features.size(); i++){
         model[i]=position+orientation*(direction[i]*radius[i]);
     }
+}
+
+void Viewpoint::computeCentroid(){
+    centroid=Eigen::Vector3d::Zero();
+    for(int i(0); i<features.size(); i++){
+        centroid+=model[i];
+    }
+    centroid/=features.size();
 }

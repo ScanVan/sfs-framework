@@ -24,11 +24,18 @@
 void Database::computeModels(){
     for(int i(0); i<viewpoints.size(); i++){
         viewpoints[i]->computeModel();
+        viewpoints[i]->computeCentroid();
     }
 }
 
 void Database::computeCorrelations(){
     for(int i(0); i<structures.size(); i++){
         structures[i]->computeCorrelation(viewpoints,transforms);
+    }
+}
+
+void Database::computePoses(){
+    for(int i(1); i<transforms.size(); i++){
+        transforms[i]->computePose(&*viewpoints[i-1],&*viewpoints[i]);
     }
 }
