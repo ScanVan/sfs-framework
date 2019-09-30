@@ -22,8 +22,8 @@
 # include "framework-structure.hpp"
 
 void Structure::computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & viewpoints, std::vector<std::shared_ptr<Transform>> & transforms){
-    for(int i(0); i<vplink.size(); i++){
-        for(int j(0); j<vplink.size(); j++){
+    for(unsigned int i(0); i<vplink.size(); i++){
+        for(unsigned int j(0); j<vplink.size(); j++){
             if (vplink[i]-vplink[j] == 1){
                 int vpb(vplink[i]), vpa(vplink[j]);
                 int ftb(ftlink[i]), fta(ftlink[j]);
@@ -37,9 +37,13 @@ void Structure::computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & vie
 }
 
 void Structure::computeOptimalPosition(std::vector<std::shared_ptr<Viewpoint>> & viewpoints ){
-
-
-    for(int i(0); i<vplink.size(); i++){
-
+    Eigen::Matrix3d macc(Eigen::Matrix3d::Zero());
+    Eigen::Vector3d vacc(Eigen::Vector3d::Zero());
+    for(unsigned int i(0); i<vplink.size(); i++){
+        Eigen::Vector3d *dirvec(viewpoints[vplink[i]]->getDirection(ftlink[i]));
+        Eigen::Matrix3d weight(Eigen::Matrix3d::Identity()-(*dirvec)*(*dirvec).transpose());
+        macc+=weight;
+        vacc+=weight*(*viewpoints[vplink[i]]->getPosition());
     }
+    position=macc.inverse()*vacc;
 }

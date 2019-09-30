@@ -22,30 +22,30 @@
 #include "framework-database.hpp"
 
 void Database::computeModels(){
-    for(int i(0); i<viewpoints.size(); i++){
+    for(unsigned int i(0); i<viewpoints.size(); i++){
         viewpoints[i]->computeModel();
         viewpoints[i]->computeCentroid();
     }
 }
 
 void Database::computeCorrelations(){
-    for(int i(0); i<transforms.size(); i++){
+    for(unsigned int i(0); i<transforms.size(); i++){
         transforms[i]->resetCorrelation();
     }
-    for(int i(0); i<structures.size(); i++){
+    for(unsigned int i(0); i<structures.size(); i++){
         structures[i]->computeCorrelation(viewpoints,transforms);
     }
 }
 
 void Database::computePoses(){
-    for(int i(1); i<transforms.size(); i++){
+    for(unsigned int i(1); i<transforms.size(); i++){
         transforms[i]->computePose(viewpoints[i-1].get(),viewpoints[i].get());
     }
 }
 
 void Database::computeFrame(){
     viewpoints[0]->resetFrame();
-    for(int i(0); i<transforms.size(); i++){
+    for(unsigned int i(0); i<transforms.size(); i++){
         transforms[i]->computeFrame(viewpoints[i].get(),viewpoints[i+1].get());
     }
 }
