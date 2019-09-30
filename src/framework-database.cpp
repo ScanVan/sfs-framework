@@ -42,3 +42,10 @@ void Database::computePoses(){
         transforms[i]->computePose(viewpoints[i-1].get(),viewpoints[i].get());
     }
 }
+
+void Database::computeFrame(){
+    viewpoints[0]->resetFrame();
+    for(int i(0); i<transforms.size(); i++){
+        transforms[i]->computeFrame(viewpoints[i].get(),viewpoints[i+1].get());
+    }
+}

@@ -40,3 +40,10 @@ void Transform::computePose(Viewpoint * first, Viewpoint * second){
     }
     translation=(*second->getCentroid())-rotation*(*first->getCentroid());
 }
+
+void Transform::computeFrame(Viewpoint * first, Viewpoint * second){
+    Eigen::Matrix3d trotation(rotation.transpose());
+    Eigen::Matrix3d *prevRotation(first->getOrientation());
+    Eigen::Vector3d *prevPosition(first->getPosition());
+    second->setPose( (*prevRotation)*trotation,(*prevPosition)-trotation*translation);
+}

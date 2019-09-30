@@ -53,5 +53,6 @@ public:
     void computeModels();
     void computeCorrelations();
     void computePoses();
+    void computeFrame();
 };
 

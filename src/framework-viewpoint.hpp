@@ -30,7 +30,6 @@
 #include <opencv4/opencv2/imgcodecs.hpp>
 #include <opencv4/opencv2/opencv.hpp>
 
-
 class Viewpoint {
 private:
     std::string uid;
@@ -53,8 +52,13 @@ public:
 	cv::Mat* getDescriptor(){return &this->descriptor;}
     Eigen::Vector3d * getModelPoint(int pointIndex);
     Eigen::Vector3d * getCentroid();
+    Eigen::Matrix3d * getOrientation();
+    Eigen::Vector3d * getPosition();
+    void resetFrame();
+    void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
     void computeModel();
     void computeCentroid();
+    //void computeFrame(Viewpoint * previous, Transform * transform);
 //	GETSET(cv::Mat, Image);
 //	GETSET(std::vector<cv::KeyPoint> , Features);
 //	GETSET(cv::Mat, Descriptor);

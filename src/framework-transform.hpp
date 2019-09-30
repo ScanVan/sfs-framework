@@ -34,6 +34,7 @@ public:
     void pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * fcentroid, Eigen::Vector3d * second, Eigen::Vector3d * scentroid);
     void resetCorrelation();
     void computePose(Viewpoint * first, Viewpoint * second);
+    void computeFrame(Viewpoint * first, Viewpoint * second);
 };
 
 # endif

@@ -29,6 +29,24 @@ Eigen::Vector3d * Viewpoint::getCentroid(){
     return &centroid;
 }
 
+Eigen::Matrix3d * Viewpoint::getOrientation(){
+    return &orientation;
+}
+
+Eigen::Vector3d * Viewpoint::getPosition(){
+    return &position;
+}
+
+void Viewpoint::resetFrame(){
+    orientation=Eigen::Matrix3d::Identity();
+    position=Eigen::Vector3d::Zero();
+}
+
+void Viewpoint::setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition){
+    orientation=newOrientation;
+    position=newPosition;
+}
+
 void Viewpoint::computeModel() {
     for(int i(0); i < features.size(); i++){
         model[i]=position+orientation*(direction[i]*radius[i]);
