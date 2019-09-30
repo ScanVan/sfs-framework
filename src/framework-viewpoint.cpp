@@ -33,10 +33,6 @@ Eigen::Matrix3d * Viewpoint::getOrientation(){
     return &orientation;
 }
 
-Eigen::Vector3d * Viewpoint::getPosition(){
-    return &position;
-}
-
 void Viewpoint::resetFrame(){
     orientation=Eigen::Matrix3d::Identity();
     position=Eigen::Vector3d::Zero();

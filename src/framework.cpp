@@ -29,7 +29,6 @@ int main(){
 	auto mask = cv::imread("/home/dolu/pro/scanvan/fs", cv::IMREAD_GRAYSCALE);
 	auto database = Database();
 
-	uint32_t index = 0;
 	std::shared_ptr<Viewpoint> lastViewpoint;
 	while(source.hasNext()){
 		//Collect the next view point and add it into the database
