@@ -29,6 +29,9 @@ void Database::computeModels(){
 }
 
 void Database::computeCorrelations(){
+    for(int i(0); i<transforms.size(); i++){
+        transforms[i]->resetCorrelation();
+    }
     for(int i(0); i<structures.size(); i++){
         structures[i]->computeCorrelation(viewpoints,transforms);
     }

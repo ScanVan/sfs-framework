@@ -26,6 +26,10 @@ void Transform::pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * fcent
     correlation+=local;
 }
 
+void Transform::resetCorrelation(){
+    correlation=Eigen::Matrix3d::Zero();
+}
+
 void Transform::computePose(Viewpoint * first, Viewpoint * second){
     Eigen::JacobiSVD<Eigen::Matrix3d> svd( correlation, Eigen::ComputeFullU | Eigen::ComputeFullV );
     rotation=svd.matrixV()*svd.matrixU().transpose();
