@@ -23,7 +23,7 @@
 
 void Transform::pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * fcentroid, Eigen::Vector3d * second, Eigen::Vector3d * scentroid){
     Eigen::Matrix3d local(((*first)-(*fcentroid))*((*second)-(*scentroid)).transpose());
-    correlation += local;
+    correlation+=local;
 }
 
 void Transform::computePose(Viewpoint * first, Viewpoint * second){

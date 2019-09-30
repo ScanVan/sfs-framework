@@ -36,6 +36,6 @@ void Database::computeCorrelations(){
 
 void Database::computePoses(){
     for(int i(1); i<transforms.size(); i++){
-        transforms[i]->computePose(&*viewpoints[i-1],&*viewpoints[i]);
+        transforms[i]->computePose(viewpoints[i-1].get(),viewpoints[i].get());
     }
 }
