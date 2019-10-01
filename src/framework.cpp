@@ -21,19 +21,27 @@
 
 #include "framework.hpp"
 
-int main(){
+#include "framework-stillcompute.hpp"
+#include <yaml-cpp/yaml.h>
+int main(int argc, char *argv[]){
+	assert(argc == 2);
 	std::cout << "Hello world!" << std::endl;
-	auto source = ViewPointSourceFs("/media/dolu/SCANVAN10TB/record/camera_40008603-40009302/20190319-103441_SionCar1");
-	auto mask = cv::imread("/home/dolu/pro/scanvan/fs", cv::IMREAD_GRAYSCALE);
+
+	YAML::Node config = YAML::LoadFile(argv[1]);
+
+	ViewPointSource *source = NULL;
+	auto sourceType = config["source"]["type"].as<std::string>();
+	if(sourceType == "FOLDER") source = new ViewPointSourceFs(config["source"]["path"].as<std::string>());
+	auto mask = cv::imread(config["source"]["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
 	auto database = Database();
 
     // temporary path specification
     database.setPath( std::string("/some/record/path"), std::string("/some/model/path"));
 
 	std::shared_ptr<Viewpoint> lastViewpoint;
-	while(source.hasNext()){
+	while(source->hasNext()){
 		//Collect the next view point and add it into the database
-		auto newViewpoint = source.next();
+		auto newViewpoint = source->next();
 //		if((index++) % 8 != 0) continue; //For debug purposes
 		database.addViewpoint(newViewpoint);
 
@@ -70,13 +78,44 @@ int main(){
 		} else {
 			newViewpoint->setPosition(Eigen::Vector3d(0,0,0));
 		}
-
-//		std::cout << "X" << std::endl;
-		cv::namedWindow("miaou", cv::WINDOW_NORMAL);
-		cv::imshow("miaou", *newViewpoint->getImage());
-		cv::waitKey(0);
-
 		lastViewpoint = newViewpoint;
+
+		continue;
+
+		//Get local viewpoints
+		auto localViewpoints = std::vector<std::shared_ptr<Viewpoint>>();
+		{
+			auto viewpoints = database.getViewpoints();
+			int localCount = MIN(3, viewpoints->size());
+			for(auto i = viewpoints->end()-localCount;i != viewpoints->end(); ++i){
+				localViewpoints.push_back(*i);
+			}
+		}
+
+		//Match local viewpoints to the new image
+		std::vector<std::vector<cv::DMatch>> matches;
+		for(uint32_t localViewpointIdx = 0; localViewpointIdx < localViewpoints.size(); localViewpointIdx++){
+			auto localViewpoint = localViewpoints[localViewpointIdx];
+			gmsMatcher (
+				newViewpoint->getFeatures(),
+				newViewpoint->getDescriptor(),
+				newViewpoint->getImage()->size(),
+				localViewpoint->getFeatures(),
+				localViewpoint->getDescriptor(),
+				localViewpoint->getImage()->size(),
+				&(matches[localViewpointIdx])
+			);
+		}
+
+		//Integrate the new image features into the structure
+//		for(uint32_t localFeatureIdx = 0; localFeatureIdx < )
+		std::cout << "miaou" << std::endl;
+
+//		cv::namedWindow("miaou", cv::WINDOW_NORMAL);
+//		cv::imshow("miaou", *newViewpoint->getImage());
+//		cv::waitKey(0);
+
+
 //		continue;
         // algorithm optimisation loop
 
