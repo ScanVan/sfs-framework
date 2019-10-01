@@ -55,5 +55,6 @@ public:
     void computePoses();
     void computeFrame();
     void computeRadius();
+    double computeError();
 };
 

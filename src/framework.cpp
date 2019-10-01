@@ -94,9 +94,11 @@ int main(){
             database.computeFrame();
             database.computeRadius();
 
-            loopError = 0.0; // getError()
+            loopError = database.computeError();
             if ( fabs( loopError - pushError ) < database.getParameter()->getError() ) {
                 loopFlag == false;
+            } else {
+                pushError=loopError;
             }
 
             loopIteration ++;

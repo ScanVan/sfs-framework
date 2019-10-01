@@ -56,6 +56,7 @@ public:
     Eigen::Matrix3d * getOrientation();
     Eigen::Vector3d * getPosition();
     Eigen::Vector3d * getDirection(unsigned int dirID);
+    double getDisparity(int featID);
     void resetFrame();
     void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
     void setRadius(int featID, double radius, double disparity);

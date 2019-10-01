@@ -41,6 +41,10 @@ Eigen::Vector3d * Viewpoint::getDirection(unsigned int dirID){
     return &direction[dirID];
 }
 
+double Viewpoint::getDisparity(int featID){
+    return disparity[featID];
+}
+
 void Viewpoint::resetFrame(){
     orientation=Eigen::Matrix3d::Identity();
     position=Eigen::Vector3d::Zero();

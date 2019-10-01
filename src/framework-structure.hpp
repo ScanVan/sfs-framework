@@ -24,6 +24,7 @@
 
 #include <Eigen/Dense>
 #include <vector>
+#include <limits>
 #include "framework-transform.hpp"
 #include "framework-viewpoint.hpp"
 
@@ -33,6 +34,7 @@ private:
     std::vector< long > vplink;
     std::vector< long > ftlink;
 public:
+    double getError(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
     void computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & viewpoints, std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
     void computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);

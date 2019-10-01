@@ -55,3 +55,13 @@ void Database::computeRadius(){
         structures[i]->computeRadius(viewpoints);
     }
 }
+
+double Database::computeError(){
+    double error(0.);
+    double candidate(0.);
+    for(unsigned int i(0); i<structures.size(); i++){
+        candidate=structures[i]->getError(viewpoints);
+        if (candidate>error) error=candidate;
+    }
+    return error;
+}

@@ -21,6 +21,16 @@
 
 # include "framework-structure.hpp"
 
+double Structure::getError(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
+    double error(0.);
+    double candidate(0.);
+    for(unsigned int i(0); i<vplink.size(); i++){
+        candidate=viewpoints[vplink[i]]->getDisparity(ftlink[i])>error;
+        if (candidate>error) error=candidate;
+    }
+    return error;
+}
+
 void Structure::computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & viewpoints, std::vector<std::shared_ptr<Transform>> & transforms){
     for(unsigned int i(0); i<vplink.size(); i++){
         for(unsigned int j(0); j<vplink.size(); j++){
