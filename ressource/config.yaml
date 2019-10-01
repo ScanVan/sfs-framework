@@ -1,4 +1,5 @@
 source: 
   type: FOLDER
   path: /media/dolu/SCANVAN10TB/record/camera_40008603-40009302/20190319-103441_SionCar1
+  pathTest: /home/dolu/pro/scanvan/dataset/a
   mask: /media/dolu/SCANVAN10TB/model/camera_40008603-40009302/20190319-103441_SionCar1_20190404_New_Mask/input/1_mask/mask0_b.png

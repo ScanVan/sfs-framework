@@ -101,3 +101,27 @@ void Database::exportOdometry(){
     exportStream.close();
 }
 
+static cv::Point f2i(Eigen::Vector2f value){
+	return cv::Point(value[0],value[1]);
+}
+
+
+//Do  cv::waitKey(0); if you want to stop after it.
+void Database::displayViewpointStructures(Viewpoint *viewpoint){
+	cv::RNG rng(12345);
+	cv::Rect myROI(0, 0, viewpoint->getImage()->cols, viewpoint->getImage()->rows);
+	cv::Mat res(myROI.width,myROI.height, CV_8UC3, cv::Scalar(0,0,0));
+	res = *viewpoint->getImage();
+	for(auto f : *viewpoint->getFeatures()){
+		if(!f.structure) continue;
+		cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
+
+		auto features = f.structure->getFeatures();
+		for(uint32_t idx = 1;idx < features->size();idx++){
+			cv::line(res, f2i((*features)[idx-1]->position),  f2i((*features)[idx]->position), color, 2);
+		}
+	}
+
+	cv::namedWindow( "miaou", cv::WINDOW_KEEPRATIO );
+	imshow( "miaou", res);
+}

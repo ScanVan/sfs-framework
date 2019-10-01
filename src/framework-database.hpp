@@ -38,7 +38,7 @@ private:
 	std::vector<std::shared_ptr<Viewpoint>> viewpoints;
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Match>> matches;
-    std::vector<std::shared_ptr<Structure>> structures;
+    std::vector<Structure*> structures;
     Io ios;
     Parameter parameters;
 
@@ -62,5 +62,7 @@ public:
     double computeError();
     void exportModel();
     void exportOdometry();
+    Structure *newStructure(){ auto s = new Structure(); structures.push_back(s); return s;}
+    void displayViewpointStructures(Viewpoint *viewpoint);
 };
 

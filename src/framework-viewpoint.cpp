@@ -61,15 +61,28 @@ void Viewpoint::setRadius(int featID, double newRadius, double newDisparity){
 }
 
 void Viewpoint::computeModel() {
-    for(unsigned int i(0); i < features.size(); i++){
+    for(unsigned int i(0); i < cvFeatures.size(); i++){
         model[i]=position+orientation*(direction[i]*radius[i]);
     }
 }
 
 void Viewpoint::computeCentroid(){
     centroid=Eigen::Vector3d::Zero();
-    for(unsigned int i(0); i<features.size(); i++){
+    for(unsigned int i(0); i<cvFeatures.size(); i++){
         centroid+=model[i];
     }
-    centroid/=features.size();
+    centroid/=cvFeatures.size();
+}
+
+void Viewpoint::allocateFeaturesFromCvFeatures(){
+	features.resize(cvFeatures.size());
+	for(uint32_t i = 0;i < cvFeatures.size();i++){
+		features[i].disparity = 0;
+		features[i].radius = 1;
+		features[i].position[0] = cvFeatures[i].pt.x;
+		features[i].position[1] = cvFeatures[i].pt.y;
+		features[i].viewpoint = this;
+		features[i].structure = NULL;
+		features[i].direction = Eigen::Vector3d(0,0,0);
+	}
 }

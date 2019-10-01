@@ -29,12 +29,15 @@
 #include <opencv4/opencv2/imgcodecs.hpp>
 #include <opencv4/opencv2/opencv.hpp>
 
+#include "framework-feature.hpp"
+
 class Viewpoint {
 private:
     std::string uid;
 	cv::Mat image;
-	std::vector<cv::KeyPoint> features;
-	cv::Mat descriptor;
+	std::vector<Feature> features;
+	std::vector<cv::KeyPoint> cvFeatures;
+	cv::Mat cvDescriptor;
     std::vector< Eigen::Vector3d > direction;
     std::vector< Eigen::Vector3d > model;
     std::vector< double > radius;
@@ -45,11 +48,12 @@ private:
 public:
 	void setImage(cv::Mat &image){this->image = image;}
 	cv::Mat* getImage(){return &this->image;}
-	void setFeatures(std::vector<cv::KeyPoint> &image){this->features = features;}
-	std::vector<cv::KeyPoint>* getFeatures(){return &this->features;}
-	void setDescriptor(cv::Mat &image){this->descriptor = descriptor;}
-	cv::Mat* getDescriptor(){return &this->descriptor;}
+	void setCvFeatures(std::vector<cv::KeyPoint> &image){this->cvFeatures = cvFeatures;}
+	std::vector<cv::KeyPoint>* getCvFeatures(){return &this->cvFeatures;}
+	void setCvDescriptor(cv::Mat &image){this->cvDescriptor = cvDescriptor;}
+	cv::Mat* getCvDescriptor(){return &this->cvDescriptor;}
 	void setPosition(Eigen::Vector3d position){this->position = position;}
+	std::vector<Feature> *getFeatures() { return &features; }
     Eigen::Vector3d * getModelPoint(int pointIndex);
     Eigen::Vector3d * getCentroid();
     Eigen::Matrix3d * getOrientation();
@@ -59,6 +63,8 @@ public:
     void resetFrame();
     void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
     void setRadius(int featID, double radius, double disparity);
+    void allocateFeaturesFromCvFeatures();
+    Feature *getFeatureFromCvIndex(uint32_t i){ return &features[i]; }
     void computeModel();
     void computeCentroid();
     //void computeFrame(Viewpoint * previous, Transform * transform);
