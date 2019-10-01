@@ -49,3 +49,9 @@ void Database::computeFrame(){
         transforms[i]->computeFrame(viewpoints[i].get(),viewpoints[i+1].get());
     }
 }
+
+void Database::computeRadius(){
+    for(unsigned int i(0); i<structures.size(); i++){
+        structures[i]->computeRadius(viewpoints);
+    }
+}

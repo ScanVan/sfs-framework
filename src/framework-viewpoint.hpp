@@ -58,6 +58,7 @@ public:
     Eigen::Vector3d * getDirection(unsigned int dirID);
     void resetFrame();
     void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
+    void setRadius(int featID, double radius, double disparity);
     void computeModel();
     void computeCentroid();
     //void computeFrame(Viewpoint * previous, Transform * transform);

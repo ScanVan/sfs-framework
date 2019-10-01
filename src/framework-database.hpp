@@ -54,5 +54,6 @@ public:
     void computeCorrelations();
     void computePoses();
     void computeFrame();
+    void computeRadius();
 };
 

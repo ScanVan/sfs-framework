@@ -92,6 +92,7 @@ int main(){
             database.computeCorrelations();
             database.computePoses();
             database.computeFrame();
+            database.computeRadius();
 
             loopError = 0.0; // getError()
             if ( fabs( loopError - pushError ) < database.getParameter()->getError() ) {

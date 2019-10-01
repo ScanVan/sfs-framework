@@ -36,7 +36,7 @@ void Structure::computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & vie
     }
 }
 
-void Structure::computeOptimalPosition(std::vector<std::shared_ptr<Viewpoint>> & viewpoints ){
+void Structure::computeOptimalPosition(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
     Eigen::Matrix3d macc(Eigen::Matrix3d::Zero());
     Eigen::Vector3d vacc(Eigen::Vector3d::Zero());
     for(unsigned int i(0); i<vplink.size(); i++){
@@ -46,4 +46,15 @@ void Structure::computeOptimalPosition(std::vector<std::shared_ptr<Viewpoint>> &
         vacc+=weight*(*viewpoints[vplink[i]]->getPosition());
     }
     position=macc.inverse()*vacc;
+}
+
+void Structure::computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
+    for(unsigned int i(0); i<vplink.size(); i++){
+        Eigen::Vector3d fdirection(*viewpoints[vplink[i]]->getDirection(ftlink[i]));
+        Eigen::Matrix3d * vorientation(viewpoints[vplink[i]]->getOrientation());
+        Eigen::Vector3d * vposition(viewpoints[vplink[i]]->getPosition());
+        fdirection=(*vorientation)*fdirection;
+        double radius(fdirection.dot(position-(*vposition)));
+        viewpoints[vplink[i]]->setRadius(ftlink[i], radius, ((*vposition)+fdirection*radius-position).norm());
+    }
 }

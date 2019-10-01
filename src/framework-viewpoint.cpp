@@ -51,6 +51,11 @@ void Viewpoint::setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosit
     position=newPosition;
 }
 
+void Viewpoint::setRadius(int featID, double newRadius, double newDisparity){
+    radius[featID]=newRadius;
+    disparity[featID]=newDisparity;
+}
+
 void Viewpoint::computeModel() {
     for(unsigned int i(0); i < features.size(); i++){
         model[i]=position+orientation*(direction[i]*radius[i]);
