@@ -19,8 +19,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FRAMEWORK_TRANSFORM__
-#define __FRAMEWORK_TRANSFORM__
+#pragma once
 
 #include <Eigen/Dense>
 #include "framework-viewpoint.hpp"
@@ -37,4 +36,3 @@ public:
     void computeFrame(Viewpoint * first, Viewpoint * second);
 };
 
-# endif

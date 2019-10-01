@@ -19,8 +19,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FRAMEWORK_PARAMETER__
-#define __FRAMEWORK_PARAMETER__
+#pragma once
 
 class Parameter {
 private:
@@ -34,5 +33,3 @@ public:
         return this->iteration_error;
     }
 };
-
-# endif

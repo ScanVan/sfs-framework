@@ -19,8 +19,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# ifndef __FRAMEWORK_VIEWPOINTSOURCE__
-# define __FRAMEWORK_VIEWPOINTSOURCE__
+#pragma once
 
 
 #include <opencv4/opencv2/core/types.hpp>
@@ -50,5 +49,3 @@ public:
 	virtual std::shared_ptr<Viewpoint> next();
 	virtual bool hasNext();
 };
-
-# endif

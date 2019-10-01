@@ -19,8 +19,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FRAMEWORK_IO__
-#define __FRAMEWORK_IO__
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -36,5 +35,3 @@ public:
     std::string * getModelPath();
     std::string * getRecordPath();
 };
-
-# endif

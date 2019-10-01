@@ -19,8 +19,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# ifndef __FRAMEWORK_MATCH__
-# define __FRAMEWORK_MATCH__
+#pragma once
 
 #include <string>
 #include <Eigen/Dense>
@@ -41,5 +40,3 @@ class Match {
         std::vector< long > ftlink_b; /* matched features links */
 
 };
-
-# endif

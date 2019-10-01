@@ -19,14 +19,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FRAMEWORK__
-#define __FRAMEWORK__
+#pragma once
 
 #include <iostream>
 #include <cmath>
 #include "framework-database.hpp"
 #include "framework-viewpointsource.hpp"
 #include "framework-sparsefeature.hpp"
+#include "framework-stillcompute.hpp"
 
 #define GETSET(type, var) \
 	private: \
@@ -40,6 +40,5 @@
 		{\
 		  _##var = val; \
 		}
-# endif
 
 void algorithmComputeModels(Database & database);

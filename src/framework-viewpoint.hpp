@@ -19,8 +19,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __FRAMEWORK_VIEWPOINT__
-#define __FRAMEWORK_VIEWPOINT__
+#pragma once
 
 #include <string>
 #include <Eigen/Dense>
@@ -67,5 +66,3 @@ public:
 //	GETSET(std::vector<cv::KeyPoint> , Features);
 //	GETSET(cv::Mat, Descriptor);
 };
-
-# endif

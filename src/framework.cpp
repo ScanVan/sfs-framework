@@ -21,8 +21,6 @@
 
 #include "framework.hpp"
 
-#include "framework-stillcompute.hpp"
-
 int main(){
 	std::cout << "Hello world!" << std::endl;
 	auto source = ViewPointSourceFs("/media/dolu/SCANVAN10TB/record/camera_40008603-40009302/20190319-103441_SionCar1");

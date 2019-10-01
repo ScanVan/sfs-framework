@@ -19,8 +19,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# ifndef __FRAMEWORK_STRUCTURE__
-# define __FRAMEWORK_STRUCTURE__
+#pragma once
 
 #include <Eigen/Dense>
 #include <vector>
@@ -40,5 +39,3 @@ public:
     void computeOptimalPosition(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
     void computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
 };
-
-# endif
