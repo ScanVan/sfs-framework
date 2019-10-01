@@ -22,14 +22,19 @@
 #ifndef __FRAMEWORK_IO__
 #define __FRAMEWORK_IO__
 
+#include <iostream>
+#include <fstream>
 #include <string>
 
 class Io {
-
 private:
     std::string model_path;
     std::string record_path;
-
+public:
+    void setModelPath(std::string path);
+    void setRecordPath(std::string path);
+    std::string * getModelPath();
+    std::string * getRecordPath();
 };
 
 # endif

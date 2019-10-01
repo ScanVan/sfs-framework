@@ -20,3 +20,19 @@
  */
 
 # include "framework-io.hpp"
+
+void Io::setModelPath(std::string path){
+    model_path=path;
+}
+
+void Io::setRecordPath(std::string path){
+    record_path=path;
+}
+
+std::string * Io::getModelPath(){
+    return &model_path;
+}
+
+std::string * Io::getRecordPath(){
+    return &record_path;
+}

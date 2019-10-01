@@ -21,6 +21,10 @@
 
 # include "framework-structure.hpp"
 
+Eigen::Vector3d * Structure::getPosition(){
+    return &position;
+}
+
 double Structure::getError(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
     double error(0.);
     double candidate(0.);

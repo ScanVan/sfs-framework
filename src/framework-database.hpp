@@ -21,13 +21,15 @@
 
 #pragma once
 
-#include <opencv4/opencv2/core.hpp>
+#include <iostream>
+#include <fstream>
 #include <vector>
+#include <opencv4/opencv2/core.hpp>
 #include "framework-viewpoint.hpp"
 #include "framework-transform.hpp"
 #include "framework-match.hpp"
-#include "framework-structure.hpp"
 #include "framework-io.hpp"
+#include "framework-structure.hpp"
 #include "framework-parameter.hpp"
 
 class Database {
@@ -50,11 +52,14 @@ public:
     Parameter * getParameter() {
         return & this->parameters;
     }
+    void setPath(std::string recordPath, std::string modelPath);
     void computeModels();
     void computeCorrelations();
     void computePoses();
     void computeFrame();
     void computeRadius();
     double computeError();
+    void exportModel();
+    void exportOdometry();
 };
 

@@ -29,6 +29,9 @@ int main(){
 	auto mask = cv::imread("/home/dolu/pro/scanvan/fs", cv::IMREAD_GRAYSCALE);
 	auto database = Database();
 
+    // temporary path specification
+    database.setPath( std::string("/some/record/path"), std::string("/some/model/path"));
+
 	std::shared_ptr<Viewpoint> lastViewpoint;
 	while(source.hasNext()){
 		//Collect the next view point and add it into the database
@@ -109,5 +112,10 @@ int main(){
         // algorithm optimisation loop
 
 	}
+
+    // exportation
+    database.exportModel();
+    database.exportOdometry();
+
 	return 0;
 }

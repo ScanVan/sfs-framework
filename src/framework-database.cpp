@@ -21,6 +21,11 @@
 
 #include "framework-database.hpp"
 
+void Database::setPath(std::string recordPath, std::string modelPath){
+    ios.setRecordPath( recordPath );
+    ios.setModelPath( modelPath );
+}
+
 void Database::computeModels(){
     for(unsigned int i(0); i<viewpoints.size(); i++){
         viewpoints[i]->computeModel();
@@ -65,3 +70,34 @@ double Database::computeError(){
     }
     return error;
 }
+
+void Database::exportModel(){
+    std::string * exportPath(ios.getModelPath());
+    std::fstream exportStream;
+    exportStream.open((*exportPath)+"/model.xyz",std::ios::out);
+    if (exportStream.is_open() == false){
+        std::cerr << "unable to create model exportation file" << std::endl;
+        return;
+    }
+    for(unsigned int i(0); i<structures.size(); i++){
+        Eigen::Vector3d * position(structures[i]->getPosition());
+        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << std::endl;
+    }
+    exportStream.close();
+}
+
+void Database::exportOdometry(){
+    std::string * exportPath(ios.getModelPath());
+    std::fstream exportStream;
+    exportStream.open((*exportPath)+"/odometry.xyz",std::ios::out);
+    if (exportStream.is_open() == false){
+        std::cerr << "unable to create odometry exportation file" << std::endl;
+        return;
+    }
+    for(unsigned int i(0); i<viewpoints.size(); i++){
+        Eigen::Vector3d * position(viewpoints[i]->getPosition());
+        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << std::endl;
+    }
+    exportStream.close();
+}
+

@@ -34,6 +34,7 @@ private:
     std::vector< long > vplink;
     std::vector< long > ftlink;
 public:
+    Eigen::Vector3d * getPosition();
     double getError(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
     void computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & viewpoints, std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
