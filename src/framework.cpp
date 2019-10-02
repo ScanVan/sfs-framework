@@ -192,7 +192,7 @@ int main(int argc, char *argv[]){
 
 		database.addViewpoint(newViewpoint);
 		database.displayViewpointStructures(newViewpoint.get());
-		cv::waitKey(1);
+		cv::waitKey(100);
 
 //		cv::namedWindow("miaou", cv::WINDOW_NORMAL);
 //		cv::imshow("miaou", *newViewpoint->getImage());
