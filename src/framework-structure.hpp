@@ -39,7 +39,6 @@ public:
     Eigen::Vector3d * getPosition();
     double getDisparity();
     std::vector< Feature* > *getFeatures(){ return &features; }
-    double getError(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
     void computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & viewpoints, std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
     void computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);

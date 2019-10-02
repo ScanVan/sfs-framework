@@ -41,10 +41,6 @@ Eigen::Vector3d * Viewpoint::getDirection(unsigned int dirID){
     return &direction[dirID];
 }
 
-double Viewpoint::getDisparity(int featID){
-    return disparity[featID];
-}
-
 void Viewpoint::resetFrame(){
     orientation=Eigen::Matrix3d::Identity();
     position=Eigen::Vector3d::Zero();
@@ -55,9 +51,8 @@ void Viewpoint::setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosit
     position=newPosition;
 }
 
-void Viewpoint::setRadius(int featID, double newRadius, double newDisparity){
+void Viewpoint::setRadius(int featID, double newRadius){
     radius[featID]=newRadius;
-    disparity[featID]=newDisparity;
 }
 
 void Viewpoint::computeModel() {

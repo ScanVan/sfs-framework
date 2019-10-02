@@ -41,7 +41,6 @@ private:
     std::vector< Eigen::Vector3d > direction;
     std::vector< Eigen::Vector3d > model;
     std::vector< double > radius;
-    std::vector< double > disparity;
     Eigen::Matrix3d orientation;
     Eigen::Vector3d position;
     Eigen::Vector3d centroid;
@@ -62,7 +61,7 @@ public:
     double getDisparity(int featID);
     void resetFrame();
     void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
-    void setRadius(int featID, double radius, double disparity);
+    void setRadius(int featID, double newRadius);
     void allocateFeaturesFromCvFeatures();
     Feature *getFeatureFromCvIndex(uint32_t i){ return &features[i]; }
     void computeModel();
