@@ -61,12 +61,25 @@ void Database::computeRadius(){
     }
 }
 
+void Database::computeFilter(double dispTolerence, double triTolerence){
+    unsigned int i(0);
+    unsigned int j(structures.size());
+    while ( i<j ){
+        if ( structures[i]->computeFilter( &viewpoints, dispTolerence, triTolerence ) == false ){
+            std::swap(structures[i],structures[--j]);
+        } else {
+            i++;
+        }
+    }
+    structures.resize(j);
+}
+
 double Database::computeError(){
     double error(0.);
     double candidate(0.);
     for(unsigned int i(0); i<structures.size(); i++){
-        candidate=structures[i]->getError(viewpoints);
-        if (candidate>error) error=candidate;
+        candidate=structures[i]->getDisparity();
+        if ( candidate>error ) error=candidate;
     }
     return error;
 }

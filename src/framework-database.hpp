@@ -48,10 +48,10 @@ public:
 		viewpoints.push_back(viewpoint);
 	}
     Io * getIos() {
-        return & this->ios;
+        return & ios;
     }
     Parameter * getParameter() {
-        return & this->parameters;
+        return & parameters;
     }
     void setPath(std::string recordPath, std::string modelPath);
     void computeModels();
@@ -59,6 +59,7 @@ public:
     void computePoses();
     void computeFrame();
     void computeRadius();
+    void computeFilter(double dispTolerence, double triTolerence);
     double computeError();
     void exportModel();
     void exportOdometry();

@@ -25,6 +25,10 @@ Eigen::Vector3d * Structure::getPosition(){
     return &position;
 }
 
+double Structure::getDisparity(){
+    return disparity;
+}
+
 double Structure::getError(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
     double error(0.);
     double candidate(0.);
@@ -71,4 +75,22 @@ void Structure::computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoin
         double radius(fdirection.dot(position-(*vposition)));
         viewpoints[vplink[i]]->setRadius(ftlink[i], radius, ((*vposition)+fdirection*radius-position).norm());
     }
+}
+
+bool Structure::computeFilter(std::vector<std::shared_ptr<Viewpoint>> * viewpoints, double dispTolerence, double triTolerence){
+    double localDisp(0.);
+    double maxDisp(0.);
+    double localAngle(0.);
+    double maxAngle(0.);
+    for(unsigned int i(0); i<vplink.size(); i++){
+        Eigen::Vector3d optimalDir(position-(*(*viewpoints)[vplink[i]]->getPosition()));
+        localDisp=acos( optimalDir.dot( (*(*viewpoints)[vplink[i]]->getDirection(ftlink[i])) ) / optimalDir.norm() );
+        if ( localDisp > maxDisp ) maxDisp=localDisp;
+        if (i>0){
+            localAngle=acos( (*(*viewpoints)[vplink[i]]->getDirection(ftlink[i])).dot( (*(*viewpoints)[vplink[i]]->getDirection(ftlink[0]))) );
+            if ( localAngle > maxAngle ) maxAngle=localAngle;
+        }
+    }
+    disparity=maxDisp;
+    if ( ( maxDisp < dispTolerence ) && ( maxAngle > triTolerence ) ) return true; else return false;
 }

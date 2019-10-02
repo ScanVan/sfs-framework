@@ -210,12 +210,12 @@ int main(int argc, char *argv[]){
         int loopIteration( 0 );
 
         while ( loopFlag == true ) {
-
-            database.computeModels();
             database.computeCorrelations();
             database.computePoses();
             database.computeFrame();
             database.computeRadius();
+            database.computeModels();
+            database.computeFilter(database.getParameter()->getDisparity(),database.getParameter()->getTriangulation());
 
             loopError = database.computeError();
             if ( fabs( loopError - pushError ) < database.getParameter()->getError() ) {

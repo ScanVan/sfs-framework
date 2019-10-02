@@ -30,16 +30,19 @@
 class Structure {
 private:
     Eigen::Vector3d position;
+    double disparity;
     std::vector< long > vplink;
     std::vector< long > ftlink;
 
     std::vector< Feature* > features;
 public:
     Eigen::Vector3d * getPosition();
+    double getDisparity();
     std::vector< Feature* > *getFeatures(){ return &features; }
     double getError(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
     void computeCorrelation(std::vector<std::shared_ptr<Viewpoint>> & viewpoints, std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
     void computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
+    bool computeFilter(std::vector<std::shared_ptr<Viewpoint>> * viewpoints, double dispTolerence, double triTolerence);
     void addFeature(Feature* feature) {feature->structure = this; features.push_back(feature); }
 };

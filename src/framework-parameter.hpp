@@ -21,15 +21,22 @@
 
 #pragma once
 
+#include <cmath>
+
 class Parameter {
 private:
     double iteration_error;  /* stop condition on geometry estimation : 1e-8 */
-    double filtering_const;  /* consistency filtering : 5.0 */
-    double filtering_radmin; /* filtering : 1 */
-    double filtering_radmax; /* filtering : 50 */
+    double disparity;
+    double triangulation;
 public:
-    Parameter(void) : iteration_error( 1e-8 ){}
+    Parameter(void) : iteration_error( 1e-8 ), disparity( ( ( 2.0 * M_PI ) / 6016 ) * 0.2 ), triangulation( ( M_PI / 180.0 ) * 1.5 ) {}
     double getError(){
-        return this->iteration_error;
+        return iteration_error;
+    }
+    double getDisparity(){
+        return disparity;
+    }
+    double getTriangulation(){
+        return triangulation;
     }
 };
