@@ -61,11 +61,23 @@ void Database::computeRadius(){
     }
 }
 
+//Issue index of following elements will be modifed, can't be use in computeFilter as this
+//void Database::deleteAndUnlinkStructure(int i){
+//	for(auto f : *structures[i]->getFeatures()){
+//		f->structure = NULL;
+//	}
+//	std::swap(structures[i],structures[structures.size()-1]);
+//  structures.resize(structures.size()-1);
+//}
+
 void Database::computeFilter(double dispTolerence, double triTolerence){
     unsigned int i(0);
     unsigned int j(structures.size());
     while ( i<j ){
         if ( structures[i]->computeFilter( &viewpoints, dispTolerence, triTolerence ) == false ){
+        	for(auto f : *structures[i]->getFeatures()){
+        		f->structure = NULL;
+        	}
             std::swap(structures[i],structures[--j]);
         } else {
             i++;

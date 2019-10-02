@@ -53,6 +53,7 @@ public:
     Parameter * getParameter() {
         return & parameters;
     }
+//    void deleteAndUnlinkStructure(int id);
     void setPath(std::string recordPath, std::string modelPath);
     void computeModels();
     void computeCorrelations();
