@@ -73,12 +73,10 @@ bool Structure::computeFilter(double dispTolerence, double triTolerence){
         localDisp=acos(optimalDir.dot(featureDir)/optimalDir.norm());
         if ( localDisp>maxDisp ) maxDisp=localDisp;
     }
-
+    disparity=maxDisp;
     if ( maxDisp > dispTolerence ) return false;
-
     double localAngle(0.);
     double maxAngle(0.);
-
     for(unsigned int i(0); i<features.size(); i++){
         Eigen::Vector3d iDirection((*features[i]->getViewpoint()->getOrientation()).transpose()*(*features[i]->getDirection()));
         for(unsigned int j(i+1); j<features.size(); j++){
