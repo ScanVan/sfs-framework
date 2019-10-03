@@ -56,6 +56,7 @@ std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
 	auto image = cv::imread(path, cv::IMREAD_COLOR);
 	if (image.empty()) throw new std::runtime_error("imread path failure : " + path );
 	viewpoint->setImage(image);
+	viewpoint->setImageDimension(image.cols, image.rows);
 	fileIndex++;
 	return viewpoint;
 }
