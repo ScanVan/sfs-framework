@@ -29,7 +29,6 @@ void Database::setPath(std::string recordPath, std::string modelPath){
 void Database::computeModels(){
     for(unsigned int i(0); i<viewpoints.size(); i++){
         viewpoints[i]->computeModel();
-        viewpoints[i]->computeCentroid();
     }
 }
 
@@ -38,13 +37,19 @@ void Database::computeCorrelations(){
         transforms[i]->resetCorrelation();
     }
     for(unsigned int i(0); i<structures.size(); i++){
-        structures[i]->computeCorrelation(viewpoints,transforms);
+        structures[i]->computeCorrelation(transforms);
+    }
+}
+
+void Database::computeCentroids(){
+    for(unsigned int i(0); i<viewpoints.size(); i++){
+        viewpoints[i]->computeCentroid();
     }
 }
 
 void Database::computePoses(){
-    for(unsigned int i(1); i<transforms.size(); i++){
-        transforms[i]->computePose(viewpoints[i-1].get(),viewpoints[i].get());
+    for(unsigned int i(0); i<transforms.size(); i++){
+        transforms[i]->computePose(viewpoints[i].get(),viewpoints[i+1].get());
     }
 }
 
@@ -52,6 +57,12 @@ void Database::computeFrame(){
     viewpoints[0]->resetFrame();
     for(unsigned int i(0); i<transforms.size(); i++){
         transforms[i]->computeFrame(viewpoints[i].get(),viewpoints[i+1].get());
+    }
+}
+
+void Database::computeOptimal(){
+    for(unsigned int i(0); i<structures.size(); i++){
+        structures[i]->computeOptimalPosition();
     }
 }
 
@@ -74,7 +85,7 @@ void Database::computeFilter(double dispTolerence, double triTolerence){
     unsigned int i(0);
     unsigned int j(structures.size());
     while ( i<j ){
-        if ( structures[i]->computeFilter( &viewpoints, dispTolerence, triTolerence ) == false ){
+        if ( structures[i]->computeFilter(dispTolerence, triTolerence) == false ){
         	for(auto f : *structures[i]->getFeatures()){
         		f->structure = NULL;
         	}

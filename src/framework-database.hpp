@@ -57,8 +57,10 @@ public:
     void setPath(std::string recordPath, std::string modelPath);
     void computeModels();
     void computeCorrelations();
+    void computeCentroids();
     void computePoses();
     void computeFrame();
+    void computeOptimal();
     void computeRadius();
     void computeFilter(double dispTolerence, double triTolerence);
     double computeError();

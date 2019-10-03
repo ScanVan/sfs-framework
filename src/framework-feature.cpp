@@ -21,4 +21,35 @@
 
 #include "framework-feature.hpp"
 
+Eigen::Vector3d * Feature::getDirection(){
+    return &direction;
+}
 
+Eigen::Vector3d * Feature::getModel(){
+    return &model;
+}
+
+Viewpoint * Feature::getViewpoint(){
+    return viewpoint;
+}
+
+void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
+    position=Eigen::Vector2f(x,y);
+    direction=convertCartesian2Spherical(x,y,imageWidth,imageHeight);
+}
+
+void Feature::setRadius(double newRadius){
+    radius=newRadius;
+}
+
+void Feature::setViewpointPtr(Viewpoint * newViewpoint){
+    viewpoint=newViewpoint;
+}
+
+void Feature::setStructurePtr(Structure * newStructure){
+    structure=newStructure;
+}
+
+void Feature::computeModel(){
+    model=direction*radius;
+}

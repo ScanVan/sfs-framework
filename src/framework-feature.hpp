@@ -22,6 +22,7 @@
 #pragma once
 
 #include <Eigen/Core>
+#include "framework-utiles.hpp"
 
 class Viewpoint;
 class Structure;
@@ -30,11 +31,18 @@ class Feature{
 public:
 	Viewpoint *viewpoint;
 	Structure *structure;
-	Eigen::Vector2f position; // not used - can be removed
+	Eigen::Vector2f position;
 	Eigen::Vector3d direction;
     Eigen::Vector3d model;
 	double radius;
 	double disparity; // no more needed - stored in structure only
 public:
-
+    Eigen::Vector3d * getDirection();
+    Eigen::Vector3d * getModel();
+    Viewpoint * getViewpoint();
+    void setFeature(double x, double y, int imageWidth, int imageHeight);
+    void setRadius(double newRadius);
+    void setViewpointPtr(Viewpoint * newViewpoint);
+    void setStructurePtr(Structure * newStructure);
+    void computeModel();
 };

@@ -21,8 +21,12 @@
 
 #include "framework-viewpoint.hpp"
 
-Eigen::Vector3d * Viewpoint::getModelPoint(int pointIndex){
-    return &model[pointIndex];
+int Viewpoint::getIndex(){
+    return index;
+}
+
+Eigen::Vector3d * Viewpoint::getModelPoint(unsigned int ID){
+    return features[ID].getModel();
 }
 
 Eigen::Vector3d * Viewpoint::getCentroid(){
@@ -37,13 +41,17 @@ Eigen::Vector3d * Viewpoint::getPosition(){
     return &position;
 }
 
-Eigen::Vector3d * Viewpoint::getDirection(unsigned int dirID){
-    return &direction[dirID];
+Eigen::Vector3d * Viewpoint::getDirection(unsigned int ID){
+    return features[ID].getDirection();
 }
 
 void Viewpoint::resetFrame(){
     orientation=Eigen::Matrix3d::Identity();
     position=Eigen::Vector3d::Zero();
+}
+
+void Viewpoint::setIndex(int newIndex){
+    index=newIndex;
 }
 
 void Viewpoint::setImageDimension(int newWidth, int newHeight){
@@ -56,33 +64,31 @@ void Viewpoint::setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosit
     position=newPosition;
 }
 
-void Viewpoint::setRadius(int featID, double newRadius){
-    radius[featID]=newRadius;
+void Viewpoint::setRadius(unsigned int ID, double newRadius){
+    features[ID].setRadius(newRadius);
 }
 
 void Viewpoint::computeModel() {
-    for(unsigned int i(0); i < cvFeatures.size(); i++){
-        model[i]=position+orientation*(direction[i]*radius[i]);
+    for(unsigned int i(0); i<features.size(); i++){
+        features[i].computeModel();
     }
 }
 
 void Viewpoint::computeCentroid(){
     centroid=Eigen::Vector3d::Zero();
-    for(unsigned int i(0); i<cvFeatures.size(); i++){
-        centroid+=model[i];
+    for(unsigned int i(0); i<features.size(); i++){
+        centroid+=(*features[i].getModel());
     }
-    centroid/=cvFeatures.size();
+    centroid/=features.size();
 }
 
 void Viewpoint::allocateFeaturesFromCvFeatures(){
 	features.resize(cvFeatures.size());
 	for(uint32_t i = 0;i < cvFeatures.size();i++){
-		features[i].disparity = 0;
-		features[i].radius = 1;
-		features[i].position[0] = cvFeatures[i].pt.x;
-		features[i].position[1] = cvFeatures[i].pt.y;
-		features[i].viewpoint = this;
-		features[i].structure = NULL;
-		features[i].direction = Eigen::Vector3d(0,0,0);
+        features[i].setFeature(cvFeatures[i].pt.x, cvFeatures[i].pt.y, width, height);
+        features[i].setRadius(1.);
+        features[i].computeModel();
+        features[i].setViewpointPtr(this);
+        features[i].setStructurePtr(NULL);
 	}
 }
