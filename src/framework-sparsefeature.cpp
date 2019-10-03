@@ -12,7 +12,7 @@ void akazeFeatures(	cv::Mat* image,
 					cv::Mat* desc) {
 
 	// The following parameters worked for the sequence 1-34 of the Sion Outdoor dataset
-	cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.00025f, 4, 4, cv::KAZE::DIFF_PM_G2);
+	cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 4, 4, cv::KAZE::DIFF_PM_G2);
 
 	akaze->detectAndCompute(*image, *mask, *keypoints, *desc);
 }
