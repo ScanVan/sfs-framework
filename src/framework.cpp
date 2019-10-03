@@ -67,21 +67,21 @@ int main(int argc, char *argv[]){
 //		std::cout << "POP" << std::endl;
 
 		//Check if the image is moving enough using features
+		std::vector<cv::DMatch> lastViewpointMatches;
 		if(lastViewpoint){
-			std::vector<cv::DMatch> matches;
 			gmsMatcher (
-				lastViewpoint->getCvFeatures(),
-				lastViewpoint->getCvDescriptor(),
-				lastViewpoint->getImage()->size(),
 				newViewpoint->getCvFeatures(),
 				newViewpoint->getCvDescriptor(),
 				newViewpoint->getImage()->size(),
-				&matches
+				lastViewpoint->getCvFeatures(),
+				lastViewpoint->getCvDescriptor(),
+				lastViewpoint->getImage()->size(),
+				&lastViewpointMatches
 			);
 			double score = computeStillDistance(
-				lastViewpoint->getCvFeatures(),
 				newViewpoint->getCvFeatures(),
-				&matches,
+				lastViewpoint->getCvFeatures(),
+				&lastViewpointMatches,
 				lastViewpoint->getImage()->size()
 			);
 //			std::cout << score << std::endl;
@@ -89,6 +89,8 @@ int main(int argc, char *argv[]){
 				continue; //Drop the image
 			}
 		}
+
+		newViewpoint->setIndex(lastViewpoint ? lastViewpoint->getIndex() + 1 : 0);
 
 
 		//profile("allocateFeaturesFromCvFeatures");
@@ -102,7 +104,6 @@ int main(int argc, char *argv[]){
 		} else {
 			newViewpoint->setPosition(Eigen::Vector3d(0,0,0));
 		}
-		lastViewpoint = newViewpoint;
 
 		//Get local viewpoints
 		auto localViewpoints = std::vector<std::shared_ptr<Viewpoint>>();
@@ -124,19 +125,25 @@ int main(int argc, char *argv[]){
 //		#pragma omp parallel for
 		for(uint32_t localViewpointIdx = 0; localViewpointIdx < localViewpointsCount; localViewpointIdx++){
 			auto localViewpoint = localViewpoints[localViewpointIdx];
-			std::vector<cv::DMatch> matches;
-			gmsMatcher (
-				newViewpoint->getCvFeatures(),
-				newViewpoint->getCvDescriptor(),
-				newViewpoint->getImage()->size(),
-				localViewpoint->getCvFeatures(),
-				localViewpoint->getCvDescriptor(),
-				localViewpoint->getImage()->size(),
-				&matches
-			);
+			if(localViewpoint == lastViewpoint){ //Reuse previously processed matches
+				for(auto match : lastViewpointMatches){
+					correlations[localViewpointIdx + match.queryIdx*localViewpointsCount] = match.trainIdx;
+				}
+			} else {
+				std::vector<cv::DMatch> matches;
+				gmsMatcher (
+					newViewpoint->getCvFeatures(),
+					newViewpoint->getCvDescriptor(),
+					newViewpoint->getImage()->size(),
+					localViewpoint->getCvFeatures(),
+					localViewpoint->getCvDescriptor(),
+					localViewpoint->getImage()->size(),
+					&matches
+				);
 
-			for(auto match : matches){
-				correlations[localViewpointIdx + match.queryIdx*localViewpointsCount] = match.trainIdx;
+				for(auto match : matches){
+					correlations[localViewpointIdx + match.queryIdx*localViewpointsCount] = match.trainIdx;
+				}
 			}
 		}
 
@@ -214,6 +221,7 @@ int main(int argc, char *argv[]){
 		delete[] structuresOccurences;
 		std::cout << "structureNewCount=" << structureNewCount << " structureAggregationCount=" << structureAggregationCount << " structureFusionCount=" << structureFusionCount << std::endl;
 
+		lastViewpoint = newViewpoint;
 
 		//profile("display");
 		database.addViewpoint(newViewpoint);
