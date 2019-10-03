@@ -35,12 +35,14 @@ class Viewpoint {
 private:
     std::string uid;
 	cv::Mat image;
+    int width;
+    int height;
 	std::vector<Feature> features;
 	std::vector<cv::KeyPoint> cvFeatures;
 	cv::Mat cvDescriptor;
-    std::vector< Eigen::Vector3d > direction;
-    std::vector< Eigen::Vector3d > model;
-    std::vector< double > radius;
+    std::vector< Eigen::Vector3d > direction; // to be removed
+    std::vector< Eigen::Vector3d > model; // to be removed
+    std::vector< double > radius; // to be removed
     Eigen::Matrix3d orientation;
     Eigen::Vector3d position;
     Eigen::Vector3d centroid;
@@ -60,6 +62,7 @@ public:
     Eigen::Vector3d * getDirection(unsigned int dirID);
     double getDisparity(int featID);
     void resetFrame();
+    void setImageDimension(int newWidth, int newHeight);
     void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
     void setRadius(int featID, double newRadius);
     void allocateFeaturesFromCvFeatures();

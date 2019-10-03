@@ -8,8 +8,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall ")
 find_package( OpenCV 4 REQUIRED )
 find_package( Eigen3 REQUIRED )
 find_package( yaml-cpp REQUIRED )
-find_package(OpenMP)
-
 
 set(ROOT ./)
 include_directories(${ROOT}/src)
@@ -28,7 +26,7 @@ file(GLOB sfs-framework_SRC
 )
 
 add_executable( sfs-framework ${sfs-framework_SRC} )
-target_link_libraries( sfs-framework yaml-cpp ${OpenCV_LIBS} ${YAML_CPP_LIBRARIES} stdc++fs OpenMP::OpenMP_CXX) 
+target_link_libraries( sfs-framework yaml-cpp ${OpenCV_LIBS} ${YAML_CPP_LIBRARIES} stdc++fs)
 
 message(STATUS "OpenCV_INCLUDE_DIRS = ${OpenCV_INCLUDE_DIRS}")
 

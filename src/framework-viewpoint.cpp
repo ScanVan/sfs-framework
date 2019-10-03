@@ -46,6 +46,11 @@ void Viewpoint::resetFrame(){
     position=Eigen::Vector3d::Zero();
 }
 
+void Viewpoint::setImageDimension(int newWidth, int newHeight){
+    width=newWidth;
+    height=newHeight;
+}
+
 void Viewpoint::setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition){
     orientation=newOrientation;
     position=newPosition;

@@ -31,8 +31,8 @@ class Structure {
 private:
     Eigen::Vector3d position;
     double disparity;
-    std::vector< long > vplink;
-    std::vector< long > ftlink;
+    std::vector< long > vplink; // to be removed
+    std::vector< long > ftlink; // to be removed
 
     std::vector< Feature* > features;
 public:

@@ -19,22 +19,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "framework-feature.hpp"
 
-#include <Eigen/Core>
 
-class Viewpoint;
-class Structure;
-
-class Feature{
-public:
-	Viewpoint *viewpoint;
-	Structure *structure;
-	Eigen::Vector2f position; // not used - can be removed
-	Eigen::Vector3d direction;
-    Eigen::Vector3d model;
-	double radius;
-	double disparity; // no more needed - stored in structure only
-public:
-
-};
