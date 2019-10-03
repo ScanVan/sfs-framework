@@ -24,8 +24,11 @@
 #include "framework-stillcompute.hpp"
 #include <yaml-cpp/yaml.h>
 #include <unistd.h>
+#include "framework-utiles.hpp"
+#include "ThreadPool.h"
 
 int main(int argc, char *argv[]){
+	//profile("boot");
 	assert(argc == 2);
 	std::cout << "Hello world!" << std::endl;
 
@@ -37,13 +40,31 @@ int main(int argc, char *argv[]){
 	auto mask = cv::imread(config["source"]["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
 	auto database = Database();
 
-	std::shared_ptr<Viewpoint> lastViewpoint;
-	while(source->hasNext()){
-		//Collect the next view point and add it into the database
-		auto newViewpoint = source->next();
+    ThreadPool threadpool(8);
 
-		//Process the viewpoint sparse features
-		akazeFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor());
+
+    BlockingQueue<std::shared_ptr<Viewpoint>> featureExtractionQueue(2);
+    auto featureExtractionThread = std::thread([&]{
+		while(source->hasNext()){
+			//Collect the next view point and add it into the database
+			auto newViewpoint = source->next();
+			auto m = threadpool.enqueue([&mask, newViewpoint] {
+//				std::cout << "AKAZE " << newViewpoint << std::endl;
+				akazeFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor());
+//				std::cout << "AKAZE DONE " << newViewpoint << std::endl;
+				return newViewpoint;
+			});
+			featureExtractionQueue.push(m);
+		}
+    });
+
+
+
+	std::shared_ptr<Viewpoint> lastViewpoint;
+	while(true){
+		auto newViewpoint = featureExtractionQueue.pop();
+
+//		std::cout << "POP" << std::endl;
 
 		//Check if the image is moving enough using features
 		if(lastViewpoint){
@@ -69,7 +90,11 @@ int main(int argc, char *argv[]){
 			}
 		}
 
+
+		//profile("allocateFeaturesFromCvFeatures");
 		newViewpoint->allocateFeaturesFromCvFeatures();
+
+		//profile("misc");
 
 		//Extrapolate the position of the newViewpoint
 		if(lastViewpoint){
@@ -92,9 +117,11 @@ int main(int argc, char *argv[]){
 		uint32_t newViewpointFeaturesCount = newViewpoint->getCvFeatures()->size();
 
 		//Match local viewpoints to the new image
+		//profile("gms + correlations");
 		uint32_t *correlations = new uint32_t[newViewpointFeaturesCount*localViewpointsCount]; //-1 => empty
 		memset(correlations, -1, newViewpointFeaturesCount*localViewpointsCount*sizeof(uint32_t));
 
+//		#pragma omp parallel for
 		for(uint32_t localViewpointIdx = 0; localViewpointIdx < localViewpointsCount; localViewpointIdx++){
 			auto localViewpoint = localViewpoints[localViewpointIdx];
 			std::vector<cv::DMatch> matches;
@@ -114,6 +141,7 @@ int main(int argc, char *argv[]){
 		}
 
 		//Integrate the new image features into the structure
+		//profile("aggregation");
 		Structure** structures = new Structure*[localViewpointsCount];
 		uint32_t* structuresOccurences = new uint32_t[localViewpointsCount];
 		uint32_t structureNewCount = 0;
@@ -187,9 +215,10 @@ int main(int argc, char *argv[]){
 		std::cout << "structureNewCount=" << structureNewCount << " structureAggregationCount=" << structureAggregationCount << " structureFusionCount=" << structureFusionCount << std::endl;
 
 
+		//profile("display");
 		database.addViewpoint(newViewpoint);
 		database.displayViewpointStructures(newViewpoint.get());
-		cv::waitKey(100);
+		cv::waitKey(100); //Wait 100 ms give opencv the time to display the GUI
 
 //		cv::namedWindow("miaou", cv::WINDOW_NORMAL);
 //		cv::imshow("miaou", *newViewpoint->getImage());

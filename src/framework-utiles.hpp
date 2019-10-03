@@ -22,6 +22,46 @@
 #pragma once
 
 #include <Eigen/Core>
+#include <string>
+#include <time.h>
+#include <iostream>
+#include <mutex>
+#include <queue>
+#include <condition_variable>
+#include <future>
 
-Eigen::Vector3d convertCartesian2Spherical(double x, double y, int width, int height);
+Eigen::Vector3d convertCartesian2Spherical (double x, double y, int width, int height);
+void profile(std::string msg);
 
+//ThreadPool threadPool(8);
+template <typename T> class BlockingQueue{
+	std::mutex pushMutex, popMutex, queueMutex;
+	std::condition_variable pushCond, popCond;
+	uint32_t sizeMax;
+	std::queue<std::future<T>> queue;
+public:
+	BlockingQueue(){
+		this->sizeMax = -1;
+	}
+	BlockingQueue(int sizeMax){
+		this->sizeMax = sizeMax;
+	}
+
+	void push(std::future<T>& e){
+		std::unique_lock<std::mutex> lk(pushMutex);
+		pushCond.wait(lk, [this]{return queue.size() != sizeMax;});
+		std::lock_guard<std::mutex> l(queueMutex);
+		queue.push(std::move(e));
+		popCond.notify_one();
+	}
+
+	T pop(){
+		std::unique_lock<std::mutex> lk(popMutex);
+		popCond.wait(lk, [this]{return !queue.empty();});
+		std::lock_guard<std::mutex> l(queueMutex);
+		T e = std::move(queue.front().get());
+		queue.pop();
+		pushCond.notify_one();
+		return std::move(e);
+	}
+};
