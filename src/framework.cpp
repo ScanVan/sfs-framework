@@ -37,9 +37,6 @@ int main(int argc, char *argv[]){
 	auto mask = cv::imread(config["source"]["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
 	auto database = Database();
 
-    // temporary path specification
-    database.setPath( std::string("/some/record/path"), std::string("/some/model/path"));
-
 	std::shared_ptr<Viewpoint> lastViewpoint;
 	while(source->hasNext()){
 		//Collect the next view point and add it into the database
@@ -209,7 +206,12 @@ int main(int argc, char *argv[]){
 
         int loopIteration( 0 );
 
+        double paramError( config["algorithm"]["error_variation"].as<double>() );
+        double paramAngleDisparity( config["algorithm"]["angle_disparity"].as<double>() );
+        double paramAngleTriangle( config["algorithm"]["angle_triangle"].as<double>() );
+
         while ( loopFlag == true ) {
+
             database.computeModels();
             database.computeCentroids();
             database.computeCorrelations();
@@ -217,10 +219,10 @@ int main(int argc, char *argv[]){
             database.computeFrame();
             database.computeOptimal();
             database.computeRadius();
-            database.computeFilter(database.getParameter()->getDisparity(),database.getParameter()->getTriangulation());
+            database.computeFilter(paramAngleDisparity,paramAngleTriangle);
 
             loopError = database.computeError();
-            if ( fabs( loopError - pushError ) < database.getParameter()->getError() ) {
+            if ( fabs( loopError - pushError ) < paramError ) {
                 loopFlag = false;
             } else {
                 pushError=loopError;
@@ -236,8 +238,9 @@ int main(int argc, char *argv[]){
 	}
 
     // exportation
-    database.exportModel();
-    database.exportOdometry();
+    database.exportModel(config["export"]["path"].as<std::string>());
+    database.exportOdometry(config["export"]["path"].as<std::string>());
 
 	return 0;
 }
+

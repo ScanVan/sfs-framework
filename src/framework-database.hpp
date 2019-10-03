@@ -28,9 +28,7 @@
 #include "framework-viewpoint.hpp"
 #include "framework-transform.hpp"
 #include "framework-match.hpp"
-#include "framework-io.hpp"
 #include "framework-structure.hpp"
-#include "framework-parameter.hpp"
 
 class Database {
 
@@ -39,22 +37,13 @@ private:
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Match>> matches;
     std::vector<std::shared_ptr<Structure>> structures;
-    Io ios;
-    Parameter parameters;
 
 public:
     std::vector<std::shared_ptr<Viewpoint>> *getViewpoints() { return &viewpoints; }
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint){
 		viewpoints.push_back(viewpoint);
 	}
-    Io * getIos() {
-        return & ios;
-    }
-    Parameter * getParameter() {
-        return & parameters;
-    }
 //    void deleteAndUnlinkStructure(int id);
-    void setPath(std::string recordPath, std::string modelPath);
     void computeModels();
     void computeCorrelations();
     void computeCentroids();
@@ -64,8 +53,8 @@ public:
     void computeRadius();
     void computeFilter(double dispTolerence, double triTolerence);
     double computeError();
-    void exportModel();
-    void exportOdometry();
+    void exportModel(std::string path);
+    void exportOdometry(std::string path);
     Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();}
     void displayViewpointStructures(Viewpoint *viewpoint);
 };

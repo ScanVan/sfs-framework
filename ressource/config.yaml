@@ -1,5 +1,11 @@
-source: 
+source:
   type: FOLDER
   path: /media/dolu/SCANVAN10TB/record/camera_40008603-40009302/20190319-103441_SionCar1
   pathTest: /home/dolu/pro/scanvan/dataset/a
   mask: /media/dolu/SCANVAN10TB/model/camera_40008603-40009302/20190319-103441_SionCar1_20190404_New_Mask/input/1_mask/mask0_b.png
+algorithm:
+  error_variation: 1e-8
+  angle_disparity: 2.0888e-04
+  angle_triangle: 0.026180
+export:
+  path: /test/path
