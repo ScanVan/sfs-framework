@@ -27,7 +27,6 @@
 #include <opencv4/opencv2/core.hpp>
 #include "framework-viewpoint.hpp"
 #include "framework-transform.hpp"
-#include "framework-match.hpp"
 #include "framework-structure.hpp"
 
 class Database {
@@ -35,7 +34,6 @@ class Database {
 private:
 	std::vector<std::shared_ptr<Viewpoint>> viewpoints;
     std::vector<std::shared_ptr<Transform>> transforms;
-    std::vector<std::shared_ptr<Match>> matches;
     std::vector<std::shared_ptr<Structure>> structures;
 
 public:
