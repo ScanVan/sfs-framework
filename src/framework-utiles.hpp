@@ -37,31 +37,56 @@ void profile(std::string msg);
 template <typename T> class BlockingQueue{
 	std::mutex pushMutex, popMutex, queueMutex;
 	std::condition_variable pushCond, popCond;
-	uint32_t sizeMax;
+	uint32_t sizeMax, occupancy;
 	std::queue<std::future<T>> queue;
 public:
 	BlockingQueue(){
 		this->sizeMax = -1;
+		this->occupancy = 0;
 	}
 	BlockingQueue(int sizeMax){
 		this->sizeMax = sizeMax;
+		this->occupancy = 0;
 	}
 
 	void push(std::future<T>& e){
-		std::unique_lock<std::mutex> lk(pushMutex);
-		pushCond.wait(lk, [this]{return queue.size() != sizeMax;});
-		std::lock_guard<std::mutex> l(queueMutex);
+		queueMutex.lock();
 		queue.push(std::move(e));
+		occupancy++;
 		popCond.notify_one();
+		queueMutex.unlock();
+
+		while(true){
+			queueMutex.lock();
+			if(occupancy < sizeMax) break;
+			queueMutex.unlock();
+			std::unique_lock<std::mutex> lk(pushMutex);
+			pushCond.wait(lk);
+		}
+
+		queueMutex.unlock();
 	}
 
 	T pop(){
-		std::unique_lock<std::mutex> lk(popMutex);
-		popCond.wait(lk, [this]{return !queue.empty();});
-		std::lock_guard<std::mutex> l(queueMutex);
-		T e = std::move(queue.front().get());
+		while(true){
+			queueMutex.lock();
+			if(occupancy != 0) break;
+			queueMutex.unlock();
+			std::unique_lock<std::mutex> lk(popMutex);
+			popCond.wait(lk);
+		}
+
+		std::future<T> f = std::move(queue.front());
+		queueMutex.unlock();
+
+		T e = std::move(f.get());
+
+		queueMutex.lock();
 		queue.pop();
+		occupancy--;
 		pushCond.notify_one();
+		queueMutex.unlock();
+
 		return std::move(e);
 	}
 };
