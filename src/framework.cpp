@@ -227,6 +227,9 @@ int main(int argc, char *argv[]){
 		database.displayViewpointStructures(newViewpoint.get());
 		cv::waitKey(100); //Wait 100 ms give opencv the time to display the GUI
 
+		//As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
+		newViewpoint->getImage()->deallocate(); //TODO
+
 //		cv::namedWindow("miaou", cv::WINDOW_NORMAL);
 //		cv::imshow("miaou", *newViewpoint->getImage());
 //		cv::waitKey(0);
