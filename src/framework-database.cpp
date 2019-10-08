@@ -21,6 +21,10 @@
 
 #include "framework-database.hpp"
 
+int Database::getViewpointCount(){
+    return viewpoints.size();
+}
+
 void Database::computeModels(){
     for(unsigned int i(0); i<viewpoints.size(); i++){
         viewpoints[i]->computeModel();
@@ -67,6 +71,40 @@ void Database::computeRadius(){
     }
 }
 
+void Database::computeStatistics(){
+    unsigned int count(0);
+
+    disparityMean=0.;
+    radiusMean=0.;
+    disparityMax=0.;
+    for(unsigned int i(0); i<structures.size(); i++){
+        for(unsigned int j(0); j<structures[i]->getFeatureCount(); j++){
+            disparityMean+=structures[i]->getDisparity(j);
+            radiusMean+=structures[i]->getRadius(j);
+            count++;
+            if(disparityMax<structures[i]->getDisparity(j)){
+                disparityMax=structures[i]->getDisparity(j);
+            }
+        }
+    }
+    disparityMean/=double(count);
+    radiusMean/=double(count);
+
+    disparitySD=0.;
+    radiusSD=0.;
+    for(unsigned int i(0); i<structures.size(); i++){
+        for(unsigned int j(0); j<structures[i]->getFeatureCount(); j++){
+            double component(structures[i]->getDisparity(j)-disparityMean);
+            disparitySD+=component*component;
+            component=structures[i]->getRadius(j)-radiusMean;
+            radiusSD+=component*component;
+        }
+    }
+    disparitySD=std::sqrt(disparitySD/double(count));
+    radiusSD=std::sqrt(radiusSD/double(count));
+}
+
+
 //Issue index of following elements will be modifed, can't be use in computeFilter as this
 //void Database::deleteAndUnlinkStructure(int i){
 //	for(auto f : *structures[i]->getFeatures()){
@@ -76,11 +114,12 @@ void Database::computeRadius(){
 //  structures.resize(structures.size()-1);
 //}
 
-void Database::computeFilter(double dispTolerence, double triTolerence){
+void Database::computeFilter(double dispTolerence, double radTolerence){
     unsigned int i(0);
     unsigned int j(structures.size());
     while ( i<j ){
-        if ( structures[i]->computeFilter(dispTolerence, triTolerence) == false ){
+        //if ( structures[i]->computeFilter(dispTolerence, triTolerence, disparitySD) == false ){
+        if (structures[i]->computeFilter(disparitySD,radiusMean,radiusSD,dispTolerence,radTolerence)==false){
         	for(auto f : *structures[i]->getFeatures()){
         		f->structure = NULL;
         	}
@@ -93,13 +132,7 @@ void Database::computeFilter(double dispTolerence, double triTolerence){
 }
 
 double Database::computeError(){
-    double error(0.);
-    double candidate(0.);
-    for(unsigned int i(0); i<structures.size(); i++){
-        candidate=structures[i]->getDisparity();
-        if ( candidate>error ) error=candidate;
-    }
-    return error;
+    return disparityMax;
 }
 
 void Database::exportModel(std::string path){
@@ -154,3 +187,71 @@ void Database::displayViewpointStructures(Viewpoint *viewpoint){
 	cv::namedWindow( "miaou", cv::WINDOW_KEEPRATIO );
 	imshow( "miaou", res);
 }
+
+//
+//  development related features
+//
+
+void Database::_exportState(std::string path){
+    std::fstream stream;
+
+    for(unsigned int i(0); i<viewpoints.size(); i++){
+        stream.open( path + "/viewpoint_direction_" + std::to_string(i) + ".xyz", std::ios::out );
+        if ( stream.is_open() == false ) { std::cerr << "debug : error on stream" << std::endl; return; }
+        for(unsigned int j(0); j<viewpoints[i]->features.size(); j++ ){
+            stream << viewpoints[i]->features[j].direction(0) << " "
+                   << viewpoints[i]->features[j].direction(1) << " "
+                   << viewpoints[i]->features[j].direction(2) << " 255 0 0 " << std::endl;
+        }
+        stream.close();
+    }
+
+    for(unsigned int i(0); i<viewpoints.size(); i++){
+        stream.open( path + "/viewpoint_model_" + std::to_string(i) + ".xyz", std::ios::out );
+        if ( stream.is_open() == false ) { std::cerr << "debug : error on stream" << std::endl; return; }
+        for(unsigned int j(0); j<viewpoints[i]->features.size(); j++ ){
+            stream << viewpoints[i]->features[j].model(0) << " "
+                   << viewpoints[i]->features[j].model(1) << " "
+                   << viewpoints[i]->features[j].model(2) << " 255 0 0 " << std::endl;
+        }
+        stream << viewpoints[i]->centroid(0) << " "
+               << viewpoints[i]->centroid(1) << " "
+               << viewpoints[i]->centroid(2) << " 0 255 0" << std::endl;
+        stream.close();
+    }
+
+    stream.open( path + "/model.xyz", std::ios::out );
+    for(unsigned int i(0); i<viewpoints.size(); i++){
+        stream << viewpoints[i]->position(0) << " "
+               << viewpoints[i]->position(1) << " "
+               << viewpoints[i]->position(2) << " 0 0 255" << std::endl;
+    }
+    for(unsigned int i(0); i<structures.size(); i++){
+        stream << structures[i]->position(0) << " "
+               << structures[i]->position(1) << " "
+               << structures[i]->position(2) << " 255 0 0" << std::endl;
+    }
+
+    stream.close();
+
+}
+
+void Database::_exportMatch(std::string path){
+    std::fstream stream;
+    for(unsigned int i(0); i<structures.size(); i++){
+        for(unsigned int j(0); j<structures[i]->features.size(); j++){
+            for(unsigned int k(0); k<structures[i]->features.size(); k++){
+                int jindex = structures[i]->features[j]->viewpoint->getIndex();
+                int kindex = structures[i]->features[k]->viewpoint->getIndex();
+                if ( jindex - kindex == 1 )
+                    stream.open( path + "/match_" + std::to_string(kindex) + "_" + std::to_string(jindex), std::ios::app );
+                    stream << structures[i]->features[k]->position(0) << " "
+                           << structures[i]->features[k]->position(1) << " "
+                           << structures[i]->features[j]->position(0) << " "
+                           << structures[i]->features[j]->position(1) << std::endl;
+                    stream.close();
+            }
+        }
+    }
+}
+

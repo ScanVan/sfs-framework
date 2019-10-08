@@ -28,19 +28,26 @@
 #include "framework-viewpoint.hpp"
 
 class Structure {
-private:
+//private:
+public:
     Eigen::Vector3d position;
     double disparity;
     std::vector<Feature*> features;
-    std::vector< long > vplink; // to be removed
-    std::vector< long > ftlink; // to be removed
+    //std::vector< long > vplink; // to be removed
+    //std::vector< long > ftlink; // to be removed
 public:
     Eigen::Vector3d * getPosition();
-    double getDisparity();
+    unsigned int getFeatureCount();
+    double getRadius(unsigned int featureID);
+    double getDisparity(unsigned int featureID);
     std::vector< Feature* > *getFeatures(){ return &features; }
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition();
     void computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
-    bool computeFilter(double dispTolerence, double triTolerence);
+    bool computeFilter(double dispSD, double radMean, double radSD, double dispTolerence, double radTolerence);
+    //bool computeFilter(double dispTolerence, double triTolerence, double disparitySD);
+    //bool computeFilterTriangulation(double triTolerence);
+    //bool computeFilterRadius(double radTolerence, double radiusMean, double radiusSD);
+    //bool computeFilterDisparity(double dispTolerence, double disparitySD);
     void addFeature(Feature* feature) {feature->structure = this; features.push_back(feature); }
 };

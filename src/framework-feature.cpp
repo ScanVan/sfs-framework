@@ -29,9 +29,18 @@ Eigen::Vector3d * Feature::getModel(){
     return &model;
 }
 
+double Feature::getRadius(){
+    return radius;
+}
+
+double Feature::getDisparity(){
+    return disparity;
+}
+
 Viewpoint * Feature::getViewpoint(){
     return viewpoint;
 }
+
 
 void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
     position=Eigen::Vector2f(x,y);
@@ -40,6 +49,10 @@ void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
 
 void Feature::setRadius(double newRadius){
     radius=newRadius;
+}
+
+void Feature::setDisparity(double newDisparity){
+    disparity=newDisparity;
 }
 
 void Feature::setViewpointPtr(Viewpoint * newViewpoint){

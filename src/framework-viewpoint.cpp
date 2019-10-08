@@ -25,9 +25,9 @@ int Viewpoint::getIndex(){
     return index;
 }
 
-Eigen::Vector3d * Viewpoint::getModelPoint(unsigned int ID){
-    return features[ID].getModel();
-}
+//Eigen::Vector3d * Viewpoint::getModelPoint(unsigned int ID){
+//    return features[ID].getModel();
+//}
 
 Eigen::Vector3d * Viewpoint::getCentroid(){
     return &centroid;
@@ -79,7 +79,7 @@ void Viewpoint::computeCentroid(){
     for(unsigned int i(0); i<features.size(); i++){
         centroid+=(*features[i].getModel());
     }
-    centroid/=features.size();
+    centroid/=double(features.size());
 }
 
 void Viewpoint::allocateFeaturesFromCvFeatures(){
@@ -87,7 +87,7 @@ void Viewpoint::allocateFeaturesFromCvFeatures(){
 	for(uint32_t i = 0;i < cvFeatures.size();i++){
         features[i].setFeature(cvFeatures[i].pt.x, cvFeatures[i].pt.y, width, height);
         features[i].setRadius(1.);
-        features[i].computeModel();
+        //features[i].computeModel();
         features[i].setViewpointPtr(this);
         features[i].setStructurePtr(NULL);
 	}

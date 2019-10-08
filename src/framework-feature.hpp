@@ -35,13 +35,16 @@ public:
 	Eigen::Vector3d direction;
     Eigen::Vector3d model;
 	double radius;
-	double disparity; // no more needed - stored in structure only
+	double disparity;
 public:
     Eigen::Vector3d * getDirection();
     Eigen::Vector3d * getModel();
+    double getRadius();
+    double getDisparity();
     Viewpoint * getViewpoint();
     void setFeature(double x, double y, int imageWidth, int imageHeight);
     void setRadius(double newRadius);
+    void setDisparity(double newDisparity);
     void setViewpointPtr(Viewpoint * newViewpoint);
     void setStructurePtr(Structure * newStructure);
     void computeModel();

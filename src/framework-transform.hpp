@@ -25,7 +25,8 @@
 #include "framework-viewpoint.hpp"
 
 class Transform {
-private:
+//private:
+public:
     Eigen::Matrix3d correlation;
     Eigen::Matrix3d rotation;
     Eigen::Vector3d translation;

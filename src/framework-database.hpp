@@ -24,6 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cmath>
 #include <opencv4/opencv2/core.hpp>
 #include "framework-viewpoint.hpp"
 #include "framework-transform.hpp"
@@ -31,10 +32,17 @@
 
 class Database {
 
-private:
+//private:
+public:
 	std::vector<std::shared_ptr<Viewpoint>> viewpoints;
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Structure>> structures;
+
+    double disparityMean;
+    double disparitySD; /* standard deviation */
+    double disparityMax;
+    double radiusMean;
+    double radiusSD;
 
 public:
     std::vector<std::shared_ptr<Viewpoint>> *getViewpoints() { return &viewpoints; }
@@ -42,6 +50,7 @@ public:
 		viewpoints.push_back(viewpoint);
 	}
 //    void deleteAndUnlinkStructure(int id);
+    int getViewpointCount();
     void computeModels();
     void computeCorrelations();
     void computeCentroids();
@@ -49,11 +58,17 @@ public:
     void computeFrame();
     void computeOptimal();
     void computeRadius();
-    void computeFilter(double dispTolerence, double triTolerence);
+    void computeStatistics();
+    void computeFilter(double dispTolerence, double radTolerence);
     double computeError();
     void exportModel(std::string path);
     void exportOdometry(std::string path);
     Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();}
     void displayViewpointStructures(Viewpoint *viewpoint);
+
+// development related features
+public:
+    void _exportState(std::string path);
+    void _exportMatch(std::string path);
 };
 

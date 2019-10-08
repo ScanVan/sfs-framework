@@ -25,8 +25,16 @@ Eigen::Vector3d * Structure::getPosition(){
     return &position;
 }
 
-double Structure::getDisparity(){
-    return disparity;
+unsigned int Structure::getFeatureCount(){
+    return features.size();
+}
+
+double Structure::getRadius(unsigned int featureID){
+    return features[featureID]->getRadius();
+}
+
+double Structure::getDisparity(unsigned int featureID){
+    return features[featureID]->getDisparity();
 }
 
 void Structure::computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms){
@@ -49,7 +57,7 @@ void Structure::computeOptimalPosition(){
     Eigen::Matrix3d macc(Eigen::Matrix3d::Zero());
     Eigen::Vector3d vacc(Eigen::Vector3d::Zero());
     for(unsigned int i(0); i<features.size(); i++){
-        Eigen::Vector3d dirVector((*features[i]->getViewpoint()->getOrientation()).transpose()*(*features[i]->getDirection()));
+        Eigen::Vector3d dirVector((*features[i]->getViewpoint()->getOrientation())*(*features[i]->getDirection()));
         Eigen::Matrix3d weight(Eigen::Matrix3d::Identity()-dirVector*dirVector.transpose());
         macc+=weight;
         vacc+=weight*(*features[i]->getViewpoint()->getPosition());
@@ -59,33 +67,32 @@ void Structure::computeOptimalPosition(){
 
 void Structure::computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
     for(unsigned int i(0); i<features.size(); i++){
-        Eigen::Vector3d featureDir((*features[i]->getViewpoint()->getOrientation()).transpose()*(*features[i]->getDirection()));
-        features[i]->setRadius(featureDir.dot(position-(*features[i]->getViewpoint()->getPosition())));
+        Eigen::Vector3d featureDir((*features[i]->getViewpoint()->getOrientation())*(*features[i]->getDirection()));
+        Eigen::Vector3d optimalDir(position-(*features[i]->getViewpoint()->getPosition()));
+        double radius(featureDir.dot(position-(*features[i]->getViewpoint()->getPosition())));
+        features[i]->setRadius(radius);
+        Eigen::Vector3d fposition((*features[i]->getViewpoint()->getPosition())+featureDir*radius);
+        features[i]->setDisparity((fposition-position).norm());
     }
 }
 
-bool Structure::computeFilter(double dispTolerence, double triTolerence){
-    double localDisp(0.);
-    double maxDisp(0.);
-    for(unsigned int i(0); i<features.size(); i++){
-        Eigen::Vector3d optimalDir(position-(*features[i]->getViewpoint()->getPosition()));
-        Eigen::Vector3d featureDir((*features[i]->getViewpoint()->getOrientation()).transpose()*(*features[i]->getDirection()));
-        localDisp=acos(optimalDir.dot(featureDir)/optimalDir.norm());
-        if ( localDisp>maxDisp ) maxDisp=localDisp;
-    }
-    disparity=maxDisp;
-    if ( maxDisp > dispTolerence ) return false;
-    double localAngle(0.);
-    double maxAngle(0.);
-    for(unsigned int i(0); i<features.size(); i++){
-        Eigen::Vector3d iDirection((*features[i]->getViewpoint()->getOrientation()).transpose()*(*features[i]->getDirection()));
-        for(unsigned int j(i+1); j<features.size(); j++){
-            Eigen::Vector3d jDirection((*features[j]->getViewpoint()->getOrientation()).transpose()*(*features[j]->getDirection()));
-            localAngle=acos(iDirection.dot(jDirection));
-            if ( localAngle>maxAngle ) maxAngle=localAngle;
+bool Structure::computeFilter(double dispSD, double radMean, double radSD, double dispTolerence, double radTolerence){
 
+    double dispFilter(dispSD*dispTolerence);
+
+    double radFilter(radSD*radTolerence);
+
+    for(unsigned int i(0); i<features.size(); i++){
+
+        if (features[i]->getDisparity()>dispFilter){
+            return false;
         }
+
+        if ((features[i]->getRadius()-radMean)>radFilter){
+            return false;
+        }
+
     }
-    if ( maxAngle<triTolerence ) return false; else return true;
+    return true;
 }
 

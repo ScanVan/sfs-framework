@@ -232,22 +232,50 @@ int main(int argc, char *argv[]){
 //		cv::imshow("miaou", *newViewpoint->getImage());
 //		cv::waitKey(0);
 
+        //
+        // issue in interface between viewpoint injection and solver
+        //
 
-		continue;
-        // algorithm optimisation loop
+        // issue : transforms stack not managed during viewpoint injection
+        if ( database.getViewpointCount() > 1 ) {
+            //Transform * dummy = new Transform;
+            auto dummy = std::make_shared<Transform>();
+            database.transforms.emplace_back( dummy );
+        }
+
+        //
+        // geometry estimation solver - begin
+        //
+
+        // check for at least two pushed viewpoint
+        if ( database.getViewpointCount() < 2 ) {
+
+            // avoid optimisation
+            continue;
+
+        }
+
+        int loopIteration( 0 );
 
         bool loopFlag( true );
 
         double loopError( 1.0 );
         double pushError( 0.0 );
 
-        int loopIteration( 0 );
+        double paramError( config["algorithm"]["error"].as<double>() );
+        double paramDisparity( config["algorithm"]["disparity"].as<double>() );
+        double paramRadius( config["algorithm"]["radius"].as<double>() );
 
-        double paramError( config["algorithm"]["error_variation"].as<double>() );
-        double paramAngleDisparity( config["algorithm"]["angle_disparity"].as<double>() );
-        double paramAngleTriangle( config["algorithm"]["angle_triangle"].as<double>() );
+        // debug
+        database._exportMatch( config["source"]["pathTest"].as<std::string>() );
+        // debug
 
         while ( loopFlag == true ) {
+
+            // debug
+            std::cerr << "Viewpoint count : " << database.getViewpointCount() << std::endl;
+            std::cerr << "Transform count : " << database.transforms.size() << std::endl;
+            // debug
 
             database.computeModels();
             database.computeCentroids();
@@ -256,7 +284,15 @@ int main(int argc, char *argv[]){
             database.computeFrame();
             database.computeOptimal();
             database.computeRadius();
-            database.computeFilter(paramAngleDisparity,paramAngleTriangle);
+            database.computeStatistics();
+            database.computeFilter(paramDisparity,paramRadius);
+
+            // debug
+            std::cerr << "debug : exporting iteration state ..." << std::endl;
+            database._exportState( config["source"]["pathTest"].as<std::string>() );
+            std::cerr << "debug : done" << std::endl;
+            //if ( loopIteration >= 60 ) { std::cerr << database.transforms[0]->rotation << std::endl; std::cerr << database.transforms[0]->translation << std::endl; return( 1 ); }
+            // debug
 
             loopError = database.computeError();
             if ( fabs( loopError - pushError ) < paramError ) {
@@ -266,11 +302,14 @@ int main(int argc, char *argv[]){
             }
 
             loopIteration ++;
-            std::cout << "algorithm iteration : " << loopIteration << std::endl;
+            std::cout << "algorithm iteration : " << loopIteration << " with error " << loopError << std::endl;
 
         }
+        return(1);
 
-        // algorithm optimisation loop
+        //
+        // geometry estimation solver - end
+        //
 
 	}
 

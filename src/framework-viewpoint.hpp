@@ -31,7 +31,8 @@
 #include "framework-feature.hpp"
 
 class Viewpoint {
-private:
+//private:
+public:
     std::string uid;
     int index;
 	cv::Mat image;
@@ -53,7 +54,7 @@ public:
 	void setPosition(Eigen::Vector3d position){this->position = position;}
 	std::vector<Feature> *getFeatures() { return &features; }
     int getIndex();
-    Eigen::Vector3d * getModelPoint(unsigned int ID);
+    //Eigen::Vector3d * getModelPoint(unsigned int ID);
     Eigen::Vector3d * getCentroid();
     Eigen::Matrix3d * getOrientation();
     Eigen::Vector3d * getPosition();
