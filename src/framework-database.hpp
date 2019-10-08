@@ -46,9 +46,7 @@ public:
 
 public:
     std::vector<std::shared_ptr<Viewpoint>> *getViewpoints() { return &viewpoints; }
-	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint){
-		viewpoints.push_back(viewpoint);
-	}
+	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
 //    void deleteAndUnlinkStructure(int id);
     int getViewpointCount();
     void computeModels();

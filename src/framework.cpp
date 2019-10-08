@@ -90,9 +90,6 @@ int main(int argc, char *argv[]){
 			}
 		}
 
-		newViewpoint->setIndex(lastViewpoint ? lastViewpoint->getIndex() + 1 : 0);
-
-
 		//profile("allocateFeaturesFromCvFeatures");
 		newViewpoint->allocateFeaturesFromCvFeatures();
 
@@ -231,17 +228,6 @@ int main(int argc, char *argv[]){
 //		cv::namedWindow("miaou", cv::WINDOW_NORMAL);
 //		cv::imshow("miaou", *newViewpoint->getImage());
 //		cv::waitKey(0);
-
-        //
-        // issue in interface between viewpoint injection and solver
-        //
-
-        // issue : transforms stack not managed during viewpoint injection
-        if ( database.getViewpointCount() > 1 ) {
-            //Transform * dummy = new Transform;
-            auto dummy = std::make_shared<Transform>();
-            database.transforms.emplace_back( dummy );
-        }
 
         //
         // geometry estimation solver - begin
