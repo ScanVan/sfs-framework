@@ -66,7 +66,7 @@ public:
 
 // development related features
 public:
-    void _exportState(std::string path);
+    void _exportState(std::string path,int major, int iter);
     void _exportMatch(std::string path);
 };
 

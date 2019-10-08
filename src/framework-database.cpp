@@ -198,35 +198,10 @@ void Database::displayViewpointStructures(Viewpoint *viewpoint){
 //  development related features
 //
 
-void Database::_exportState(std::string path){
+void Database::_exportState(std::string path, int major, int iter){
     std::fstream stream;
-
-    for(unsigned int i(0); i<viewpoints.size(); i++){
-        stream.open( path + "/viewpoint_direction_" + std::to_string(i) + ".xyz", std::ios::out );
-        if ( stream.is_open() == false ) { std::cerr << "debug : error on stream" << std::endl; return; }
-        for(unsigned int j(0); j<viewpoints[i]->features.size(); j++ ){
-            stream << viewpoints[i]->features[j].direction(0) << " "
-                   << viewpoints[i]->features[j].direction(1) << " "
-                   << viewpoints[i]->features[j].direction(2) << " 255 0 0 " << std::endl;
-        }
-        stream.close();
-    }
-
-    for(unsigned int i(0); i<viewpoints.size(); i++){
-        stream.open( path + "/viewpoint_model_" + std::to_string(i) + ".xyz", std::ios::out );
-        if ( stream.is_open() == false ) { std::cerr << "debug : error on stream" << std::endl; return; }
-        for(unsigned int j(0); j<viewpoints[i]->features.size(); j++ ){
-            stream << viewpoints[i]->features[j].model(0) << " "
-                   << viewpoints[i]->features[j].model(1) << " "
-                   << viewpoints[i]->features[j].model(2) << " 255 0 0 " << std::endl;
-        }
-        stream << viewpoints[i]->centroid(0) << " "
-               << viewpoints[i]->centroid(1) << " "
-               << viewpoints[i]->centroid(2) << " 0 255 0" << std::endl;
-        stream.close();
-    }
-
-    stream.open( path + "/model.xyz", std::ios::out );
+    path = path + "/" + std::to_string(major) + "_" + std::to_string(iter);
+    stream.open( path + "_model.xyz", std::ios::out );
     for(unsigned int i(0); i<viewpoints.size(); i++){
         stream << viewpoints[i]->position(0) << " "
                << viewpoints[i]->position(1) << " "
@@ -236,10 +211,17 @@ void Database::_exportState(std::string path){
         stream << structures[i]->position(0) << " "
                << structures[i]->position(1) << " "
                << structures[i]->position(2) << " 255 0 0" << std::endl;
+        for(unsigned int j(0); j<structures[i]->features.size(); j++){
+            Eigen::Matrix3d matrix(*structures[i]->features[j]->getViewpoint()->getOrientation());
+            Eigen::Vector3d vector(*structures[i]->features[j]->getViewpoint()->getPosition());
+            Eigen::Vector3d Position(matrix*(structures[i]->features[j]->direction*structures[i]->features[j]->radius)+vector);
+            stream << Position(0) << " "
+                   << Position(1) << " "
+                   << Position(2) << " 0 255 0" << std::endl;
+        }
+
     }
-
     stream.close();
-
 }
 
 void Database::_exportMatch(std::string path){

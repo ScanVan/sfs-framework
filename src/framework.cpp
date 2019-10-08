@@ -59,6 +59,8 @@ int main(int argc, char *argv[]){
     });
 
 
+    int loopMajor(1);
+
 
 	std::shared_ptr<Viewpoint> lastViewpoint;
 	while(true){
@@ -241,16 +243,15 @@ int main(int argc, char *argv[]){
 
         }
 
-        int loopIteration( 0 );
-
-        bool loopFlag( true );
-
         double loopError( 1.0 );
         double pushError( 0.0 );
-
         double paramError( config["algorithm"]["error"].as<double>() );
         double paramDisparity( config["algorithm"]["disparity"].as<double>() );
         double paramRadius( config["algorithm"]["radius"].as<double>() );
+
+        bool loopFlag( true );
+
+        int loopIteration( 0 );
 
         // debug
         database._exportMatch( config["source"]["pathTest"].as<std::string>() );
@@ -275,7 +276,7 @@ int main(int argc, char *argv[]){
 
             // debug
             std::cerr << "debug : exporting iteration state ..." << std::endl;
-            database._exportState( config["source"]["pathTest"].as<std::string>() );
+            database._exportState( config["source"]["pathTest"].as<std::string>(), loopMajor, loopIteration );
             std::cerr << "debug : done" << std::endl;
             //if ( loopIteration >= 60 ) { std::cerr << database.transforms[0]->rotation << std::endl; std::cerr << database.transforms[0]->translation << std::endl; return( 1 ); }
             // debug
@@ -288,18 +289,18 @@ int main(int argc, char *argv[]){
             }
 
             loopIteration ++;
-            std::cout << "algorithm iteration : " << loopIteration << " with error " << loopError << std::endl;
+            std::cout << "step : " << loopMajor << " | iteration : " << loopIteration << " | error : " << loopError << std::endl;
 
         }
-        return(1);
 
-        //
-        // geometry estimation solver - end
-        //
+        loopMajor ++;
+
+        // debug
+        return(1);
+        // debug
 
 	}
 
-    // exportation
     database.exportModel(config["export"]["path"].as<std::string>());
     database.exportOdometry(config["export"]["path"].as<std::string>());
 
