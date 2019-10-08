@@ -42,7 +42,7 @@ void gmsMatcher (	std::vector<cv::KeyPoint>* k1,
 	// GMS filter
 	std::vector<bool> vbInliers;
 	gms_matcher gms(*k1, s1, *k2, s2, matches_all);
-	gms.GetInlierMask(vbInliers, false, false);
+	gms.GetInlierMask(vbInliers, true, true);
 
 	// collect matches
 	for (size_t i = 0; i < vbInliers.size(); ++i)
