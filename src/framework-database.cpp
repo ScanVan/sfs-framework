@@ -21,6 +21,12 @@
 
 #include "framework-database.hpp"
 
+void Database::addViewpoint(std::shared_ptr<Viewpoint> viewpoint){
+	viewpoint->setIndex(viewpoints.size());
+	if(viewpoint->getIndex() > 0) transforms.push_back(std::make_shared<Transform>());
+	viewpoints.push_back(viewpoint);
+}
+
 void Database::computeModels(){
     for(unsigned int i(0); i<viewpoints.size(); i++){
         viewpoints[i]->computeModel();

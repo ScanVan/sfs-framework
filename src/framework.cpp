@@ -90,9 +90,6 @@ int main(int argc, char *argv[]){
 			}
 		}
 
-		newViewpoint->setIndex(lastViewpoint ? lastViewpoint->getIndex() + 1 : 0);
-
-
 		//profile("allocateFeaturesFromCvFeatures");
 		newViewpoint->allocateFeaturesFromCvFeatures();
 
