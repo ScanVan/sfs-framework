@@ -77,21 +77,15 @@ void Structure::computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoin
 }
 
 bool Structure::computeFilter(double dispSD, double radMean, double radSD, double dispTolerence, double radTolerence){
-
     double dispFilter(dispSD*dispTolerence);
-
     double radFilter(radSD*radTolerence);
-
     for(unsigned int i(0); i<features.size(); i++){
-
         if (features[i]->getDisparity()>dispFilter){
             return false;
         }
-
         if ((features[i]->getRadius()-radMean)>radFilter){
             return false;
         }
-
     }
     return true;
 }

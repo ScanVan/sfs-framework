@@ -124,7 +124,6 @@ void Database::computeFilter(double dispTolerence, double radTolerence){
     unsigned int i(0);
     unsigned int j(structures.size());
     while ( i<j ){
-        //if ( structures[i]->computeFilter(dispTolerence, triTolerence, disparitySD) == false ){
         if (structures[i]->computeFilter(disparitySD,radiusMean,radiusSD,dispTolerence,radTolerence)==false){
         	for(auto f : *structures[i]->getFeatures()){
         		f->structure = NULL;

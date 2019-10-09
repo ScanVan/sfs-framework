@@ -259,11 +259,6 @@ int main(int argc, char *argv[]){
 
         while ( loopFlag == true ) {
 
-            // debug
-            std::cerr << "Viewpoint count : " << database.getViewpointCount() << std::endl;
-            std::cerr << "Transform count : " << database.transforms.size() << std::endl;
-            // debug
-
             database.computeModels();
             database.computeCentroids();
             database.computeCorrelations();
