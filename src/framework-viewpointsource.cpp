@@ -25,7 +25,7 @@
 #include <experimental/filesystem>
 #include <opencv4/opencv2/imgcodecs.hpp>
 #include <opencv4/opencv2/highgui.hpp>
-
+#include <ctime>
 
 namespace fs = std::experimental::filesystem;
 
@@ -57,6 +57,31 @@ std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
 	if (image.empty()) throw new std::runtime_error("imread path failure : " + path );
 	viewpoint->setImage(image);
 	viewpoint->setImageDimension(image.cols, image.rows);
+
+	struct tm tm;
+	auto fileName = fs::path(path).filename();
+	auto dateString = fileName.string().substr(0, fileName.string().size() - fileName.extension().string().size());
+	viewpoint->microsecond = std::stoi(dateString.substr(16, 16+6));
+	dateString = dateString.substr(0, 15);
+	dateString.insert(13,"-");
+	dateString.insert(11,"-");
+	dateString.insert(6,"-");
+	dateString.insert(4,"-");
+
+//	sscanf(dateString.c_str(), "%d-%d-%d-%d-%d-%d-%d",
+//		&viewpoint->year,
+//		&viewpoint->month,
+//		&viewpoint->day,
+//		&viewpoint->hour,
+//		&viewpoint->minute,
+//		&viewpoint->second,
+//		&viewpoint->microseconde
+//	);
+
+
+	assert(strptime(dateString.c_str(), "%Y-%m-%d-%H-%M-%S", &tm));
+	viewpoint->time = mktime(&tm);
+
 	fileIndex++;
 	return viewpoint;
 }

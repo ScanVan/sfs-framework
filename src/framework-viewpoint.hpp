@@ -45,6 +45,9 @@ public:
     Eigen::Vector3d position;
     Eigen::Vector3d centroid;
 public:
+    time_t time;
+    int microsecond;
+
 	void setImage(cv::Mat &image){this->image = image;}
 	cv::Mat* getImage(){return &this->image;}
 	void setCvFeatures(std::vector<cv::KeyPoint> &image){this->cvFeatures = cvFeatures;}
@@ -66,6 +69,7 @@ public:
     void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
     void setRadius(unsigned int ID, double newRadius);
     void allocateFeaturesFromCvFeatures();
+    double getSecondFrom(Viewpoint *ref);
     Feature *getFeatureFromCvIndex(uint32_t i){ return &features[i]; }
     void computeModel();
     void computeCentroid();
