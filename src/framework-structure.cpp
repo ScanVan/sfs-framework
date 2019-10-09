@@ -83,7 +83,7 @@ bool Structure::computeFilter(double dispSD, double radMean, double radSD, doubl
         if (features[i]->getDisparity()>dispFilter){
             return false;
         }
-        if ((features[i]->getRadius()-radMean)>radFilter){
+        if (std::fabs(features[i]->getRadius()-radMean)>radFilter){
             return false;
         }
     }

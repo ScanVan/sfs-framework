@@ -106,8 +106,8 @@ void Database::computeStatistics(){
             radiusSD+=component*component;
         }
     }
-    disparitySD=std::sqrt(disparitySD/double(count));
-    radiusSD=std::sqrt(radiusSD/double(count));
+    disparitySD=std::sqrt(disparitySD/double(count-1));
+    radiusSD=std::sqrt(radiusSD/double(count-1));
 }
 
 
