@@ -86,3 +86,9 @@ void Viewpoint::allocateFeaturesFromCvFeatures(){
 	}
 }
 
+double Viewpoint::getSecondFrom(Viewpoint *ref){
+	double s = this->time - ref->time;
+	s += 1e-6*(this->microsecond - ref->microsecond);
+	return s;
+}
+
