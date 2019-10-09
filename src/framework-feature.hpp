@@ -42,6 +42,7 @@ public:
     double getRadius();
     double getDisparity();
     Viewpoint * getViewpoint();
+    Structure * getStructure();
     void setFeature(double x, double y, int imageWidth, int imageHeight);
     void setRadius(double newRadius);
     void setDisparity(double newDisparity);

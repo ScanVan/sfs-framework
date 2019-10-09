@@ -41,6 +41,9 @@ Viewpoint * Feature::getViewpoint(){
     return viewpoint;
 }
 
+Structure * Feature::getStructure(){
+    return structure;
+}
 
 void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
     position=Eigen::Vector2f(x,y);

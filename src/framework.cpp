@@ -275,8 +275,6 @@ int main(int argc, char *argv[]){
             // debug
             std::cerr << "debug : exporting iteration state ..." << std::endl;
             database._exportState( config["source"]["pathTest"].as<std::string>(), loopMajor, loopIteration );
-            std::cerr << "debug : done" << std::endl;
-            //if ( loopIteration >= 60 ) { std::cerr << database.transforms[0]->rotation << std::endl; std::cerr << database.transforms[0]->translation << std::endl; return( 1 ); }
             // debug
 
             loopError = database.computeError();

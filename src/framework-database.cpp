@@ -32,8 +32,8 @@ void Database::addViewpoint(std::shared_ptr<Viewpoint> viewpoint){
 }
 
 void Database::computeModels(){
-    for(unsigned int i(0); i<viewpoints.size(); i++){
-        viewpoints[i]->computeModel();
+    for(unsigned int i(0); i<structures.size(); i++){
+        structures[i]->computeModel();
     }
 }
 

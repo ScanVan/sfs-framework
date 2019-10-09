@@ -37,6 +37,12 @@ double Structure::getDisparity(unsigned int featureID){
     return features[featureID]->getDisparity();
 }
 
+void Structure::computeModel(){
+    for(unsigned int i(0); i<features.size(); i++){
+        features[i]->computeModel();
+    }
+}
+
 void Structure::computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms){
     int i_index(0), j_index(0);
     for(unsigned int i(0); i<features.size(); i++){

@@ -54,7 +54,6 @@ public:
 	void setPosition(Eigen::Vector3d position){this->position = position;}
 	std::vector<Feature> *getFeatures() { return &features; }
     int getIndex();
-    //Eigen::Vector3d * getModelPoint(unsigned int ID);
     Eigen::Vector3d * getCentroid();
     Eigen::Matrix3d * getOrientation();
     Eigen::Vector3d * getPosition();
@@ -67,7 +66,6 @@ public:
     void setRadius(unsigned int ID, double newRadius);
     void allocateFeaturesFromCvFeatures();
     Feature *getFeatureFromCvIndex(uint32_t i){ return &features[i]; }
-    void computeModel();
     void computeCentroid();
     //void computeFrame(Viewpoint * previous, Transform * transform);
 //	GETSET(cv::Mat, Image);
