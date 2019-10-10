@@ -301,3 +301,22 @@ void Database::_exportInitialPair(std::string path){
 
 }
 
+void Database::_exportFrame(std::string path){
+    std::fstream stream;
+    stream.open(path+"/frame",std::ios::out);
+    for(unsigned int i(0); i<viewpoints.size(); i++){
+        stream << viewpoints[i]->position(0) << " "
+               << viewpoints[i]->position(1) << " "
+               << viewpoints[i]->position(2) << std::endl
+               << viewpoints[i]->orientation(0,0) << " "
+               << viewpoints[i]->orientation(1,0) << " "
+               << viewpoints[i]->orientation(2,0) << std::endl
+               << viewpoints[i]->orientation(0,1) << " "
+               << viewpoints[i]->orientation(1,1) << " "
+               << viewpoints[i]->orientation(2,1) << std::endl
+               << viewpoints[i]->orientation(0,2) << " "
+               << viewpoints[i]->orientation(1,2) << " "
+               << viewpoints[i]->orientation(2,2) << std::endl;
+    }
+    stream.close();
+}

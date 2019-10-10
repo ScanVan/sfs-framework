@@ -260,6 +260,7 @@ int main(int argc, char *argv[]){
 
         // debug
         //database._exportMatch( config["source"]["pathTest"].as<std::string>() );
+        database._exportFrame( config["source"]["pathTest"].as<std::string>() );
         // debug
 
         while ( loopFlag == true ) {
