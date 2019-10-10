@@ -221,6 +221,7 @@ void Database::displayViewpointStructures(Viewpoint *viewpoint){
 
 void Database::_exportState(std::string path, int major, int iter){
     std::fstream stream;
+    int vpcount(255/viewpoints.size());
     path = path + "/" + std::to_string(major) + "_" + std::to_string(iter);
     stream.open( path + "_model.xyz", std::ios::out );
     for(unsigned int i(0); i<viewpoints.size(); i++){
@@ -231,14 +232,14 @@ void Database::_exportState(std::string path, int major, int iter){
     for(unsigned int i(0); i<structures.size(); i++){
         stream << structures[i]->position(0) << " "
                << structures[i]->position(1) << " "
-               << structures[i]->position(2) << " 255 0 0" << std::endl;
+               << structures[i]->position(2) << " 255 0 255" << std::endl;
         for(unsigned int j(0); j<structures[i]->features.size(); j++){
             Eigen::Matrix3d matrix(*structures[i]->features[j]->getViewpoint()->getOrientation());
             Eigen::Vector3d vector(*structures[i]->features[j]->getViewpoint()->getPosition());
             Eigen::Vector3d Position(matrix*(structures[i]->features[j]->direction*structures[i]->features[j]->radius)+vector);
             stream << Position(0) << " "
                    << Position(1) << " "
-                   << Position(2) << " 0 255 0" << std::endl;
+                   << Position(2) << " 255 " << j*vpcount << " 0" << std::endl;
         }
 
     }
