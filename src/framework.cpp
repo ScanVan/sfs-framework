@@ -214,7 +214,10 @@ int main(int argc, char *argv[]){
 					}
 				}
 			}
-			structure->addFeature(newViewpoint->getFeatureFromCvIndex(queryIdx));
+
+			auto newFeature = newViewpoint->getFeatureFromCvIndex(queryIdx);
+			assert(!newFeature->structure);
+			structure->addFeature(newFeature);
 		}
 		delete[] correlations;
 		delete[] structures;
