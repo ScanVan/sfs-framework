@@ -137,7 +137,7 @@ void Database::computeFilter(double dispTolerence, double radTolerence){
 }
 
 double Database::computeError(){
-    return disparityMax;
+    return disparityMean;
 }
 
 void Database::extrapolateViewpoint(Viewpoint * v){

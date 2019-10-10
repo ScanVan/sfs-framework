@@ -259,8 +259,7 @@ int main(int argc, char *argv[]){
         int loopIteration( 0 );
 
         // debug
-        //database._exportMatch( config["source"]["pathTest"].as<std::string>() );
-        //database._exportFrame( config["source"]["pathTest"].as<std::string>() );
+        database._exportMatch( config["source"]["pathTest"].as<std::string>() );
         database._exportState( config["source"]["pathTest"].as<std::string>(), loopMajor, -1 );
         // debug
 
@@ -293,13 +292,7 @@ int main(int argc, char *argv[]){
 
         }
 
-        //database._exportInitialPair( config["source"]["pathTest"].as<std::string>() ); return(1);
-
         loopMajor ++;
-
-        // debug
-        if (loopMajor>2) return(1);
-        // debug
 
 	}
 
