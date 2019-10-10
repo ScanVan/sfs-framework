@@ -242,3 +242,40 @@ void Database::_exportMatch(std::string path){
     }
 }
 
+void Database::_exportInitialPair(std::string path){
+
+    std::fstream stream, stream_[2];
+
+    stream.open(path+"/initial_rotation",std::ios::out);
+    stream << transforms[0]->rotation << std::endl;
+    stream.close();
+
+    stream.open(path+"/initial_translation",std::ios::out);
+    stream << transforms[0]->translation << std::endl;
+    stream.close();
+
+    stream.open(path+"/initial_radius",std::ios::out);
+    for(unsigned int i(0); i<viewpoints[0]->features.size(); i++){
+        if(viewpoints[0]->features[i].structure!=NULL){
+            stream << viewpoints[0]->features[i].radius << std::endl;
+        }
+    }
+    stream.close();
+
+    stream_[0].open(path+"/initial_dir_0",std::ios::out);
+    stream_[1].open(path+"/initial_dir_1",std::ios::out);
+    for(unsigned int i(0); i<structures.size(); i++){
+        for(unsigned int j(0); j<structures[i]->features.size(); j++){
+
+            stream_[structures[i]->features[j]->getViewpoint()->index]
+            << structures[i]->features[j]->direction(0) << " "
+            << structures[i]->features[j]->direction(1) << " "
+            << structures[i]->features[j]->direction(2) << std::endl;
+
+        }
+    }
+    stream_[0].close();
+    stream_[1].close();
+
+}
+

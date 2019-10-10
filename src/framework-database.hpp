@@ -68,5 +68,6 @@ public:
 public:
     void _exportState(std::string path,int major, int iter);
     void _exportMatch(std::string path);
+    void _exportInitialPair(std::string path);
 };
 
