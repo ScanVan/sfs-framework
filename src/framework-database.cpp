@@ -47,9 +47,18 @@ void Database::computeCorrelations(){
 }
 
 void Database::computeCentroids(){
-    for(unsigned int i(0); i<viewpoints.size(); i++){
-        viewpoints[i]->computeCentroid();
+    for(unsigned int i(0); i<transforms.size(); i++){
+        transforms[i]->resetCentroid();
     }
+    for(unsigned int i(0); i<structures.size(); i++){
+        structures[i]->computeCentroid(transforms);
+    }
+    for(unsigned int i(0); i<transforms.size(); i++){
+        transforms[i]->computeCentroid();
+    }
+    //for(unsigned int i(0); i<viewpoints.size(); i++){
+    //    viewpoints[i]->computeCentroid();
+    //}
 }
 
 void Database::computePoses(){

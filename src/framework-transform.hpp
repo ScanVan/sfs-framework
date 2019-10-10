@@ -30,11 +30,17 @@ public:
     Eigen::Matrix3d correlation;
     Eigen::Matrix3d rotation;
     Eigen::Vector3d translation;
+    Eigen::Vector3d centroid_a;
+    Eigen::Vector3d centroid_b;
+    unsigned int pushCount;
 public:
     Eigen::Matrix3d * getRotation();
     Eigen::Vector3d * getTranslation();
     void pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * fcentroid, Eigen::Vector3d * second, Eigen::Vector3d * scentroid);
+    void pushCentroid(Eigen::Vector3d * push_a, Eigen::Vector3d * push_b);
     void resetCorrelation();
+    void resetCentroid();
+    void computeCentroid();
     void computePose(Viewpoint * first, Viewpoint * second);
     void computeFrame(Viewpoint * first, Viewpoint * second);
 };

@@ -30,11 +30,29 @@ Eigen::Vector3d * Transform::getTranslation(){
 }
 
 void Transform::pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * fcentroid, Eigen::Vector3d * second, Eigen::Vector3d * scentroid){
-    correlation+=Eigen::Matrix3d(((*first)-(*fcentroid))*((*second)-(*scentroid)).transpose());
+    //correlation+=Eigen::Matrix3d(((*first)-(*fcentroid))*((*second)-(*scentroid)).transpose());
+    correlation+=Eigen::Matrix3d(((*first)-centroid_a)*((*second)-centroid_b).transpose());
+}
+
+void Transform::pushCentroid(Eigen::Vector3d * push_a, Eigen::Vector3d * push_b){
+    centroid_a+=*push_a;
+    centroid_b+=*push_b;
+    pushCount++;
 }
 
 void Transform::resetCorrelation(){
     correlation=Eigen::Matrix3d::Zero();
+}
+
+void Transform::resetCentroid(){
+    centroid_a=Eigen::Vector3d::Zero();
+    centroid_b=Eigen::Vector3d::Zero();
+    pushCount=0;
+}
+
+void Transform::computeCentroid(){
+    centroid_a/=double(pushCount);
+    centroid_b/=double(pushCount);
 }
 
 void Transform::computePose(Viewpoint * first, Viewpoint * second){
@@ -46,7 +64,8 @@ void Transform::computePose(Viewpoint * first, Viewpoint * second){
         correction(3,3)=-1;
         rotation=(svd.matrixV()*correction)*svd.matrixU().transpose();
     }
-    translation=(*second->getCentroid())-rotation*(*first->getCentroid());
+    //translation=(*second->getCentroid())-rotation*(*first->getCentroid());
+    translation=centroid_b-rotation*centroid_a;
 }
 
 void Transform::computeFrame(Viewpoint * first, Viewpoint * second){

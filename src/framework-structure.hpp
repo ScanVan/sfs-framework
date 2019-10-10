@@ -42,6 +42,7 @@ public:
     double getDisparity(unsigned int featureID);
     std::vector< Feature* > *getFeatures(){ return &features; }
     void computeModel();
+    void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition();
     void computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);

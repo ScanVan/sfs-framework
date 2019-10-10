@@ -43,6 +43,19 @@ void Structure::computeModel(){
     }
 }
 
+void Structure::computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms){
+    int i_index(0), j_index(0);
+    for(unsigned int i(0); i<features.size(); i++){
+        i_index=features[i]->getViewpoint()->getIndex();
+        for(unsigned int j(0); j<features.size(); j++){
+            j_index=features[j]->getViewpoint()->getIndex();
+            if (i_index-j_index==1){
+                transforms[j_index]->pushCentroid(features[j]->getModel(),features[i]->getModel());
+            }
+        }
+    }
+}
+
 void Structure::computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms){
     int i_index(0), j_index(0);
     for(unsigned int i(0); i<features.size(); i++){
