@@ -21,6 +21,14 @@
 
 #include "framework-transform.hpp"
 
+Eigen::Matrix3d * Transform::getRotation(){
+    return &rotation;
+}
+
+Eigen::Vector3d * Transform::getTranslation(){
+    return &translation;
+}
+
 void Transform::pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * fcentroid, Eigen::Vector3d * second, Eigen::Vector3d * scentroid){
     correlation+=Eigen::Matrix3d(((*first)-(*fcentroid))*((*second)-(*scentroid)).transpose());
 }

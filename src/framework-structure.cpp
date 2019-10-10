@@ -69,6 +69,7 @@ void Structure::computeOptimalPosition(){
         vacc+=weight*(*features[i]->getViewpoint()->getPosition());
     }
     position=macc.inverse()*vacc;
+    flag=true;
 }
 
 void Structure::computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
@@ -96,3 +97,9 @@ bool Structure::computeFilter(double dispSD, double radMean, double radSD, doubl
     return true;
 }
 
+void Structure::extrapolate(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
+    if (flag==false){
+        computeOptimalPosition();
+    }
+    computeRadius(viewpoints);
+}

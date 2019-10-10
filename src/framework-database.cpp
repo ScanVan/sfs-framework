@@ -140,6 +140,28 @@ double Database::computeError(){
     return disparityMax;
 }
 
+void Database::extrapolateViewpoint(Viewpoint * v){
+    auto viewpointCount = viewpoints.size();
+    if(viewpointCount<2){
+        v->setPose(Eigen::Matrix3d::Identity(),Eigen::Vector3d::Zero());
+    }else{
+        Eigen::Matrix3d orientation(*viewpoints[viewpointCount-1]->getOrientation());
+        Eigen::Vector3d position(*viewpoints[viewpointCount-1]->getPosition());
+        Eigen::Matrix3d rotation((*transforms[viewpointCount-2]->getRotation()).transpose());
+        Eigen::Vector3d translation(*transforms[viewpointCount-2]->getTranslation());
+        v->setPose(orientation*rotation,position-rotation*translation);
+    }
+}
+
+void Database::extrapolateStructure(){
+    if (viewpoints.size()<=2){
+        return;
+    }
+    for(unsigned int i(0); i<structures.size(); i++){
+        structures[i]->extrapolate(viewpoints);
+    }
+}
+
 void Database::exportModel(std::string path){
     std::fstream exportStream;
     exportStream.open(path+"/model.xyz",std::ios::out);

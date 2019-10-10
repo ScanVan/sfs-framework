@@ -32,10 +32,12 @@ class Structure {
 public:
     Eigen::Vector3d position;
     double disparity;
+    bool flag;
     std::vector<Feature*> features;
     //std::vector< long > vplink; // to be removed
     //std::vector< long > ftlink; // to be removed
 public:
+    Structure() : flag(false) {}
     Eigen::Vector3d * getPosition();
     unsigned int getFeatureCount();
     double getRadius(unsigned int featureID);
@@ -46,6 +48,7 @@ public:
     void computeOptimalPosition();
     void computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
     bool computeFilter(double dispSD, double radMean, double radSD, double dispTolerence, double radTolerence);
+    void extrapolate(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
     //bool computeFilter(double dispTolerence, double triTolerence, double disparitySD);
     //bool computeFilterTriangulation(double triTolerence);
     //bool computeFilterRadius(double radTolerence, double radiusMean, double radiusSD);

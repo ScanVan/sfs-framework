@@ -59,6 +59,8 @@ public:
     void computeStatistics();
     void computeFilter(double dispTolerence, double radTolerence);
     double computeError();
+    void extrapolateViewpoint(Viewpoint * v);
+    void extrapolateStructure();
     void exportModel(std::string path);
     void exportOdometry(std::string path);
     Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();}

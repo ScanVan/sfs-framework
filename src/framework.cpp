@@ -98,11 +98,12 @@ int main(int argc, char *argv[]){
 		//profile("misc");
 
 		//Extrapolate the position of the newViewpoint
-		if(lastViewpoint){
-			newViewpoint->setPosition(*lastViewpoint->getPosition());
-		} else {
-			newViewpoint->setPosition(Eigen::Vector3d(0,0,0));
-		}
+		//if(lastViewpoint){
+		//	newViewpoint->setPosition(*lastViewpoint->getPosition());
+		//} else {
+		//	newViewpoint->setPosition(Eigen::Vector3d(0,0,0));
+		//}
+        database.extrapolateViewpoint(newViewpoint.get());
 
 		//Get local viewpoints
 		auto localViewpoints = std::vector<std::shared_ptr<Viewpoint>>();
@@ -224,6 +225,7 @@ int main(int argc, char *argv[]){
 
 		//profile("display");
 		database.addViewpoint(newViewpoint);
+        database.extrapolateStructure();
 		database.displayViewpointStructures(newViewpoint.get());
 		cv::waitKey(100); //Wait 100 ms give opencv the time to display the GUI
 

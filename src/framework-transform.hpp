@@ -31,6 +31,8 @@ public:
     Eigen::Matrix3d rotation;
     Eigen::Vector3d translation;
 public:
+    Eigen::Matrix3d * getRotation();
+    Eigen::Vector3d * getTranslation();
     void pushCorrelation(Eigen::Vector3d * first, Eigen::Vector3d * fcentroid, Eigen::Vector3d * second, Eigen::Vector3d * scentroid);
     void resetCorrelation();
     void computePose(Viewpoint * first, Viewpoint * second);
