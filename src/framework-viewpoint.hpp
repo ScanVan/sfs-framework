@@ -47,7 +47,6 @@ public:
 public:
     time_t time;
     int microsecond;
-
 	void setImage(cv::Mat &image){this->image = image;}
 	cv::Mat* getImage(){return &this->image;}
 	void setCvFeatures(std::vector<cv::KeyPoint> &image){this->cvFeatures = cvFeatures;}

@@ -39,8 +39,8 @@ public:
     std::vector<std::shared_ptr<Structure>> structures;
 
     double disparityMean;
-    double disparitySD; /* standard deviation */
-    double disparityMax;
+    double disparitySD;
+    double disparityMax; /* no more needed - can be suppressed */
     double radiusMean;
     double radiusSD;
 
