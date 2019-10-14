@@ -31,9 +31,9 @@ class Structure {
 //private:
 public:
     Eigen::Vector3d position;
-    double disparity;
-    bool flag;
     std::vector<Feature*> features;
+    double disparity;
+    bool flag; /* needed to know if an optimal position has been computed */
 public:
     Structure() : flag(false) {}
     Eigen::Vector3d * getPosition();
@@ -46,7 +46,7 @@ public:
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition();
     void computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
-    bool computeFilter(double dispSD, double radMean, double radSD, double dispTolerence, double radTolerence);
+    bool computeFilter(double dispFilter, double radFilter, double radMean);
     void extrapolate(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
     void addFeature(Feature* feature) {feature->structure = this; features.push_back(feature); }
 };

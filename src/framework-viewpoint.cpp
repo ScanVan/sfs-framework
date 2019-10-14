@@ -56,7 +56,7 @@ void Viewpoint::allocateFeaturesFromCvFeatures(){
 	features.resize(cvFeatures.size());
 	for(uint32_t i = 0;i < cvFeatures.size();i++){
         features[i].setFeature(cvFeatures[i].pt.x, cvFeatures[i].pt.y, width, height);
-        features[i].setRadius(1.);
+        features[i].setRadius(1., 0.);
         features[i].setViewpointPtr(this);
         features[i].setStructurePtr(NULL);
 	}

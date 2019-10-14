@@ -130,8 +130,13 @@ void Database::computeStatistics(){
 void Database::computeFilters(double dispTolerence, double radTolerence){
     unsigned int i(0);
     unsigned int j(structures.size());
+
+    double dispFilter(disparitySD*dispTolerence);
+    double radFilter(radiusSD*radTolerence);
+
     while (i < j){
-        if (structures[i]->computeFilter(disparitySD,radiusMean,radiusSD,dispTolerence,radTolerence)==false){
+        //if (structures[i]->computeFilter(disparitySD,radiusMean,radiusSD,dispTolerence,radTolerence)==false){
+        if (structures[i]->computeFilter(dispFilter, radFilter, radiusMean)==false){
         	for(auto f : *structures[i]->getFeatures()){
         		f->structure = NULL;
         	}

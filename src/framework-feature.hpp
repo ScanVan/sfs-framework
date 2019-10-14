@@ -46,8 +46,7 @@ public:
     Structure * getStructure();
     // modifiers : assignation
     void setFeature(double x, double y, int imageWidth, int imageHeight);
-    void setRadius(double newRadius);
-    void setDisparity(double newDisparity);
+    void setRadius(double newRadius, double newDisparity);
     void setViewpointPtr(Viewpoint * newViewpoint);
     void setStructurePtr(Structure * newStructure);
     // modifiers

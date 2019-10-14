@@ -283,7 +283,7 @@ int main(int argc, char *argv[]){
             loopMinor ++;
 
             // display information
-            std::cout << "step : " << loopMajor << " | iteration : " << loopMinor << " | error : " << loopError << std::endl;
+            std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | error : " << loopError << std::endl;
 
         }
 

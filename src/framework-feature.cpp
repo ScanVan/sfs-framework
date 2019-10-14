@@ -50,11 +50,8 @@ void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
     direction=convertCartesian2Spherical(x,y,imageWidth,imageHeight);
 }
 
-void Feature::setRadius(double newRadius){
+void Feature::setRadius(double newRadius, double newDisparity){
     radius=newRadius;
-}
-
-void Feature::setDisparity(double newDisparity){
     disparity=newDisparity;
 }
 
