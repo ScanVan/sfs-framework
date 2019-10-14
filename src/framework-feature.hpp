@@ -37,16 +37,19 @@ public:
 	double radius;
 	double disparity;
 public:
+    // accessors
     Eigen::Vector3d * getDirection();
     Eigen::Vector3d * getModel();
     double getRadius();
     double getDisparity();
     Viewpoint * getViewpoint();
     Structure * getStructure();
+    // modifiers : assignation
     void setFeature(double x, double y, int imageWidth, int imageHeight);
     void setRadius(double newRadius);
     void setDisparity(double newDisparity);
     void setViewpointPtr(Viewpoint * newViewpoint);
     void setStructurePtr(Structure * newStructure);
+    // modifiers
     void computeModel();
 };

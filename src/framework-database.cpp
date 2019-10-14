@@ -164,30 +164,30 @@ void Database::extrapolateStructure(){
     }
 }
 
-void Database::exportModel(std::string path){
+void Database::exportModel(std::string path, unsigned int major){
     std::fstream exportStream;
-    exportStream.open(path+"/model.xyz",std::ios::out);
+    exportStream.open(path+"/dev/"+std::to_string(major)+"_structure.xyz",std::ios::out);
     if (exportStream.is_open() == false){
         std::cerr << "unable to create model exportation file" << std::endl;
         return;
     }
     for(unsigned int i(0); i<structures.size(); i++){
         Eigen::Vector3d * position(structures[i]->getPosition());
-        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << std::endl;
+        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 0 0" << std::endl;
     }
     exportStream.close();
 }
 
-void Database::exportOdometry(std::string path){
+void Database::exportOdometry(std::string path, unsigned int major){
     std::fstream exportStream;
-    exportStream.open(path+"/odometry.xyz",std::ios::out);
+    exportStream.open(path+"/dev/"+std::to_string(major)+"_odometry.xyz",std::ios::out);
     if (exportStream.is_open() == false){
         std::cerr << "unable to create odometry exportation file" << std::endl;
         return;
     }
     for(unsigned int i(0); i<viewpoints.size(); i++){
         Eigen::Vector3d * position(viewpoints[i]->getPosition());
-        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << std::endl;
+        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 255 255" << std::endl;
     }
     exportStream.close();
 }

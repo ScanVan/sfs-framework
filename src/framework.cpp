@@ -58,9 +58,13 @@ int main(int argc, char *argv[]){
 		}
     });
 
-
+    // pipeline major iteration
     int loopMajor(1);
 
+    // algorithm parameter query
+    double paramError( config["algorithm"]["error"].as<double>() );
+    double paramDisparity( config["algorithm"]["disparity"].as<double>() );
+    double paramRadius( config["algorithm"]["radius"].as<double>() );
 
 	std::shared_ptr<Viewpoint> lastViewpoint;
 	while(true){
@@ -240,34 +244,23 @@ int main(int argc, char *argv[]){
 //		cv::waitKey(0);
 
         //
-        // geometry estimation solver - begin
+        // geometry estimation solver
         //
 
-        // check for at least two pushed viewpoint
+        // check for at least two pushed viewpoints
         if ( database.getViewpointCount() < 2 ) {
-
-            // avoid optimisation
             continue;
-
         }
 
-        double loopError( 1.0 );
-        double pushError( 0.0 );
-        double paramError( config["algorithm"]["error"].as<double>() );
-        double paramDisparity( config["algorithm"]["disparity"].as<double>() );
-        double paramRadius( config["algorithm"]["radius"].as<double>() );
-
+        // algorithm variable
+        double loopError( 1.0 ), pushError( 0.0 );
         bool loopFlag( true );
+        int loopMinor( 0 );
 
-        int loopIteration( 0 );
-
-        // debug
-        database._exportMatch( config["source"]["pathTest"].as<std::string>() );
-        database._exportState( config["source"]["pathTest"].as<std::string>(), loopMajor, -1 );
-        // debug
-
+        // algorithm loop
         while ( loopFlag == true ) {
 
+            // algorithm core
             database.computeModels();
             database.computeCentroids();
             database.computeCorrelations();
@@ -278,11 +271,7 @@ int main(int argc, char *argv[]){
             database.computeStatistics();
             database.computeFilters(paramDisparity,paramRadius);
 
-            // debug
-            std::cerr << "debug : exporting iteration state ..." << std::endl;
-            database._exportState( config["source"]["pathTest"].as<std::string>(), loopMajor, loopIteration );
-            // debug
-
+            // algorithm error management
             loopError = database.computeError();
             if ( fabs( loopError - pushError ) < paramError ) {
                 loopFlag = false;
@@ -290,18 +279,25 @@ int main(int argc, char *argv[]){
                 pushError=loopError;
             }
 
-            loopIteration ++;
-            std::cout << "step : " << loopMajor << " | iteration : " << loopIteration << " | error : " << loopError << std::endl;
+            // update minor iterator
+            loopMinor ++;
+
+            // display information
+            std::cout << "step : " << loopMajor << " | iteration : " << loopMinor << " | error : " << loopError << std::endl;
 
         }
 
+        // major iteration exportation : model and odometry
+        database.exportModel   (config["export"]["path"].as<std::string>(),loopMajor);
+        database.exportOdometry(config["export"]["path"].as<std::string>(),loopMajor);
+
+        // update major iterator
         loopMajor ++;
 
 	}
 
-    database.exportModel(config["export"]["path"].as<std::string>());
-    database.exportOdometry(config["export"]["path"].as<std::string>());
-
+    // system message
 	return 0;
+
 }
 

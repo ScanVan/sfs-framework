@@ -30,7 +30,7 @@ Eigen::Vector3d * Transform::getTranslation(){
 }
 
 void Transform::pushCorrelation(Eigen::Vector3d * firstComponent, Eigen::Vector3d * secondComponent){
-    correlation+=Eigen::Matrix3d(((*firstComponent)-centerFirst)*((*secondComponent)-centerSecond).transpose());
+    correlation+=((*firstComponent)-centerFirst)*((*secondComponent)-centerSecond).transpose();
 }
 
 void Transform::pushCentroid(Eigen::Vector3d * pushFirst, Eigen::Vector3d * pushSecond){
@@ -68,7 +68,5 @@ void Transform::computePose(Viewpoint * first, Viewpoint * second){
 
 void Transform::computeFrame(Viewpoint * first, Viewpoint * second){
     Eigen::Matrix3d trotation(rotation.transpose());
-    Eigen::Matrix3d *prevRotation(first->getOrientation());
-    Eigen::Vector3d *prevPosition(first->getPosition());
-    second->setPose( (*prevRotation)*trotation,(*prevPosition)-trotation*translation);
+    second->setPose( (*first->getOrientation())*trotation,(*first->getPosition())-trotation*translation);
 }
