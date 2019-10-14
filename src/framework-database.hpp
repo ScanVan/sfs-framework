@@ -40,7 +40,6 @@ public:
 
     double disparityMean;
     double disparitySD;
-    //double disparityMax; /* no more needed - can be suppressed */
     double radiusMean;
     double radiusSD;
 

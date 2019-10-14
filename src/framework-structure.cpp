@@ -63,10 +63,7 @@ void Structure::computeCorrelation(std::vector<std::shared_ptr<Transform>> & tra
         for(unsigned int j(0); j<features.size(); j++){
             j_index=features[j]->getViewpoint()->getIndex();
             if (i_index-j_index==1){
-                transforms[j_index]->pushCorrelation(
-                    features[j]->getModel(), features[j]->getViewpoint()->getCentroid(),
-                    features[i]->getModel(), features[i]->getViewpoint()->getCentroid()
-                );
+                transforms[j_index]->pushCorrelation(features[j]->getModel(), features[i]->getModel());
             }
         }
     }
