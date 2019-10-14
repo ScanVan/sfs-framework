@@ -25,20 +25,12 @@ int Viewpoint::getIndex(){
     return index;
 }
 
-Eigen::Vector3d * Viewpoint::getCentroid(){
-    return &centroid;
-}
-
 Eigen::Matrix3d * Viewpoint::getOrientation(){
     return &orientation;
 }
 
 Eigen::Vector3d * Viewpoint::getPosition(){
     return &position;
-}
-
-Eigen::Vector3d * Viewpoint::getDirection(unsigned int ID){
-    return features[ID].getDirection();
 }
 
 void Viewpoint::resetFrame(){
@@ -58,22 +50,6 @@ void Viewpoint::setImageDimension(int newWidth, int newHeight){
 void Viewpoint::setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition){
     orientation=newOrientation;
     position=newPosition;
-}
-
-void Viewpoint::setRadius(unsigned int ID, double newRadius){
-    features[ID].setRadius(newRadius);
-}
-
-void Viewpoint::computeCentroid(){
-    unsigned int count(0);
-    centroid=Eigen::Vector3d::Zero();
-    for(unsigned int i(0); i<features.size(); i++){
-        if(features[i].getStructure()!=NULL){
-            centroid+=*features[i].getModel();
-            count++;
-        }
-    }
-    centroid/=double(count);
 }
 
 void Viewpoint::allocateFeaturesFromCvFeatures(){

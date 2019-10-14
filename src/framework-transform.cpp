@@ -68,5 +68,5 @@ void Transform::computePose(Viewpoint * first, Viewpoint * second){
 
 void Transform::computeFrame(Viewpoint * first, Viewpoint * second){
     Eigen::Matrix3d trotation(rotation.transpose());
-    second->setPose( (*first->getOrientation())*trotation,(*first->getPosition())-trotation*translation);
+    second->setPose((*first->getOrientation())*trotation,(*first->getPosition())-trotation*translation);
 }
