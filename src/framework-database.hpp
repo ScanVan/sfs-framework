@@ -40,7 +40,7 @@ public:
 
     double disparityMean;
     double disparitySD;
-    double disparityMax; /* no more needed - can be suppressed */
+    //double disparityMax; /* no more needed - can be suppressed */
     double radiusMean;
     double radiusSD;
 
@@ -53,11 +53,11 @@ public:
     void computeCorrelations();
     void computeCentroids();
     void computePoses();
-    void computeFrame();
-    void computeOptimal();
-    void computeRadius();
+    void computeFrames();
+    void computeOptimals();
+    void computeRadii();
     void computeStatistics();
-    void computeFilter(double dispTolerence, double radTolerence);
+    void computeFilters(double dispTolerence, double radTolerence);
     double computeError();
     void extrapolateViewpoint(Viewpoint * v);
     void extrapolateStructure();

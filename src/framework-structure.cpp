@@ -116,3 +116,4 @@ void Structure::extrapolate(std::vector<std::shared_ptr<Viewpoint>> & viewpoints
     }
     computeRadius(viewpoints);
 }
+

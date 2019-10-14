@@ -28,8 +28,6 @@ Eigen::Vector3d convertCartesian2Spherical(double x, double y, int width, int he
 	return pos3d;
 }
 
-
-
 void profile(std::string msg){
 	static struct timespec specOld;
 	static std::string msgLast = "";

@@ -56,9 +56,6 @@ void Database::computeCentroids(){
     for(unsigned int i(0); i<transforms.size(); i++){
         transforms[i]->computeCentroid();
     }
-    //for(unsigned int i(0); i<viewpoints.size(); i++){
-    //    viewpoints[i]->computeCentroid();
-    //}
 }
 
 void Database::computePoses(){
@@ -67,20 +64,20 @@ void Database::computePoses(){
     }
 }
 
-void Database::computeFrame(){
+void Database::computeFrames(){
     viewpoints[0]->resetFrame();
     for(unsigned int i(0); i<transforms.size(); i++){
         transforms[i]->computeFrame(viewpoints[i].get(),viewpoints[i+1].get());
     }
 }
 
-void Database::computeOptimal(){
+void Database::computeOptimals(){
     for(unsigned int i(0); i<structures.size(); i++){
         structures[i]->computeOptimalPosition();
     }
 }
 
-void Database::computeRadius(){
+void Database::computeRadii(){
     for(unsigned int i(0); i<structures.size(); i++){
         structures[i]->computeRadius(viewpoints);
     }
@@ -91,15 +88,11 @@ void Database::computeStatistics(){
 
     disparityMean=0.;
     radiusMean=0.;
-    disparityMax=0.;
     for(unsigned int i(0); i<structures.size(); i++){
         for(unsigned int j(0); j<structures[i]->getFeatureCount(); j++){
             disparityMean+=structures[i]->getDisparity(j);
             radiusMean+=structures[i]->getRadius(j);
             count++;
-            if(disparityMax<structures[i]->getDisparity(j)){
-                disparityMax=structures[i]->getDisparity(j);
-            }
         }
     }
     disparityMean/=double(count);
@@ -129,7 +122,7 @@ void Database::computeStatistics(){
 //  structures.resize(structures.size()-1);
 //}
 
-void Database::computeFilter(double dispTolerence, double radTolerence){
+void Database::computeFilters(double dispTolerence, double radTolerence){
     unsigned int i(0);
     unsigned int j(structures.size());
     while ( i<j ){
@@ -199,10 +192,15 @@ void Database::exportOdometry(std::string path){
     exportStream.close();
 }
 
+// Move to utils ? NH
+
 static cv::Point f2i(Eigen::Vector2f value){
 	return cv::Point(value[0],value[1]);
 }
 
+//
+//  development related features
+//
 
 //Do  cv::waitKey(0); if you want to stop after it.
 void Database::displayViewpointStructures(Viewpoint *viewpoint){
@@ -223,10 +221,6 @@ void Database::displayViewpointStructures(Viewpoint *viewpoint){
 	cv::namedWindow( "miaou", cv::WINDOW_KEEPRATIO );
 	imshow( "miaou", res);
 }
-
-//
-//  development related features
-//
 
 void Database::_exportState(std::string path, int major, int iter){
     std::fstream stream;

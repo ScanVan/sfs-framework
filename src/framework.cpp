@@ -272,11 +272,11 @@ int main(int argc, char *argv[]){
             database.computeCentroids();
             database.computeCorrelations();
             database.computePoses();
-            database.computeFrame();
-            database.computeOptimal();
-            database.computeRadius();
+            database.computeFrames();
+            database.computeOptimals();
+            database.computeRadii();
             database.computeStatistics();
-            database.computeFilter(paramDisparity,paramRadius);
+            database.computeFilters(paramDisparity,paramRadius);
 
             // debug
             std::cerr << "debug : exporting iteration state ..." << std::endl;
