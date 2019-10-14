@@ -25,6 +25,10 @@ int Database::getViewpointCount(){
     return viewpoints.size();
 }
 
+double Database::getError(){
+    return disparityMean;
+}
+
 void Database::addViewpoint(std::shared_ptr<Viewpoint> viewpoint){
 	viewpoint->setIndex(viewpoints.size());
 	if(viewpoint->getIndex() > 0) transforms.push_back(std::make_shared<Transform>());
@@ -32,29 +36,29 @@ void Database::addViewpoint(std::shared_ptr<Viewpoint> viewpoint){
 }
 
 void Database::computeModels(){
-    for(unsigned int i(0); i<structures.size(); i++){
-        structures[i]->computeModel();
+    for(auto element: structures){
+        element->computeModel();
     }
 }
 
 void Database::computeCorrelations(){
-    for(unsigned int i(0); i<transforms.size(); i++){
-        transforms[i]->resetCorrelation();
+    for(auto element: transforms){
+        element->resetCorrelation();
     }
-    for(unsigned int i(0); i<structures.size(); i++){
-        structures[i]->computeCorrelation(transforms);
+    for(auto element: structures){
+        element->computeCorrelation(transforms);
     }
 }
 
 void Database::computeCentroids(){
-    for(unsigned int i(0); i<transforms.size(); i++){
-        transforms[i]->resetCentroid();
+    for(auto element: transforms){
+        element->resetCentroid();
     }
-    for(unsigned int i(0); i<structures.size(); i++){
-        structures[i]->computeCentroid(transforms);
+    for(auto element: structures){
+        element->computeCentroid(transforms);
     }
-    for(unsigned int i(0); i<transforms.size(); i++){
-        transforms[i]->computeCentroid();
+    for(auto element: transforms){
+        element->computeCentroid();
     }
 }
 
@@ -72,19 +76,20 @@ void Database::computeFrames(){
 }
 
 void Database::computeOptimals(){
-    for(unsigned int i(0); i<structures.size(); i++){
-        structures[i]->computeOptimalPosition();
+    for(auto element: structures){
+        element->computeOptimalPosition();
     }
 }
 
 void Database::computeRadii(){
-    for(unsigned int i(0); i<structures.size(); i++){
-        structures[i]->computeRadius(viewpoints);
+    for(auto element: structures){
+        element->computeRadius(viewpoints);
     }
 }
 
 void Database::computeStatistics(){
     unsigned int count(0);
+    double component(0.);
 
     disparityMean=0.;
     radiusMean=0.;
@@ -102,7 +107,7 @@ void Database::computeStatistics(){
     radiusSD=0.;
     for(unsigned int i(0); i<structures.size(); i++){
         for(unsigned int j(0); j<structures[i]->getFeatureCount(); j++){
-            double component(structures[i]->getDisparity(j)-disparityMean);
+            component=structures[i]->getDisparity(j)-disparityMean;
             disparitySD+=component*component;
             component=structures[i]->getRadius(j)-radiusMean;
             radiusSD+=component*component;
@@ -125,7 +130,7 @@ void Database::computeStatistics(){
 void Database::computeFilters(double dispTolerence, double radTolerence){
     unsigned int i(0);
     unsigned int j(structures.size());
-    while ( i<j ){
+    while (i < j){
         if (structures[i]->computeFilter(disparitySD,radiusMean,radiusSD,dispTolerence,radTolerence)==false){
         	for(auto f : *structures[i]->getFeatures()){
         		f->structure = NULL;
@@ -138,20 +143,17 @@ void Database::computeFilters(double dispTolerence, double radTolerence){
     structures.resize(j);
 }
 
-double Database::computeError(){
-    return disparityMean;
-}
-
-void Database::extrapolateViewpoint(Viewpoint * v){
-    auto viewpointCount = viewpoints.size();
+void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
+    auto viewpointCount(viewpoints.size());
     if(viewpointCount<2){
-        v->setPose(Eigen::Matrix3d::Identity(),Eigen::Vector3d::Zero());
+        pushedViewpoint->resetFrame();
     }else{
-        Eigen::Matrix3d orientation(*viewpoints[viewpointCount-1]->getOrientation());
-        Eigen::Vector3d position(*viewpoints[viewpointCount-1]->getPosition());
-        Eigen::Matrix3d rotation((*transforms[viewpointCount-2]->getRotation()).transpose());
-        Eigen::Vector3d translation(*transforms[viewpointCount-2]->getTranslation());
-        v->setPose(orientation*rotation,position-rotation*translation);
+        Eigen::Matrix3d prevRotation((*transforms[viewpointCount-2]->getRotation()).transpose());
+        Eigen::Vector3d prevTranslation(prevRotation*(*transforms[viewpointCount-2]->getTranslation()));
+        pushedViewpoint->setPose(
+            (*viewpoints[viewpointCount-1]->getOrientation())*prevRotation,
+            (*viewpoints[viewpointCount-1]->getPosition())-prevTranslation
+        );
     }
 }
 
@@ -159,8 +161,8 @@ void Database::extrapolateStructure(){
     if (viewpoints.size()<=2){
         return;
     }
-    for(unsigned int i(0); i<structures.size(); i++){
-        structures[i]->extrapolate(viewpoints);
+    for(auto element: structures){
+        element->extrapolate(viewpoints);
     }
 }
 
@@ -171,8 +173,8 @@ void Database::exportModel(std::string path, unsigned int major){
         std::cerr << "unable to create model exportation file" << std::endl;
         return;
     }
-    for(unsigned int i(0); i<structures.size(); i++){
-        Eigen::Vector3d * position(structures[i]->getPosition());
+    for(auto element: structures){
+        Eigen::Vector3d * position(element->getPosition());
         exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 0 0" << std::endl;
     }
     exportStream.close();
@@ -185,22 +187,20 @@ void Database::exportOdometry(std::string path, unsigned int major){
         std::cerr << "unable to create odometry exportation file" << std::endl;
         return;
     }
-    for(unsigned int i(0); i<viewpoints.size(); i++){
-        Eigen::Vector3d * position(viewpoints[i]->getPosition());
+    for(auto element: viewpoints){
+        Eigen::Vector3d * position(element->getPosition());
         exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 255 255" << std::endl;
     }
     exportStream.close();
 }
 
-// Move to utils ? NH
+//
+//  development related features
+//
 
 static cv::Point f2i(Eigen::Vector2f value){
 	return cv::Point(value[0],value[1]);
 }
-
-//
-//  development related features
-//
 
 //Do  cv::waitKey(0); if you want to stop after it.
 void Database::displayViewpointStructures(Viewpoint *viewpoint){

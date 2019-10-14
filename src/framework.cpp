@@ -272,7 +272,7 @@ int main(int argc, char *argv[]){
             database.computeFilters(paramDisparity,paramRadius);
 
             // algorithm error management
-            loopError = database.computeError();
+            loopError = database.getError();
             if ( fabs( loopError - pushError ) < paramError ) {
                 loopFlag = false;
             } else {

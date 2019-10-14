@@ -48,6 +48,7 @@ public:
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
 //    void deleteAndUnlinkStructure(int id);
     int getViewpointCount();
+    double getError();
     void computeModels();
     void computeCorrelations();
     void computeCentroids();
@@ -57,7 +58,6 @@ public:
     void computeRadii();
     void computeStatistics();
     void computeFilters(double dispTolerence, double radTolerence);
-    double computeError();
     void extrapolateViewpoint(Viewpoint * v);
     void extrapolateStructure();
     void exportModel(std::string path, unsigned int major);
