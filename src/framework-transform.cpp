@@ -59,9 +59,11 @@ void Transform::computePose(Viewpoint * first, Viewpoint * second){
     rotation=svd.matrixV()*svd.matrixU().transpose();
     if (rotation.determinant()<0){
         std::cerr << "SVD fault" << std::endl;
-        Eigen::Matrix3d correction(Eigen::Matrix3d::Identity());
-        correction(3,3)=-1;
-        rotation=(svd.matrixV()*correction)*svd.matrixU().transpose();
+        Eigen::Matrix3d correctV(svd.matrixV());
+        correctV(0,2)=-correctV(0,2);
+        correctV(1,2)=-correctV(1,2);
+        correctV(2,2)=-correctV(2,2);
+        rotation=correctV*svd.matrixU().transpose();
     }
     translation=centerSecond-rotation*centerFirst;
 }
@@ -70,3 +72,4 @@ void Transform::computeFrame(Viewpoint * first, Viewpoint * second){
     Eigen::Matrix3d trotation(rotation.transpose());
     second->setPose((*first->getOrientation())*trotation,(*first->getPosition())-trotation*translation);
 }
+
