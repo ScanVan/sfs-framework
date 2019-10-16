@@ -340,7 +340,6 @@ void Database::_exportFrame(std::string path){
 
 void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations){
 	uint32_t localViewpointsCount = localViewpoints->size();
-
 	Structure** structures = new Structure*[localViewpointsCount];
 	uint32_t* structuresOccurences = new uint32_t[localViewpointsCount];
 	uint32_t structureNewCount = 0;

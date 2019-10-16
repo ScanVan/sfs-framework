@@ -121,7 +121,7 @@ FrontendCloudpoint::FrontendCloudpoint(Database *database, std::string modelPath
 		model.push_back(p);
 	}
 
-	std::ifstream o(modelPath);
+	std::ifstream o(odometryPath);
 	while(true){
 		Eigen::Vector3d p;
 		if(!(o >> p[0] >> p[1] >> p[2])) break;
@@ -135,7 +135,7 @@ bool FrontendCloudpoint::next(){
 
 	//Extract feature from nearby model points
 	double dMax = 30;
-	auto o = odometry[viewpointIndex];
+	auto o = odometry[viewpointIndex++];
 	for(uint32_t mid = 0;mid < model.size();mid++){
 		auto m = model[mid];
 		auto position = (m-o);
@@ -156,7 +156,7 @@ bool FrontendCloudpoint::next(){
 	database->getLocalViewpoints(newViewpoint->position, &localViewpoints);
 
 	uint32_t localViewpointsCount = localViewpoints.size();
-	uint32_t newViewpointFeaturesCount = newViewpoint->getCvFeatures()->size();
+	uint32_t newViewpointFeaturesCount = newViewpoint->features.size();
 
 	//Match local viewpoints to the new image
 	uint32_t *correlations = new uint32_t[newViewpointFeaturesCount*localViewpointsCount]; //-1 => empty
@@ -167,8 +167,8 @@ bool FrontendCloudpoint::next(){
 			auto flid = localViewpoint->features[fli].inliner;
 			for(uint32_t fln = 0;fln < newViewpoint->features.size();fln++){
 				auto flnd = newViewpoint->features[fln].inliner;
-				if(flid== flnd){
-					correlations[localViewpointIdx + flnd*localViewpointsCount] = flid;
+				if(flid == flnd){
+					correlations[localViewpointIdx + fln*localViewpointsCount] = fli;
 				}
 			}
 		}
