@@ -53,28 +53,15 @@ bool FrontendPicture::next() {
 		}
 	}
 
-	//profile("allocateFeaturesFromCvFeatures");
 	newViewpoint->allocateFeaturesFromCvFeatures();
 
-	//profile("misc");
-
 	//Extrapolate the position of the newViewpoint
-	//if(lastViewpoint){
-	//	newViewpoint->setPosition(*lastViewpoint->getPosition());
-	//} else {
-	//	newViewpoint->setPosition(Eigen::Vector3d(0,0,0));
-	//}
 	database->extrapolateViewpoint(newViewpoint.get());
 
 	//Get local viewpoints
-	auto localViewpoints = std::vector<std::shared_ptr<Viewpoint>>();
-	{
-		auto viewpoints = database->getViewpoints();
-		int localCount = MIN(3, viewpoints->size());
-		for(auto i = viewpoints->end()-localCount;i != viewpoints->end(); ++i){
-			localViewpoints.push_back(*i);
-		}
-	}
+	std::vector<std::shared_ptr<Viewpoint>> localViewpoints;
+	database->getLocalViewpoints(newViewpoint->position, &localViewpoints);
+
 	uint32_t localViewpointsCount = localViewpoints.size();
 	uint32_t newViewpointFeaturesCount = newViewpoint->getCvFeatures()->size();
 
@@ -109,85 +96,11 @@ bool FrontendPicture::next() {
 	}
 
 	//Integrate the new image features into the structure
-	//profile("aggregation");
-	Structure** structures = new Structure*[localViewpointsCount];
-	uint32_t* structuresOccurences = new uint32_t[localViewpointsCount];
-	uint32_t structureNewCount = 0;
-	uint32_t structureAggregationCount = 0;
-	uint32_t structureFusionCount = 0;
-	for(uint32_t queryIdx = 0;queryIdx < newViewpoint->getCvFeatures()->size(); queryIdx++){
-		uint32_t *correlationsPtr = correlations + queryIdx*localViewpointsCount; //Used to iterate over the given lines
-
-		uint32_t structuresCount = 0;
-		uint32_t matchCount = 0;
-
-		//Collect all the existing structures of the matches and count their occurences
-		for(uint32_t localIdx = 0;localIdx < localViewpointsCount;localIdx++){
-			uint32_t trainIdx = correlationsPtr[localIdx];
-			if(trainIdx != 0xFFFFFFFF){
-				matchCount++;
-				auto localFeature = localViewpoints[localIdx]->getFeatureFromCvIndex(trainIdx);
-				auto localStructure = localFeature->structure;
-				if(localStructure){
-					uint32_t cacheIdx;
-					for(cacheIdx = 0;cacheIdx < structuresCount; cacheIdx++){
-						if(structures[cacheIdx] == localStructure){
-							structuresOccurences[cacheIdx]++;
-							break;
-						}
-					}
-					if(cacheIdx == structuresCount){ //No cache hit
-						structures[cacheIdx] = localStructure;
-						structuresOccurences[cacheIdx] = 1;
-						structuresCount++;
-					}
-				}
-			}
-		}
-
-
-		//Figure out which structure will be used to integrate the newViewpoint feature
-		if(matchCount == 0) continue; //No match => no integration
-		Structure *structure = NULL;
-		switch(structuresCount){
-			case 0: {
-				structure = database->newStructure();
-				structureNewCount++;
-			}break;
-			case 1: {
-				if(structuresOccurences[0] < 2) continue; //Not good enough
-				structure = structures[0];
-				structureAggregationCount++;
-			}break;
-			default: {
-				structureFusionCount++;
-				continue;
-			}break;
-		}
-
-		//Integrate all orphan feature into the common structure
-		for(uint32_t localIdx = 0;localIdx < localViewpointsCount;localIdx++){
-			uint32_t trainIdx = correlationsPtr[localIdx];
-			if(trainIdx != 0xFFFFFFFF){
-				auto localFeature = localViewpoints[localIdx]->getFeatureFromCvIndex(trainIdx);
-				if(!localFeature->structure){
-					structure->addFeature(localViewpoints[localIdx]->getFeatureFromCvIndex(trainIdx));
-				}
-			}
-		}
-
-		auto newFeature = newViewpoint->getFeatureFromCvIndex(queryIdx);
-		assert(!newFeature->structure);
-		structure->addFeature(newFeature);
-	}
+	database->aggregate(&localViewpoints, newViewpoint.get(), correlations);
 	delete[] correlations;
-	delete[] structures;
-	delete[] structuresOccurences;
-	std::cout << "structureNewCount=" << structureNewCount << " structureAggregationCount=" << structureAggregationCount << " structureFusionCount=" << structureFusionCount << std::endl;
 
 	lastViewpoint = newViewpoint;
 
-	//profile("display");
 	database->addViewpoint(newViewpoint);
 	database->extrapolateStructure();
 	database->displayViewpointStructures(newViewpoint.get());
@@ -217,5 +130,55 @@ FrontendCloudpoint::FrontendCloudpoint(Database *database, std::string modelPath
 }
 
 bool FrontendCloudpoint::next(){
+	if(viewpointIndex == odometry.size()) return false;
+	auto newViewpoint = std::make_shared<Viewpoint>();
+
+	//Extract feature from nearby model points
+	double dMax = 30;
+	auto o = odometry[viewpointIndex];
+	for(uint32_t mid = 0;mid < model.size();mid++){
+		auto m = model[mid];
+		auto position = (m-o);
+		if((m-o).norm() < dMax){
+			Feature f;
+	        f.setDirection(position.normalized());
+	        f.setRadius(1., 0.);
+	        f.setViewpointPtr(newViewpoint.get());
+	        f.setStructurePtr(NULL);
+	        f.inliner = mid;
+			newViewpoint->addFeature(f);
+		}
+	}
+
+	database->extrapolateViewpoint(newViewpoint.get());
+
+	std::vector<std::shared_ptr<Viewpoint>> localViewpoints;
+	database->getLocalViewpoints(newViewpoint->position, &localViewpoints);
+
+	uint32_t localViewpointsCount = localViewpoints.size();
+	uint32_t newViewpointFeaturesCount = newViewpoint->getCvFeatures()->size();
+
+	//Match local viewpoints to the new image
+	uint32_t *correlations = new uint32_t[newViewpointFeaturesCount*localViewpointsCount]; //-1 => empty
+	memset(correlations, -1, newViewpointFeaturesCount*localViewpointsCount*sizeof(uint32_t));
+	for(uint32_t localViewpointIdx = 0; localViewpointIdx < localViewpointsCount; localViewpointIdx++){
+		auto localViewpoint = localViewpoints[localViewpointIdx];
+		for(uint32_t fli = 0;fli < localViewpoint->features.size();fli++){
+			auto flid = localViewpoint->features[fli].inliner;
+			for(uint32_t fln = 0;fln < newViewpoint->features.size();fln++){
+				auto flnd = newViewpoint->features[fln].inliner;
+				if(flid== flnd){
+					correlations[localViewpointIdx + flnd*localViewpointsCount] = flid;
+				}
+			}
+		}
+	}
+
+	database->aggregate(&localViewpoints, newViewpoint.get(), correlations);
+	delete[] correlations;
+
+	database->addViewpoint(newViewpoint);
+	database->extrapolateStructure();
+
 	return true;
 }

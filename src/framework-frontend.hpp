@@ -35,9 +35,9 @@ public:
 
 class FrontendCloudpoint : public Frontend{
 private:
-	std::shared_ptr<Viewpoint> lastViewpoint;
 	Database *database;
 	std::vector<Eigen::Vector3d> model, odometry;
+	uint32_t viewpointIndex = 0;
 public:
 	FrontendCloudpoint(Database *database, std::string modelPath, std::string odometryPath);
 	virtual ~FrontendCloudpoint(){}

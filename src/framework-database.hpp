@@ -59,11 +59,13 @@ public:
     void computeStatistics();
     void computeFilters(double dispTolerence, double radTolerence);
     void extrapolateViewpoint(Viewpoint * v);
+    void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
     void extrapolateStructure();
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);
     Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();}
     void displayViewpointStructures(Viewpoint *viewpoint);
+    void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
 
 // development related features
 public:

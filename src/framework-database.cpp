@@ -162,6 +162,13 @@ void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
     }
 }
 
+void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
+	int localCount = MIN(3, viewpoints.size());
+	for(auto i = viewpoints.end()-localCount;i != viewpoints.end(); ++i){
+		localViewpoints->push_back(*i);
+	}
+}
+
 void Database::extrapolateStructure(){
     if (viewpoints.size()<=2){
         return;
@@ -328,4 +335,84 @@ void Database::_exportFrame(std::string path){
                << viewpoints[i]->orientation(2,2) << std::endl;
     }
     stream.close();
+}
+
+
+void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations){
+	uint32_t localViewpointsCount = localViewpoints->size();
+
+	Structure** structures = new Structure*[localViewpointsCount];
+	uint32_t* structuresOccurences = new uint32_t[localViewpointsCount];
+	uint32_t structureNewCount = 0;
+	uint32_t structureAggregationCount = 0;
+	uint32_t structureFusionCount = 0;
+	for(uint32_t queryIdx = 0;queryIdx < newViewpoint->features.size(); queryIdx++){
+		uint32_t *correlationsPtr = correlations + queryIdx*localViewpointsCount; //Used to iterate over the given lines
+
+		uint32_t structuresCount = 0;
+		uint32_t matchCount = 0;
+
+		//Collect all the existing structures of the matches and count their occurences
+		for(uint32_t localIdx = 0;localIdx < localViewpointsCount;localIdx++){
+			uint32_t trainIdx = correlationsPtr[localIdx];
+			if(trainIdx != 0xFFFFFFFF){
+				matchCount++;
+				auto localFeature = (*localViewpoints)[localIdx]->getFeatureFromCvIndex(trainIdx);
+				auto localStructure = localFeature->structure;
+				if(localStructure){
+					uint32_t cacheIdx;
+					for(cacheIdx = 0;cacheIdx < structuresCount; cacheIdx++){
+						if(structures[cacheIdx] == localStructure){
+							structuresOccurences[cacheIdx]++;
+							break;
+						}
+					}
+					if(cacheIdx == structuresCount){ //No cache hit
+						structures[cacheIdx] = localStructure;
+						structuresOccurences[cacheIdx] = 1;
+						structuresCount++;
+					}
+				}
+			}
+		}
+
+
+		//Figure out which structure will be used to integrate the newViewpoint feature
+		if(matchCount == 0) continue; //No match => no integration
+		Structure *structure = NULL;
+		switch(structuresCount){
+			case 0: {
+				structure = this->newStructure();
+				structureNewCount++;
+			}break;
+			case 1: {
+				if(structuresOccurences[0] < 2) continue; //Not good enough
+				structure = structures[0];
+				structureAggregationCount++;
+			}break;
+			default: {
+				structureFusionCount++;
+				continue;
+			}break;
+		}
+
+		//Integrate all orphan feature into the common structure
+		for(uint32_t localIdx = 0;localIdx < localViewpointsCount;localIdx++){
+			uint32_t trainIdx = correlationsPtr[localIdx];
+			if(trainIdx != 0xFFFFFFFF){
+				auto localFeature = (*localViewpoints)[localIdx]->getFeatureFromCvIndex(trainIdx);
+				if(!localFeature->structure){
+					structure->addFeature((*localViewpoints)[localIdx]->getFeatureFromCvIndex(trainIdx));
+				}
+			}
+		}
+
+		auto newFeature = newViewpoint->getFeatureFromCvIndex(queryIdx);
+		assert(!newFeature->structure);
+		structure->addFeature(newFeature);
+	}
+	delete[] structures;
+	delete[] structuresOccurences;
+	std::cout << "structureNewCount=" << structureNewCount << " structureAggregationCount=" << structureAggregationCount << " structureFusionCount=" << structureFusionCount << std::endl;
+
 }
