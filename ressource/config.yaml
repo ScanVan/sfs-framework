@@ -4,9 +4,18 @@ frontend:
     type: FOLDER
     path: /home/dolu/pro/scanvan/dataset/e
     mask: /home/dolu/pro/scanvan/dataset/mask.png
+
+#To use datapoints as viewpoint source, replace the frontend stuff with
+#frontend:
+#  type: CLOUDPOINT
+#  model: dev/model.xyz
+#  odometry: dev/odometry.xyz
+
 algorithm:
   error: 1e-8
   disparity: 5
   radius: 3
 export:
   path: /media/hamel/Documents/model
+
+

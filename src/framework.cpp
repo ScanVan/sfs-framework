@@ -50,6 +50,10 @@ int main(int argc, char *argv[]){
 		frontend = new FrontendPicture(source, mask, &threadpool, &database);
 	}
 
+	if(frontendType == "CLOUDPOINT"){
+		frontend = new FrontendCloudpoint(&database, config["frontend"]["model"].as<std::string>(), config["frontend"]["odometry"].as<std::string>());
+	}
+
 
     // pipeline major iteration
     int loopMajor(1);

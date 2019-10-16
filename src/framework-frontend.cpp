@@ -197,3 +197,25 @@ bool FrontendPicture::next() {
 	newViewpoint->getImage()->deallocate(); //TODO
 	return true;
 }
+
+
+
+FrontendCloudpoint::FrontendCloudpoint(Database *database, std::string modelPath, std::string odometryPath) : database(database){
+	std::ifstream m(modelPath);
+	while(true){
+		Eigen::Vector3d p;
+		if(!(m >> p[0] >> p[1] >> p[2])) break;
+		model.push_back(p);
+	}
+
+	std::ifstream o(modelPath);
+	while(true){
+		Eigen::Vector3d p;
+		if(!(o >> p[0] >> p[1] >> p[2])) break;
+		odometry.push_back(p);
+	}
+}
+
+bool FrontendCloudpoint::next(){
+	return true;
+}
