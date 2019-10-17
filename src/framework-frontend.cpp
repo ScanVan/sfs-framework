@@ -184,8 +184,18 @@ bool FrontendCloudpoint::next(){
 	for(auto s : database->structures){
 		assert(s->features.size() > 1);
 		auto inliner = s->features.front()->inliner;
-		for(auto f : s->features){
+		for(auto &f : s->features){
+			assert(f->structure == s.get());
 			assert(f->inliner == inliner);
+		}
+	}
+
+	for(auto v : *database->getViewpoints()){
+		for(auto &f : v->features){
+			if(f.structure){
+				auto sf = &(f.structure->features);
+				assert(std::find(sf->begin(), sf->end(), &f) != sf->end());
+			}
 		}
 	}
 
