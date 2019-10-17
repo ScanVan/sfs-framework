@@ -163,12 +163,12 @@ bool FrontendCloudpoint::next(){
 	memset(correlations, -1, newViewpointFeaturesCount*localViewpointsCount*sizeof(uint32_t));
 	for(uint32_t localViewpointIdx = 0; localViewpointIdx < localViewpointsCount; localViewpointIdx++){
 		auto localViewpoint = localViewpoints[localViewpointIdx];
-		for(uint32_t fli = 0;fli < localViewpoint->features.size();fli++){
-			auto flid = localViewpoint->features[fli].inliner;
-			for(uint32_t fln = 0;fln < newViewpoint->features.size();fln++){
-				auto flnd = newViewpoint->features[fln].inliner;
-				if(flid == flnd){
-					correlations[localViewpointIdx + fln*localViewpointsCount] = fli;
+		for(uint32_t localFeatureIndex = 0;localFeatureIndex < localViewpoint->features.size();localFeatureIndex++){
+			auto localFeatureInliner = localViewpoint->features[localFeatureIndex].inliner;
+			for(uint32_t newFeatureIndex = 0;newFeatureIndex < newViewpoint->features.size();newFeatureIndex++){
+				auto newFeatureInliner = newViewpoint->features[newFeatureIndex].inliner;
+				if(localFeatureInliner == newFeatureInliner){
+					correlations[localViewpointIdx + newFeatureIndex*localViewpointsCount] = localFeatureIndex;
 				}
 			}
 		}
@@ -179,6 +179,15 @@ bool FrontendCloudpoint::next(){
 
 	database->addViewpoint(newViewpoint);
 	database->extrapolateStructure();
+
+	//Sanity check
+	for(auto s : database->structures){
+		assert(s->features.size() > 1);
+		auto inliner = s->features.front()->inliner;
+		for(auto f : s->features){
+			assert(f->inliner == inliner);
+		}
+	}
 
 	return true;
 }
