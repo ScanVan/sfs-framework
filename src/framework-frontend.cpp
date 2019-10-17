@@ -181,14 +181,24 @@ bool FrontendCloudpoint::next(){
 	database->extrapolateStructure();
 
 	//Sanity check
+	uint32_t *structureSizes = new uint32_t[database->viewpoints.size() + 1];
+	memset(structureSizes, 0, (database->viewpoints.size() + 1)*sizeof(uint32_t));
 	for(auto s : database->structures){
 		assert(s->features.size() > 1);
+		structureSizes[s->features.size()]++;
 		auto inliner = s->features.front()->inliner;
 		for(auto &f : s->features){
 			assert(f->structure == s.get());
 			assert(f->inliner == inliner);
 		}
 	}
+	std::cout << "Structure family ";
+	for(uint32_t size = 0;size <= database->viewpoints.size(); size++){
+		auto count = structureSizes[size];
+		if(count) std::cout << size << "=>" << count << " ";
+	}
+	std::cout << std::endl;
+	delete []structureSizes;
 
 	for(auto v : *database->getViewpoints()){
 		for(auto &f : v->features){
