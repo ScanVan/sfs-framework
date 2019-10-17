@@ -38,6 +38,7 @@ int main(int argc, char *argv[]){
 	auto database = Database();
 	ThreadPool threadpool(8);
 
+	bool inlinerEnabled = false;
 	Frontend *frontend = NULL;
 	auto frontendType = config["frontend"]["type"].as<std::string>();
 	if(frontendType == "IMAGE"){
@@ -52,6 +53,7 @@ int main(int argc, char *argv[]){
 
 	if(frontendType == "CLOUDPOINT"){
 		frontend = new FrontendCloudpoint(&database, config["frontend"]["model"].as<std::string>(), config["frontend"]["odometry"].as<std::string>());
+		inlinerEnabled = true;
 	}
 
 
@@ -65,6 +67,8 @@ int main(int argc, char *argv[]){
 
 	while(true){
 		if(!frontend->next()) continue; //image drop
+
+		database.sanityCheck(inlinerEnabled);
 
         //
         // geometry estimation solver
@@ -109,7 +113,7 @@ int main(int argc, char *argv[]){
             std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | error : " << loopError << std::endl;
 
         }
-
+        database.sanityCheck(inlinerEnabled);
         // major iteration exportation : model and odometry
         database.exportModel   (config["export"]["path"].as<std::string>(),loopMajor);
         database.exportOdometry(config["export"]["path"].as<std::string>(),loopMajor);

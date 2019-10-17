@@ -136,12 +136,14 @@ bool FrontendCloudpoint::next(){
 	//Extract feature from nearby model points
 	double dMax = 30;
 	auto o = odometry[viewpointIndex++];
+//	auto origin = odometry[0];
 	for(uint32_t mid = 0;mid < model.size();mid++){
 		auto m = model[mid];
 		auto position = (m-o);
 		if((m-o).norm() < dMax){
 			Feature f;
 	        f.setDirection(position.normalized());
+//	        f.setRadius(position.norm()+0.1, 0.);
 	        f.setRadius(1., 0.);
 	        f.setViewpointPtr(newViewpoint.get());
 	        f.setStructurePtr(NULL);
@@ -150,6 +152,7 @@ bool FrontendCloudpoint::next(){
 		}
 	}
 
+//	newViewpoint->setPose(Eigen::Matrix3d::Identity(), o-origin);
 	database->extrapolateViewpoint(newViewpoint.get());
 
 	std::vector<std::shared_ptr<Viewpoint>> localViewpoints;
@@ -179,35 +182,6 @@ bool FrontendCloudpoint::next(){
 
 	database->addViewpoint(newViewpoint);
 	database->extrapolateStructure();
-
-	//Sanity check
-	uint32_t *structureSizes = new uint32_t[database->viewpoints.size() + 1];
-	memset(structureSizes, 0, (database->viewpoints.size() + 1)*sizeof(uint32_t));
-	for(auto s : database->structures){
-		assert(s->features.size() > 1);
-		structureSizes[s->features.size()]++;
-		auto inliner = s->features.front()->inliner;
-		for(auto &f : s->features){
-			assert(f->structure == s.get());
-			assert(f->inliner == inliner);
-		}
-	}
-	std::cout << "Structure family ";
-	for(uint32_t size = 0;size <= database->viewpoints.size(); size++){
-		auto count = structureSizes[size];
-		if(count) std::cout << size << "=>" << count << " ";
-	}
-	std::cout << std::endl;
-	delete []structureSizes;
-
-	for(auto v : *database->getViewpoints()){
-		for(auto &f : v->features){
-			if(f.structure){
-				auto sf = &(f.structure->features);
-				assert(std::find(sf->begin(), sf->end(), &f) != sf->end());
-			}
-		}
-	}
 
 	return true;
 }

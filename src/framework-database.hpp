@@ -66,7 +66,7 @@ public:
     Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();}
     void displayViewpointStructures(Viewpoint *viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
-
+    void sanityCheck(bool inliner);
 // development related features
 public:
     void _exportState(std::string path,int major, int iter);
