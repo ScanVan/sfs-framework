@@ -43,6 +43,12 @@ public:
 	cv::Mat cvDescriptor;
     Eigen::Matrix3d orientation;
     Eigen::Vector3d position;
+
+    double dispMean;
+    double dispSD;
+    double distReference;
+    unsigned int dispCount;
+
 public:
     time_t time;
     int microsecond;
@@ -68,4 +74,13 @@ public:
 //	GETSET(cv::Mat, Image);
 //	GETSET(std::vector<cv::KeyPoint> , Features);
 //	GETSET(cv::Mat, Descriptor);
+
+    double getDisparityMean();
+    void resetStatistics();
+    void pushStatisticsMean(double pushValue);
+    void computeStatisticsMean();
+    void pushStatisticsSD(double pushValue);
+    void computeStatisticsSD();
+    void setReferenceDistance(double newReference);
+
 };

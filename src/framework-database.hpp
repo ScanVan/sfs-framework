@@ -38,16 +38,21 @@ public:
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Structure>> structures;
 
-    double disparityMean;
-    double disparitySD;
-    double radiusMean;
-    double radiusSD;
+    unsigned long configBootstrap;
+    double configError;
+    double configStructure;
+    double configDisparity;
+    double configRadiusMin;
+    double configRadiusMax;
 
 public:
+    Database(unsigned long initialBootstrap, double initialError, double initialStructure, double initialDisparity, double initialRadiusMin, double initialRadiusMax);
+
     std::vector<std::shared_ptr<Viewpoint>> *getViewpoints() { return &viewpoints; }
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
 //    void deleteAndUnlinkStructure(int id);
     int getViewpointCount();
+    double getConfigError();
     double getError();
     void computeModels();
     void computeCorrelations();
@@ -57,7 +62,7 @@ public:
     void computeOptimals();
     void computeRadii();
     void computeStatistics();
-    void computeFilters(double dispTolerence, double radTolerence);
+    void computeFilters();
     void extrapolateViewpoint(Viewpoint * v);
     void extrapolateStructure();
     void exportModel(std::string path, unsigned int major);
@@ -68,8 +73,5 @@ public:
 // development related features
 public:
     void _exportState(std::string path,int major, int iter);
-    void _exportMatch(std::string path);
-    void _exportInitialPair(std::string path);
-    void _exportFrame(std::string path);
 };
 

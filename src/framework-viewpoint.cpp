@@ -68,3 +68,37 @@ double Viewpoint::getSecondFrom(Viewpoint *ref){
 	return s;
 }
 
+////
+
+double Viewpoint::getDisparityMean(){
+    return dispMean;
+}
+
+void Viewpoint::resetStatistics(){
+    dispMean=0.;
+    dispSD=0.;
+    dispCount=0;
+}
+
+void Viewpoint::pushStatisticsMean(double pushValue){
+    dispMean+=pushValue;
+    dispCount++;
+}
+
+void Viewpoint::computeStatisticsMean(){
+    dispMean/=double(dispCount);
+}
+
+void Viewpoint::pushStatisticsSD(double pushValue){
+    pushValue-=dispMean;
+    dispSD+=pushValue*pushValue;
+}
+
+void Viewpoint::computeStatisticsSD(){
+    dispSD=std::sqrt(dispSD/double(dispCount-1));
+}
+
+void Viewpoint::setReferenceDistance(double newReference){
+    distReference=newReference;
+}
+

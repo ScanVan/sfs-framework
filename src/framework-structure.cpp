@@ -25,7 +25,7 @@ Eigen::Vector3d * Structure::getPosition(){
     return &position;
 }
 
-unsigned int Structure::getFeatureCount(){
+unsigned int Structure::getFeaturesCount(){
     return features.size();
 }
 
@@ -35,6 +35,10 @@ double Structure::getRadius(unsigned int featureID){
 
 double Structure::getDisparity(unsigned int featureID){
     return features[featureID]->getDisparity();
+}
+
+bool Structure::getFlag(){
+    return flag;
 }
 
 void Structure::computeModel(){
@@ -96,17 +100,33 @@ void Structure::computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoin
     }
 }
 
-bool Structure::computeFilter(double dispFilter, double radFilter, double radMean){
+//bool Structure::computeFilter(double dispFilter, double radFilter, double radMean, double temp, double temp2, double temp3){
+bool Structure::computeFilter(double configDisparity, double configRadiusMin, double configRadiusMax ){
     for(auto element: features){
-        if (element->getDisparity()>dispFilter){
+        if (element->getDisparity()>element->getViewpoint()->dispSD*configDisparity) {
             return false;
         }
-        if (std::fabs(element->getRadius()-radMean)>radFilter){
+        if (element->getRadius()<element->getViewpoint()->distReference*configRadiusMin) {
+            return false;
+        }
+        if (element->getRadius()>element->getViewpoint()->distReference*configRadiusMax) {
             return false;
         }
     }
     return true;
 }
+
+//bool Structure::computeFilter(double dispFilter, double radFilter, double radMean){
+//    for(auto element: features){
+//        if (element->getDisparity()>dispFilter){
+//            return false;
+//        }
+//        if (std::fabs(element->getRadius()-radMean)>radFilter){
+//            return false;
+//        }
+//    }
+//    return true;
+//}
 
 void Structure::extrapolate(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
     if (flag==false){
@@ -114,4 +134,20 @@ void Structure::extrapolate(std::vector<std::shared_ptr<Viewpoint>> & viewpoints
     }
     computeRadius(viewpoints);
 }
+
+////
+
+void Structure::computeStatisticsMean(){
+    for(auto & element: features){
+        element->getViewpoint()->pushStatisticsMean(element->getDisparity());
+    }
+}
+
+void Structure::computeStatisticsSD(){
+    for(auto & element: features){
+        element->getViewpoint()->pushStatisticsSD(element->getDisparity());
+    }
+}
+
+
 

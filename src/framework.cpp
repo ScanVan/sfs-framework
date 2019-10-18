@@ -38,7 +38,15 @@ int main(int argc, char *argv[]){
 	auto sourceType = config["source"]["type"].as<std::string>();
 	if(sourceType == "FOLDER") source = new ViewPointSourceFs(config["source"]["path"].as<std::string>());
 	auto mask = cv::imread(config["source"]["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
-	auto database = Database();
+	//auto database = Database();
+    auto database = Database(
+        config["algorithm"]["bootstrap"].as<unsigned long>(),
+        config["algorithm"]["error"].as<double>(),
+        config["algorithm"]["structure"].as<double>(),
+        config["algorithm"]["disparity"].as<double>(),
+        config["algorithm"]["radius_min"].as<double>(),
+        config["algorithm"]["radius_max"].as<double>()
+    );
 
     ThreadPool threadpool(8);
 
@@ -62,9 +70,9 @@ int main(int argc, char *argv[]){
     int loopMajor(1);
 
     // algorithm parameter query
-    double paramError( config["algorithm"]["error"].as<double>() );
-    double paramDisparity( config["algorithm"]["disparity"].as<double>() );
-    double paramRadius( config["algorithm"]["radius"].as<double>() );
+    //double paramError( config["algorithm"]["error"].as<double>() );
+    //double paramDisparity( config["algorithm"]["disparity"].as<double>() );
+    //double paramRadius( config["algorithm"]["radius"].as<double>() );
 
 	std::shared_ptr<Viewpoint> lastViewpoint;
 	while(true){
@@ -113,7 +121,8 @@ int main(int argc, char *argv[]){
 		auto localViewpoints = std::vector<std::shared_ptr<Viewpoint>>();
 		{
 			auto viewpoints = database.getViewpoints();
-			int localCount = MIN(3, viewpoints->size());
+			//int localCount = MIN(3, viewpoints->size());
+            int localCount = MIN(5, viewpoints->size());
 			for(auto i = viewpoints->end()-localCount;i != viewpoints->end(); ++i){
 				localViewpoints.push_back(*i);
 			}
@@ -248,7 +257,7 @@ int main(int argc, char *argv[]){
         //
 
         // check for at least two pushed viewpoints
-        if ( database.getViewpointCount() < 2 ) {
+        if ( database.getViewpointCount() < 3 ) {
             continue;
         }
 
@@ -256,6 +265,10 @@ int main(int argc, char *argv[]){
         double loopError( 1.0 ), pushError( 0.0 );
         bool loopFlag( true );
         int loopMinor( 0 );
+
+        //database._exportMatch(config["source"]["pathTest"].as<std::string>());
+        //database._exportTriplet(config["source"]["pathTest"].as<std::string>()); return(0);
+        database._exportState(config["source"]["pathTest"].as<std::string>(),loopMajor,-1);
 
         // algorithm loop
         while ( loopFlag == true ) {
@@ -269,11 +282,13 @@ int main(int argc, char *argv[]){
             database.computeOptimals();
             database.computeRadii();
             database.computeStatistics();
-            database.computeFilters(paramDisparity,paramRadius);
+            database.computeFilters();
+
+            database._exportState(config["source"]["pathTest"].as<std::string>(),loopMajor,loopMinor);
 
             // algorithm error management
             loopError = database.getError();
-            if ( fabs( loopError - pushError ) < paramError ) {
+            if (fabs( loopError - pushError ) < database.getConfigError()) {
                 loopFlag = false;
             } else {
                 pushError=loopError;
