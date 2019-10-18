@@ -74,7 +74,7 @@ double Viewpoint::getDisparityMean(){
     return dispMean;
 }
 
-double Viewpoint::getDisparitySD(){
+double Viewpoint::getDisparityFilterSD(){
     return dispSD;
 }
 

@@ -73,7 +73,7 @@ public:
 
 
     double getDisparityMean();
-    double getDisparitySD();
+    double getDisparityFilterSD();
     double getdistReference();
     void setReferenceDistance(double newReference);
     void computeStatistics(double configDisparity);
