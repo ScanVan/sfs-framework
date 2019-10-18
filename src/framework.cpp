@@ -63,30 +63,44 @@ int main(int argc, char *argv[]){
         inlinerEnabled = true;
     }
 
-
     // pipeline major iteration
     int loopMajor(1);
 
+    // pipeline minor iteration
+    int loopMinor( 0 );
+
+    // algorithm variables
+    double loopError( 1. );
+    double pushError( 0. );
+    bool loopFlag( true );
+
+    // pipeline loop
     while(true){
 
-        if(!frontend->next()) continue; //image drop
+        // query image from source
+        if(!frontend->next()){
+            // drop the pushed image
+            continue;
+        }
 
-        database.sanityCheck(inlinerEnabled);
+        // development feature - begin
+        //database.sanityCheck(inlinerEnabled);
+        // development feature - end
 
         //
         // geometry estimation solver
         //
 
         // check for at least two pushed viewpoints
-        if ( database.getViewpointCount() < 3 ) {
+        if(database.getViewpointCount()<3) {
             continue;
         }
 
-        // algorithm variable
-        double loopError( 1.0 );
-        double pushError( 0.0 );
-        bool loopFlag( true );
-        int loopMinor( 0 );
+        // reset algorithm variables
+        loopError=1.;
+        pushError=0.;
+        loopFlag=true;
+        loopMinor=0;
 
         // algorithm loop
         while ( loopFlag == true ) {
@@ -121,7 +135,11 @@ int main(int argc, char *argv[]){
             std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | error : " << loopError << std::endl;
 
         }
-        database.sanityCheck(inlinerEnabled);
+
+        // development feature - begin
+        //database.sanityCheck(inlinerEnabled);
+        // development feature - end
+
         // major iteration exportation : model and odometry
         database.exportModel   (config["export"]["path"].as<std::string>(),loopMajor);
         database.exportOdometry(config["export"]["path"].as<std::string>(),loopMajor);
