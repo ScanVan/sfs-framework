@@ -143,7 +143,7 @@ bool FrontendCloudpoint::next(){
 		auto position = (m-o);
 		if((m-o).norm() < dMax){
 			Feature f;
-			auto noiseFactor = 0.01 + (1.0*rand()/RAND_MAX < badmatchRate ? 0.2 : 0);
+			auto noiseFactor = 0.001 + (1.0*rand()/RAND_MAX < badmatchRate ? 0.2 : 0);
 			auto noise = Eigen::Vector3d(dMax*noiseFactor*rand()/RAND_MAX,dMax*noiseFactor*rand()/RAND_MAX,dMax*noiseFactor*rand()/RAND_MAX);
 	        f.setDirection((position + noise).normalized());
 //	        f.setRadius(position.norm()+0.1, 0.);
