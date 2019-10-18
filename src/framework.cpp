@@ -262,13 +262,10 @@ int main(int argc, char *argv[]){
         }
 
         // algorithm variable
-        double loopError( 1.0 ), pushError( 0.0 );
+        double loopError( 1.0 );
+        double pushError( 0.0 );
         bool loopFlag( true );
         int loopMinor( 0 );
-
-        //database._exportMatch(config["source"]["pathTest"].as<std::string>());
-        //database._exportTriplet(config["source"]["pathTest"].as<std::string>()); return(0);
-        database._exportState(config["source"]["pathTest"].as<std::string>(),loopMajor,-1);
 
         // algorithm loop
         while ( loopFlag == true ) {
@@ -284,7 +281,9 @@ int main(int argc, char *argv[]){
             database.computeStatistics();
             database.computeFilters();
 
+            // development feature - begin
             database._exportState(config["source"]["pathTest"].as<std::string>(),loopMajor,loopMinor);
+            // development feature - end
 
             // algorithm error management
             loopError = database.getError();
