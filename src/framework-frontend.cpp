@@ -135,7 +135,7 @@ bool FrontendCloudpoint::next(){
 
 	//Extract feature from nearby model points
 	double dMax = 30;
-	double noiseFactor = 0.01;
+    double badmatchRate = 0.10;
 	auto o = odometry[viewpointIndex++];
 //	auto origin = odometry[0];
 	for(uint32_t mid = 0;mid < model.size();mid++){
@@ -143,6 +143,7 @@ bool FrontendCloudpoint::next(){
 		auto position = (m-o);
 		if((m-o).norm() < dMax){
 			Feature f;
+			auto noiseFactor = 0.01 + (1.0*rand()/RAND_MAX < badmatchRate ? 0.2 : 0);
 			auto noise = Eigen::Vector3d(dMax*noiseFactor*rand()/RAND_MAX,dMax*noiseFactor*rand()/RAND_MAX,dMax*noiseFactor*rand()/RAND_MAX);
 	        f.setDirection((position + noise).normalized());
 //	        f.setRadius(position.norm()+0.1, 0.);
