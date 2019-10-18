@@ -24,34 +24,30 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <limits>
+#include "framework-feature.hpp"
 #include "framework-transform.hpp"
 #include "framework-viewpoint.hpp"
 
 class Structure {
-//private:
 public:
     Eigen::Vector3d position;
     std::vector<Feature*> features;
-    bool flag; /* needed to know if an optimal position has been computed */
+    bool flag;
+
 public:
     Structure() : flag(false) {}
     Eigen::Vector3d * getPosition();
     unsigned int getFeaturesCount();
-    double getRadius(unsigned int featureID);
-    double getDisparity(unsigned int featureID);
-    bool getFlag();
-    std::vector< Feature* > *getFeatures(){ return &features; }
+    void addFeature(Feature * feature);
     void computeModel();
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition();
-    void computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
-    bool computeFilter(double configDisparity, double configRadiusMin, double configRadiusMax );
-    //bool computeFilter(double dispFilter, double radFilter, double radMean);
-    void extrapolate(std::vector<std::shared_ptr<Viewpoint>> & viewpoints);
-    void addFeature(Feature* feature) {feature->structure = this; features.push_back(feature); }
-
-    //
+    void computeRadius();
     void computeStatisticsMean();
     void computeStatisticsSD();
+    bool computeFilter(double configDisparity, double configRadiusMin, double configRadiusMax );
+    void extrapolate();
+
+    std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */
 };

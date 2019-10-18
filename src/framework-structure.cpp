@@ -29,16 +29,9 @@ unsigned int Structure::getFeaturesCount(){
     return features.size();
 }
 
-double Structure::getRadius(unsigned int featureID){
-    return features[featureID]->getRadius();
-}
-
-double Structure::getDisparity(unsigned int featureID){
-    return features[featureID]->getDisparity();
-}
-
-bool Structure::getFlag(){
-    return flag;
+void Structure::addFeature(Feature * feature){
+    feature->setStructurePtr(this);
+    features.push_back(feature);
 }
 
 void Structure::computeModel(){
@@ -88,7 +81,7 @@ void Structure::computeOptimalPosition(){
     flag=true;
 }
 
-void Structure::computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
+void Structure::computeRadius(){
     Eigen::Vector3d fvector;
     Eigen::Vector3d fposition;
     double radius(0.);
@@ -97,6 +90,18 @@ void Structure::computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoin
         radius=fvector.dot(position-(*element->getViewpoint()->getPosition()));
         fposition=(*element->getViewpoint()->getPosition())+fvector*radius;
         element->setRadius(radius,(fposition-position).norm());
+    }
+}
+
+void Structure::computeStatisticsMean(){
+    for(auto & element: features){
+        element->getViewpoint()->pushStatisticsMean(element->getDisparity());
+    }
+}
+
+void Structure::computeStatisticsSD(){
+    for(auto & element: features){
+        element->getViewpoint()->pushStatisticsSD(element->getDisparity());
     }
 }
 
@@ -115,26 +120,10 @@ bool Structure::computeFilter(double configDisparity, double configRadiusMin, do
     return true;
 }
 
-void Structure::extrapolate(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
+void Structure::extrapolate(){
     if (flag==false){
         computeOptimalPosition();
     }
-    computeRadius(viewpoints);
+    computeRadius();
 }
-
-////
-
-void Structure::computeStatisticsMean(){
-    for(auto & element: features){
-        element->getViewpoint()->pushStatisticsMean(element->getDisparity());
-    }
-}
-
-void Structure::computeStatisticsSD(){
-    for(auto & element: features){
-        element->getViewpoint()->pushStatisticsSD(element->getDisparity());
-    }
-}
-
-
 

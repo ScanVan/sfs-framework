@@ -217,7 +217,7 @@ void Database::computeOptimals(){
 void Database::computeRadii(){
     for(auto & element: structures){
         if(element->getFeaturesCount()>=configStructure){
-            element->computeRadius(viewpoints);
+            element->computeRadius();
         }
     }
 }
@@ -294,7 +294,7 @@ void Database::extrapolateStructure(){
         return;
     }
     for(auto element: structures){
-        element->extrapolate(viewpoints);
+        element->extrapolate();
     }
 }
 
