@@ -36,6 +36,7 @@ public:
     Eigen::Vector3d model;
 	double radius;
 	double disparity;
+    bool state;
 	uint32_t inliner; /* redundant with selection per features count and deletion trough filtering ? + encapsulation fault */
 
 public:
@@ -44,10 +45,12 @@ public:
     double getRadius();
     double getDisparity();
     Viewpoint * getViewpoint();
+    bool getState();
     void setFeature(double x, double y, int imageWidth, int imageHeight);
     void setRadius(double newRadius, double newDisparity);
     void setViewpointPtr(Viewpoint * newViewpoint);
     void setStructurePtr(Structure * newStructure);
     void setDirection(Eigen::Vector3d newDirection);
+    void setState(bool newState);
     void computeModel();
 };

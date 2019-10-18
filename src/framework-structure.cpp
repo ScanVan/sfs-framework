@@ -93,6 +93,12 @@ void Structure::computeRadius(){
     }
 }
 
+void Structure::computeFeaturesState(bool state){
+    for(auto & element: features){
+        element->setState(state);
+    }
+}
+
 void Structure::computeStatisticsMean(){
     for(auto & element: features){
         element->getViewpoint()->pushStatisticsMean(element->getDisparity());

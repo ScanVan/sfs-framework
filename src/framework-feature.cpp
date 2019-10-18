@@ -41,6 +41,10 @@ Viewpoint * Feature::getViewpoint(){
     return viewpoint;
 }
 
+bool Feature::getState(){
+    return state;
+}
+
 void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
     position=Eigen::Vector2f(x,y);
     direction=convertCartesian2Spherical(x,y,imageWidth,imageHeight);
@@ -61,6 +65,10 @@ void Feature::setStructurePtr(Structure * newStructure){
 
 void Feature::setDirection(Eigen::Vector3d newDirection){
     direction=newDirection;
+}
+
+void Feature::setState(bool newState){
+    state=newState;
 }
 
 void Feature::computeModel(){

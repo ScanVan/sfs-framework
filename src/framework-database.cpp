@@ -223,6 +223,20 @@ void Database::computeRadii(){
 }
 
 void Database::computeStatistics(){
+
+    for(auto & element: structures){
+        if(element->getFeaturesCount()>=configStructure){
+            element->computeFeaturesState(true);
+        }else{
+            element->computeFeaturesState(false);
+        }
+    }
+    for(auto & element: viewpoints){
+        element->computeStatistics();
+    }
+
+    // new // old
+
     for(auto & element: viewpoints){
         element->resetStatistics();
     }

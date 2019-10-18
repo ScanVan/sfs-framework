@@ -31,27 +31,25 @@
 #include "framework-feature.hpp"
 
 class Viewpoint {
-//private:
 public:
     std::string uid;
     int index;
 	cv::Mat image;
-    int width;
-    int height;
+    int width; /* maybe to delete : only used in allocateFeaturesFromCvFeatures : passed as parameter ? */
+    int height; /* maybe to delete : only used in allocateFeaturesFromCvFeatures : passed as parameter ? */
 	std::vector<Feature> features;
 	std::vector<cv::KeyPoint> cvFeatures;
 	cv::Mat cvDescriptor;
     Eigen::Matrix3d orientation;
     Eigen::Vector3d position;
-
     double dispMean;
     double dispSD;
     double distReference;
     unsigned int dispCount;
-
-public:
     time_t time;
     int microsecond;
+
+public:
 	void setImage(cv::Mat &image){this->image = image;}
 	cv::Mat* getImage(){return &this->image;}
 	void setCvFeatures(std::vector<cv::KeyPoint> &image){this->cvFeatures = cvFeatures;}
@@ -72,9 +70,7 @@ public:
     void addFeature(Feature f){ features.push_back(f); }
     double getSecondFrom(Viewpoint *ref);
     Feature *getFeatureFromCvIndex(uint32_t i){ return &features[i]; }
-//	GETSET(cv::Mat, Image);
-//	GETSET(std::vector<cv::KeyPoint> , Features);
-//	GETSET(cv::Mat, Descriptor);
+
 
     double getDisparityMean();
     double getDisparitySD();
@@ -85,5 +81,7 @@ public:
     void pushStatisticsSD(double pushValue);
     void computeStatisticsSD();
     void setReferenceDistance(double newReference);
+
+    void computeStatistics();
 
 };

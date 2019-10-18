@@ -95,6 +95,7 @@ void Viewpoint::pushStatisticsMean(double pushValue){
 
 void Viewpoint::computeStatisticsMean(){
     dispMean/=double(dispCount);
+    std::cerr << "MN(old) : (" << index << ") : " << dispMean << std::endl;
 }
 
 void Viewpoint::pushStatisticsSD(double pushValue){
@@ -104,9 +105,34 @@ void Viewpoint::pushStatisticsSD(double pushValue){
 
 void Viewpoint::computeStatisticsSD(){
     dispSD=std::sqrt(dispSD/double(dispCount-1));
+    std::cerr << "SD(old) : (" << index << ") : " << dispSD << std::endl;
 }
 
 void Viewpoint::setReferenceDistance(double newReference){
     distReference=newReference;
+}
+
+void Viewpoint::computeStatistics(){
+    unsigned long count(0);
+    double component(0.);
+    dispMean=0.;
+    for(auto & element: features){
+        if(element.getState()==true){
+            dispMean+=element.getDisparity();
+            count++;
+        }
+    }
+    dispMean/=double(count);
+
+    dispSD=0.;
+    for(auto & element: features){
+        if(element.getState()==true){
+            component=element.getDisparity()-dispMean;
+            dispSD+=component*component;
+        }
+    }
+    dispSD=std::sqrt(dispSD/double(count-1));
+    std::cerr << "MN(new) : (" << index << ") : " << dispMean << std::endl;
+    std::cerr << "SD(new) : (" << index << ") : " << dispSD << std::endl;
 }
 
