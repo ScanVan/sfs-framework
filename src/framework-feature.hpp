@@ -37,6 +37,7 @@ public:
 	double radius;
 	double disparity;
 public:
+	uint32_t inliner;
     // accessors
     Eigen::Vector3d * getDirection();
     Eigen::Vector3d * getModel();
@@ -49,6 +50,7 @@ public:
     void setRadius(double newRadius, double newDisparity);
     void setViewpointPtr(Viewpoint * newViewpoint);
     void setStructurePtr(Structure * newStructure);
+    void setDirection(Eigen::Vector3d direction){ this->direction = direction;}
     // modifiers
     void computeModel();
 };

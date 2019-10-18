@@ -26,19 +26,15 @@
 #include <unistd.h>
 #include "framework-utiles.hpp"
 #include "ThreadPool.h"
+#include "framework-frontend.hpp"
 
 int main(int argc, char *argv[]){
-	//profile("boot");
-	assert(argc == 2);
-	std::cout << "Hello world!" << std::endl;
+    //profile("boot");
+    assert(argc == 2);
+    std::cout << "Hello world!" << std::endl;
 
-	YAML::Node config = YAML::LoadFile(argv[1]);
+    YAML::Node config = YAML::LoadFile(argv[1]);
 
-	ViewPointSource *source = NULL;
-	auto sourceType = config["source"]["type"].as<std::string>();
-	if(sourceType == "FOLDER") source = new ViewPointSourceFs(config["source"]["path"].as<std::string>());
-	auto mask = cv::imread(config["source"]["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
-	//auto database = Database();
     auto database = Database(
         config["algorithm"]["bootstrap"].as<unsigned long>(),
         config["algorithm"]["error"].as<double>(),
@@ -47,210 +43,35 @@ int main(int argc, char *argv[]){
         config["algorithm"]["radius_min"].as<double>(),
         config["algorithm"]["radius_max"].as<double>()
     );
-
     ThreadPool threadpool(8);
 
+    bool inlinerEnabled = false;
+    Frontend *frontend = NULL;
+    auto frontendType = config["frontend"]["type"].as<std::string>();
+    if(frontendType == "IMAGE"){
+        ViewPointSource *source = NULL;
+        auto sourceType = config["frontend"]["source"]["type"].as<std::string>();
+        if(sourceType == "FOLDER") {
+            source = new ViewPointSourceFs(config["frontend"]["source"]["path"].as<std::string>());
+        }
+        auto mask = cv::imread(config["frontend"]["source"]["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
+        frontend = new FrontendPicture(source, mask, &threadpool, &database);
+    }
 
-    BlockingQueue<std::shared_ptr<Viewpoint>> featureExtractionQueue(2);
-    auto featureExtractionThread = std::thread([&]{
-		while(source->hasNext()){
-			//Collect the next view point and add it into the database
-			auto newViewpoint = source->next();
-			auto m = threadpool.enqueue([&mask, newViewpoint] {
-//				std::cout << "AKAZE " << newViewpoint << std::endl;
-				akazeFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor());
-//				std::cout << "AKAZE DONE " << newViewpoint << std::endl;
-				return newViewpoint;
-			});
-			featureExtractionQueue.push(m);
-		}
-    });
+    if(frontendType == "CLOUDPOINT"){
+        frontend = new FrontendCloudpoint(&database, config["frontend"]["model"].as<std::string>(), config["frontend"]["odometry"].as<std::string>());
+        inlinerEnabled = true;
+    }
+
 
     // pipeline major iteration
     int loopMajor(1);
 
-    // algorithm parameter query
-    //double paramError( config["algorithm"]["error"].as<double>() );
-    //double paramDisparity( config["algorithm"]["disparity"].as<double>() );
-    //double paramRadius( config["algorithm"]["radius"].as<double>() );
+    while(true){
 
-	std::shared_ptr<Viewpoint> lastViewpoint;
-	while(true){
-		auto newViewpoint = featureExtractionQueue.pop();
+        if(!frontend->next()) continue; //image drop
 
-//		std::cout << "POP" << std::endl;
-
-		//Check if the image is moving enough using features
-		std::vector<cv::DMatch> lastViewpointMatches;
-		if(lastViewpoint){
-			gmsMatcher (
-				newViewpoint->getCvFeatures(),
-				newViewpoint->getCvDescriptor(),
-				newViewpoint->getImage()->size(),
-				lastViewpoint->getCvFeatures(),
-				lastViewpoint->getCvDescriptor(),
-				lastViewpoint->getImage()->size(),
-				&lastViewpointMatches
-			);
-			double score = computeStillDistance(
-				newViewpoint->getCvFeatures(),
-				lastViewpoint->getCvFeatures(),
-				&lastViewpointMatches,
-				lastViewpoint->getImage()->size()
-			);
-//			std::cout << score << std::endl;
-			if(score < 0.0005){
-				continue; //Drop the image
-			}
-		}
-
-		//profile("allocateFeaturesFromCvFeatures");
-		newViewpoint->allocateFeaturesFromCvFeatures();
-
-		//profile("misc");
-
-		//Extrapolate the position of the newViewpoint
-		//if(lastViewpoint){
-		//	newViewpoint->setPosition(*lastViewpoint->getPosition());
-		//} else {
-		//	newViewpoint->setPosition(Eigen::Vector3d(0,0,0));
-		//}
-        database.extrapolateViewpoint(newViewpoint.get());
-
-		//Get local viewpoints
-		auto localViewpoints = std::vector<std::shared_ptr<Viewpoint>>();
-		{
-			auto viewpoints = database.getViewpoints();
-			//int localCount = MIN(3, viewpoints->size());
-            int localCount = MIN(5, viewpoints->size());
-			for(auto i = viewpoints->end()-localCount;i != viewpoints->end(); ++i){
-				localViewpoints.push_back(*i);
-			}
-		}
-		uint32_t localViewpointsCount = localViewpoints.size();
-		uint32_t newViewpointFeaturesCount = newViewpoint->getCvFeatures()->size();
-
-		//Match local viewpoints to the new image
-		//profile("gms + correlations");
-		uint32_t *correlations = new uint32_t[newViewpointFeaturesCount*localViewpointsCount]; //-1 => empty
-		memset(correlations, -1, newViewpointFeaturesCount*localViewpointsCount*sizeof(uint32_t));
-
-//		#pragma omp parallel for
-		for(uint32_t localViewpointIdx = 0; localViewpointIdx < localViewpointsCount; localViewpointIdx++){
-			auto localViewpoint = localViewpoints[localViewpointIdx];
-			if(localViewpoint == lastViewpoint){ //Reuse previously processed matches
-				for(auto match : lastViewpointMatches){
-					correlations[localViewpointIdx + match.queryIdx*localViewpointsCount] = match.trainIdx;
-				}
-			} else {
-				std::vector<cv::DMatch> matches;
-				gmsMatcher (
-					newViewpoint->getCvFeatures(),
-					newViewpoint->getCvDescriptor(),
-					newViewpoint->getImage()->size(),
-					localViewpoint->getCvFeatures(),
-					localViewpoint->getCvDescriptor(),
-					localViewpoint->getImage()->size(),
-					&matches
-				);
-
-				for(auto match : matches){
-					correlations[localViewpointIdx + match.queryIdx*localViewpointsCount] = match.trainIdx;
-				}
-			}
-		}
-
-		//Integrate the new image features into the structure
-		//profile("aggregation");
-		Structure** structures = new Structure*[localViewpointsCount];
-		uint32_t* structuresOccurences = new uint32_t[localViewpointsCount];
-		uint32_t structureNewCount = 0;
-		uint32_t structureAggregationCount = 0;
-		uint32_t structureFusionCount = 0;
-		for(uint32_t queryIdx = 0;queryIdx < newViewpoint->getCvFeatures()->size(); queryIdx++){
-			uint32_t *correlationsPtr = correlations + queryIdx*localViewpointsCount; //Used to iterate over the given lines
-
-			uint32_t structuresCount = 0;
-			uint32_t matchCount = 0;
-
-			//Collect all the existing structures of the matches and count their occurences
-			for(uint32_t localIdx = 0;localIdx < localViewpointsCount;localIdx++){
-				uint32_t trainIdx = correlationsPtr[localIdx];
-				if(trainIdx != 0xFFFFFFFF){
-					matchCount++;
-					auto localFeature = localViewpoints[localIdx]->getFeatureFromCvIndex(trainIdx);
-					auto localStructure = localFeature->structure;
-					if(localStructure){
-						uint32_t cacheIdx;
-						for(cacheIdx = 0;cacheIdx < structuresCount; cacheIdx++){
-							if(structures[cacheIdx] == localStructure){
-								structuresOccurences[cacheIdx]++;
-								break;
-							}
-						}
-						if(cacheIdx == structuresCount){ //No cache hit
-							structures[cacheIdx] = localStructure;
-							structuresOccurences[cacheIdx] = 1;
-							structuresCount++;
-						}
-					}
-				}
-			}
-
-
-			//Figure out which structure will be used to integrate the newViewpoint feature
-			if(matchCount == 0) continue; //No match => no integration
-			Structure *structure = NULL;
-			switch(structuresCount){
-				case 0: {
-					structure = database.newStructure();
-					structureNewCount++;
-				}break;
-				case 1: {
-					if(structuresOccurences[0] < 2) continue; //Not good enough
-					structure = structures[0];
-					structureAggregationCount++;
-				}break;
-				default: {
-					structureFusionCount++;
-					continue;
-				}break;
-			}
-
-			//Integrate all orphan feature into the common structure
-			for(uint32_t localIdx = 0;localIdx < localViewpointsCount;localIdx++){
-				uint32_t trainIdx = correlationsPtr[localIdx];
-				if(trainIdx != 0xFFFFFFFF){
-					auto localFeature = localViewpoints[localIdx]->getFeatureFromCvIndex(trainIdx);
-					if(!localFeature->structure){
-						structure->addFeature(localViewpoints[localIdx]->getFeatureFromCvIndex(trainIdx));
-					}
-				}
-			}
-
-			auto newFeature = newViewpoint->getFeatureFromCvIndex(queryIdx);
-			assert(!newFeature->structure);
-			structure->addFeature(newFeature);
-		}
-		delete[] correlations;
-		delete[] structures;
-		delete[] structuresOccurences;
-		std::cout << "structureNewCount=" << structureNewCount << " structureAggregationCount=" << structureAggregationCount << " structureFusionCount=" << structureFusionCount << std::endl;
-
-		lastViewpoint = newViewpoint;
-
-		//profile("display");
-		database.addViewpoint(newViewpoint);
-        database.extrapolateStructure();
-		database.displayViewpointStructures(newViewpoint.get());
-		cv::waitKey(100); //Wait 100 ms give opencv the time to display the GUI
-
-		//As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
-		newViewpoint->getImage()->deallocate(); //TODO
-
-//		cv::namedWindow("miaou", cv::WINDOW_NORMAL);
-//		cv::imshow("miaou", *newViewpoint->getImage());
-//		cv::waitKey(0);
+        database.sanityCheck(inlinerEnabled);
 
         //
         // geometry estimation solver
@@ -282,7 +103,7 @@ int main(int argc, char *argv[]){
             database.computeFilters();
 
             // development feature - begin
-            database._exportState(config["source"]["pathTest"].as<std::string>(),loopMajor,loopMinor);
+            database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
             // development feature - end
 
             // algorithm error management
@@ -300,7 +121,7 @@ int main(int argc, char *argv[]){
             std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | error : " << loopError << std::endl;
 
         }
-
+        database.sanityCheck(inlinerEnabled);
         // major iteration exportation : model and odometry
         database.exportModel   (config["export"]["path"].as<std::string>(),loopMajor);
         database.exportOdometry(config["export"]["path"].as<std::string>(),loopMajor);
@@ -308,10 +129,10 @@ int main(int argc, char *argv[]){
         // update major iterator
         loopMajor ++;
 
-	}
+    }
 
     // system message
-	return 0;
+    return 0;
 
 }
 

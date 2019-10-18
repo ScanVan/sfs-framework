@@ -1,11 +1,25 @@
-source:
-  type: FOLDER
-  path: /media/dolu/SCANVAN10TB/record/camera_40008603-40009302/20190319-103441_SionCar1
-  pathTest: /home/dolu/pro/scanvan/dataset/a
-  mask: /media/dolu/SCANVAN10TB/model/camera_40008603-40009302/20190319-103441_SionCar1_20190404_New_Mask/input/1_mask/mask0_b.png
+frontend:
+  type: IMAGE
+  source:
+    type: FOLDER
+    path: /home/dolu/pro/scanvan/dataset/e
+    mask: /home/dolu/pro/scanvan/dataset/mask.png
+
+#To use datapoints as viewpoint source, replace the frontend stuff with
+#frontend:
+#  type: CLOUDPOINT
+#  model: dev/model.xyz
+#  odometry: dev/odometry.xyz
+
 algorithm:
-  error: 1e-8
+  bootstrap: 3
+  error: 1e-6
+  structure: 3
   disparity: 5
-  radius: 3
+  radius_min: 1
+  radius_max: 500
+
+# note : path has to contain a dev/ and debug/ directory
 export:
-  path: /media/hamel/Documents/model
+  path: /media/user/Documents/model
+

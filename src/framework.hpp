@@ -40,5 +40,3 @@
 		{\
 		  _##var = val; \
 		}
-
-void algorithmComputeModels(Database & database);
