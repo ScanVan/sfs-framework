@@ -24,7 +24,7 @@
 Database::Database(
     unsigned long initialBootstrap,
     double initialError,
-    double initialStructure,
+    unsigned long initialStructure,
     double initialDisparity,
     double initialRadiusMin,
     double initialRadiusMax

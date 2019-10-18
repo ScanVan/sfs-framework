@@ -76,6 +76,8 @@ public:
 //	GETSET(cv::Mat, Descriptor);
 
     double getDisparityMean();
+    double getDisparitySD();
+    double getdistReference();
     void resetStatistics();
     void pushStatisticsMean(double pushValue);
     void computeStatisticsMean();

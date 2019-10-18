@@ -40,13 +40,13 @@ public:
 
     unsigned long configBootstrap;
     double configError;
-    double configStructure;
+    unsigned long configStructure;
     double configDisparity;
     double configRadiusMin;
     double configRadiusMax;
 
 public:
-    Database(unsigned long initialBootstrap, double initialError, double initialStructure, double initialDisparity, double initialRadiusMin, double initialRadiusMax);
+    Database(unsigned long initialBootstrap, double initialError, unsigned long initialStructure, double initialDisparity, double initialRadiusMin, double initialRadiusMax);
 
     std::vector<std::shared_ptr<Viewpoint>> *getViewpoints() { return &viewpoints; }
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);

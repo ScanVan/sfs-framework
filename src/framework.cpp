@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
     auto database = Database(
         config["algorithm"]["bootstrap"].as<unsigned long>(),
         config["algorithm"]["error"].as<double>(),
-        config["algorithm"]["structure"].as<double>(),
+        config["algorithm"]["structure"].as<unsigned long>(),
         config["algorithm"]["disparity"].as<double>(),
         config["algorithm"]["radius_min"].as<double>(),
         config["algorithm"]["radius_max"].as<double>()

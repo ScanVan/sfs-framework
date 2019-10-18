@@ -74,6 +74,14 @@ double Viewpoint::getDisparityMean(){
     return dispMean;
 }
 
+double Viewpoint::getDisparitySD(){
+    return dispSD;
+}
+
+double Viewpoint::getdistReference(){
+    return distReference;
+}
+
 void Viewpoint::resetStatistics(){
     dispMean=0.;
     dispSD=0.;

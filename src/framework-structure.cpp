@@ -100,33 +100,20 @@ void Structure::computeRadius(std::vector<std::shared_ptr<Viewpoint>> & viewpoin
     }
 }
 
-//bool Structure::computeFilter(double dispFilter, double radFilter, double radMean, double temp, double temp2, double temp3){
 bool Structure::computeFilter(double configDisparity, double configRadiusMin, double configRadiusMax ){
     for(auto element: features){
-        if (element->getDisparity()>element->getViewpoint()->dispSD*configDisparity) {
+        if (element->getDisparity()>element->getViewpoint()->getDisparitySD()*configDisparity) {
             return false;
         }
-        if (element->getRadius()<element->getViewpoint()->distReference*configRadiusMin) {
+        if (element->getRadius()<element->getViewpoint()->getdistReference()*configRadiusMin) {
             return false;
         }
-        if (element->getRadius()>element->getViewpoint()->distReference*configRadiusMax) {
+        if (element->getRadius()>element->getViewpoint()->getdistReference()*configRadiusMax) {
             return false;
         }
     }
     return true;
 }
-
-//bool Structure::computeFilter(double dispFilter, double radFilter, double radMean){
-//    for(auto element: features){
-//        if (element->getDisparity()>dispFilter){
-//            return false;
-//        }
-//        if (std::fabs(element->getRadius()-radMean)>radFilter){
-//            return false;
-//        }
-//    }
-//    return true;
-//}
 
 void Structure::extrapolate(std::vector<std::shared_ptr<Viewpoint>> & viewpoints){
     if (flag==false){
