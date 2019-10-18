@@ -23,10 +23,16 @@
 
 #include <iostream>
 #include <cmath>
+#include <yaml-cpp/yaml.h>
+#include <unistd.h>
 #include "framework-database.hpp"
 #include "framework-viewpointsource.hpp"
 #include "framework-sparsefeature.hpp"
 #include "framework-stillcompute.hpp"
+#include "framework-frontend.hpp"
+#include "framework-stillcompute.hpp"
+#include "framework-utiles.hpp"
+#include "ThreadPool.h"
 
 #define GETSET(type, var) \
 	private: \

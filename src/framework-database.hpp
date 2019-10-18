@@ -47,13 +47,12 @@ public:
 
 public:
     Database(unsigned long initialBootstrap, double initialError, unsigned long initialStructure, double initialDisparity, double initialRadiusMin, double initialRadiusMax);
-
-    std::vector<std::shared_ptr<Viewpoint>> *getViewpoints() { return &viewpoints; }
-	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
-//    void deleteAndUnlinkStructure(int id);
     int getViewpointCount();
     double getConfigError();
     double getError();
+    void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
+	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
+    void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
     void computeModels();
     void computeCorrelations();
     void computeCentroids();
@@ -62,18 +61,17 @@ public:
     void computeOptimals();
     void computeRadii();
     void computeStatistics();
+//    void deleteAndUnlinkStructure(int id); /* need decision */
     void computeFilters();
     void extrapolateViewpoint(Viewpoint * v);
-    void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
     void extrapolateStructure();
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);
-    Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();}
-    void displayViewpointStructures(Viewpoint *viewpoint);
-    void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
-    void sanityCheck(bool inliner);
-// development related features
+    Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();} /* need deletion */
+
 public:
+    void _displayViewpointStructures(Viewpoint *viewpoint);
+    void _sanityCheck(bool inliner);
     void _exportState(std::string path,int major, int iter);
 };
 

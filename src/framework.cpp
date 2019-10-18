@@ -21,13 +21,6 @@
 
 #include "framework.hpp"
 
-#include "framework-stillcompute.hpp"
-#include <yaml-cpp/yaml.h>
-#include <unistd.h>
-#include "framework-utiles.hpp"
-#include "ThreadPool.h"
-#include "framework-frontend.hpp"
-
 int main(int argc, char *argv[]){
     //profile("boot");
     assert(argc == 2);
@@ -84,7 +77,7 @@ int main(int argc, char *argv[]){
         }
 
         // development feature - begin
-        //database.sanityCheck(inlinerEnabled);
+        database._sanityCheck(inlinerEnabled);
         // development feature - end
 
         //
@@ -137,7 +130,7 @@ int main(int argc, char *argv[]){
         }
 
         // development feature - begin
-        //database.sanityCheck(inlinerEnabled);
+        database._sanityCheck(inlinerEnabled);
         // development feature - end
 
         // major iteration exportation : model and odometry

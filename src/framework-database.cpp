@@ -55,10 +55,109 @@ double Database::getError(){
     return( maxValue );
 }
 
+void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
+    int localCount = MIN(5, viewpoints.size());
+    for(auto i = viewpoints.end()-localCount;i != viewpoints.end(); ++i){
+        localViewpoints->push_back(*i);
+    }
+}
+
 void Database::addViewpoint(std::shared_ptr<Viewpoint> viewpoint){
     viewpoint->setIndex(viewpoints.size());
     if(viewpoint->getIndex() > 0) transforms.push_back(std::make_shared<Transform>());
     viewpoints.push_back(viewpoint);
+}
+
+void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations){
+    uint32_t localViewpointsCount = localViewpoints->size();
+    Structure** structures = new Structure*[localViewpointsCount];
+    uint32_t* structuresOccurences = new uint32_t[localViewpointsCount];
+    uint32_t structureNewCount = 0;
+    uint32_t structureAggregationCount = 0;
+    uint32_t structureFusionCount = 0;
+    uint32_t *viewpointsUsage = new uint32_t[viewpoints.size() + 1];
+    memset(viewpointsUsage, -1, (viewpoints.size() + 1)*sizeof(uint32_t));
+    for(uint32_t queryIdx = 0;queryIdx < newViewpoint->features.size(); queryIdx++){
+        uint32_t *correlationsPtr = correlations + queryIdx*localViewpointsCount; //Used to iterate over the given lines
+
+        uint32_t structuresCount = 0;
+        uint32_t matchCount = 0;
+
+        //Collect all the existing structures of the matches and count their occurences
+        for(uint32_t localIdx = 0;localIdx < localViewpointsCount;localIdx++){
+            uint32_t trainIdx = correlationsPtr[localIdx];
+            if(trainIdx != 0xFFFFFFFF){
+                matchCount++;
+                auto localFeature = (*localViewpoints)[localIdx]->getFeatureFromCvIndex(trainIdx);
+                auto localStructure = localFeature->structure;
+                if(localStructure){
+                    uint32_t cacheIdx;
+                    for(cacheIdx = 0;cacheIdx < structuresCount; cacheIdx++){
+                        if(structures[cacheIdx] == localStructure){
+                            structuresOccurences[cacheIdx]++;
+                            break;
+                        }
+                    }
+                    if(cacheIdx == structuresCount){ //No cache hit
+                        structures[cacheIdx] = localStructure;
+                        structuresOccurences[cacheIdx] = 1;
+                        structuresCount++;
+                    }
+                }
+            }
+        }
+
+        //Figure out which structure will be used to integrate the newViewpoint feature
+        if(matchCount == 0) continue; //No match => no integration
+        Structure *structure = NULL;
+        switch(structuresCount){
+            case 0: {
+                // no more needed - direct access to structure
+                structure = this->newStructure();
+                structureNewCount++;
+            }break;
+            case 1: {
+                if(structuresOccurences[0] < 2) continue; //Not good enough
+                structure = structures[0];
+                structureAggregationCount++;
+            }break;
+            default: {
+                structureFusionCount++;
+                continue;
+            }break;
+        }
+
+        //Populate pre-existing viewpoint usage from the structure
+        for(auto f : structure->features){
+            viewpointsUsage[f->viewpoint->index] = queryIdx;
+        }
+
+        //Integrate all orphan feature into the common structure
+        for(uint32_t localIdx = 0;localIdx < localViewpointsCount;localIdx++){
+            uint32_t trainIdx = correlationsPtr[localIdx];
+            if(trainIdx != 0xFFFFFFFF){
+                auto localFeature = (*localViewpoints)[localIdx]->getFeatureFromCvIndex(trainIdx);
+                auto viewpointId = (*localViewpoints)[localIdx]->index;
+                if(!localFeature->structure && viewpointsUsage[viewpointId] != queryIdx){
+                    viewpointsUsage[viewpointId] = queryIdx;
+                    structure->addFeature((*localViewpoints)[localIdx]->getFeatureFromCvIndex(trainIdx));
+                }
+            }
+        }
+
+        auto newFeature = newViewpoint->getFeatureFromCvIndex(queryIdx);
+        if(newFeature->structure) throw std::runtime_error("New feature already had a structure");
+        if(viewpointsUsage[viewpoints.size()] != queryIdx){
+            structure->addFeature(newFeature);
+        } else {
+            std::cout << "prout" << std::endl;
+        }
+    }
+    delete[] viewpointsUsage;
+    delete[] structures;
+    delete[] structuresOccurences;
+    std::cout << "structureNewCount=" << structureNewCount << " structureAggregationCount=" << structureAggregationCount << " structureFusionCount=" << structureFusionCount << std::endl;
+
 }
 
 void Database::computeModels(){
@@ -190,13 +289,6 @@ void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
     }
 }
 
-void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
-    int localCount = MIN(5, viewpoints.size());
-    for(auto i = viewpoints.end()-localCount;i != viewpoints.end(); ++i){
-        localViewpoints->push_back(*i);
-    }
-}
-
 void Database::extrapolateStructure(){
     if (viewpoints.size()<=configBootstrap){
         return;
@@ -240,12 +332,12 @@ void Database::exportOdometry(std::string path, unsigned int major){
 //  development related features
 //
 
-static cv::Point f2i(Eigen::Vector2f value){
+static cv::Point _f2i(Eigen::Vector2f value){
     return cv::Point(value[0],value[1]);
 }
 
 //Do  cv::waitKey(0); if you want to stop after it.
-void Database::displayViewpointStructures(Viewpoint *viewpoint){
+void Database::_displayViewpointStructures(Viewpoint *viewpoint){
     cv::RNG rng(12345);
     cv::Rect myROI(0, 0, viewpoint->getImage()->cols, viewpoint->getImage()->rows);
     cv::Mat res(myROI.width,myROI.height, CV_8UC3, cv::Scalar(0,0,0));
@@ -256,12 +348,52 @@ void Database::displayViewpointStructures(Viewpoint *viewpoint){
 
         auto features = f.structure->getFeatures();
         for(uint32_t idx = 1;idx < features->size();idx++){
-            cv::line(res, f2i((*features)[idx-1]->position),  f2i((*features)[idx]->position), color, 2);
+            cv::line(res, _f2i((*features)[idx-1]->position),  _f2i((*features)[idx]->position), color, 2);
         }
     }
 
     cv::namedWindow( "miaou", cv::WINDOW_KEEPRATIO );
     imshow( "miaou", res);
+}
+
+void Database::_sanityCheck(bool inliner){
+    //Sanity check
+    uint32_t *structureSizes = new uint32_t[100];
+    memset(structureSizes, 0, (100)*sizeof(uint32_t));
+
+    uint32_t *viewpointsUsage = new uint32_t[viewpoints.size()];
+    memset(viewpointsUsage, -1, (viewpoints.size())*sizeof(uint32_t));
+    for(uint32_t structureId = 0;structureId < structures.size();structureId++){
+        auto &s = structures[structureId];
+        if(s->features.size() < 2) throw std::runtime_error("Structure with less than two feature");
+        structureSizes[s->features.size()]++;
+        auto inliner = s->features.front()->inliner;
+        for(auto &f : s->features){
+            if(f->structure != s.get()) throw std::runtime_error("Structure with a feature which isn't pointing that structure");
+            if(inliner) if(f->inliner != inliner) throw std::runtime_error("Inliner issue");
+            auto viewpointId = f->viewpoint->index;
+            if(viewpointsUsage[viewpointId] == structureId) throw std::runtime_error("Same view point twice in a structure");
+            viewpointsUsage[viewpointId] = structureId;
+        }
+    }
+    delete []viewpointsUsage;
+
+    std::cout << "Structure family ";
+    for(uint32_t size = 0;size < 100; size++){
+        auto count = structureSizes[size];
+        if(count) std::cout << size << "=>" << count << " ";
+    }
+    std::cout << std::endl;
+    delete []structureSizes;
+
+    for(auto v : viewpoints){
+        for(auto &f : v->features){
+            if(f.structure){
+                auto sf = &(f.structure->features);
+                if(std::find(sf->begin(), sf->end(), &f) == sf->end()) throw std::runtime_error("Feature having a structure without that feature");
+            }
+        }
+    }
 }
 
 // Note : this function does not respect encapsulation (development function)
@@ -294,136 +426,5 @@ void Database::_exportState(std::string path, int major, int iter){
         }
     }
     stream.close();
-}
-
-void Database::sanityCheck(bool inliner){
-    //Sanity check
-    uint32_t *structureSizes = new uint32_t[100];
-    memset(structureSizes, 0, (100)*sizeof(uint32_t));
-
-    uint32_t *viewpointsUsage = new uint32_t[viewpoints.size()];
-    memset(viewpointsUsage, -1, (viewpoints.size())*sizeof(uint32_t));
-    for(uint32_t structureId = 0;structureId < structures.size();structureId++){
-        auto &s = structures[structureId];
-        if(s->features.size() < 2) throw std::runtime_error("Structure with less than two feature");
-        structureSizes[s->features.size()]++;
-        auto inliner = s->features.front()->inliner;
-        for(auto &f : s->features){
-            if(f->structure != s.get()) throw std::runtime_error("Structure with a feature which isn't pointing that structure");
-            if(inliner) if(f->inliner != inliner) throw std::runtime_error("Inliner issue");
-            auto viewpointId = f->viewpoint->index;
-            if(viewpointsUsage[viewpointId] == structureId) throw std::runtime_error("Same view point twice in a structure");
-            viewpointsUsage[viewpointId] = structureId;
-        }
-    }
-    delete []viewpointsUsage;
-
-    std::cout << "Structure family ";
-    for(uint32_t size = 0;size < 100; size++){
-        auto count = structureSizes[size];
-        if(count) std::cout << size << "=>" << count << " ";
-    }
-    std::cout << std::endl;
-    delete []structureSizes;
-
-    for(auto v : *getViewpoints()){
-        for(auto &f : v->features){
-            if(f.structure){
-                auto sf = &(f.structure->features);
-                if(std::find(sf->begin(), sf->end(), &f) == sf->end()) throw std::runtime_error("Feature having a structure without that feature");
-            }
-        }
-    }
-}
-
-void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations){
-    uint32_t localViewpointsCount = localViewpoints->size();
-    Structure** structures = new Structure*[localViewpointsCount];
-    uint32_t* structuresOccurences = new uint32_t[localViewpointsCount];
-    uint32_t structureNewCount = 0;
-    uint32_t structureAggregationCount = 0;
-    uint32_t structureFusionCount = 0;
-    uint32_t *viewpointsUsage = new uint32_t[viewpoints.size() + 1];
-    memset(viewpointsUsage, -1, (viewpoints.size() + 1)*sizeof(uint32_t));
-    for(uint32_t queryIdx = 0;queryIdx < newViewpoint->features.size(); queryIdx++){
-        uint32_t *correlationsPtr = correlations + queryIdx*localViewpointsCount; //Used to iterate over the given lines
-
-        uint32_t structuresCount = 0;
-        uint32_t matchCount = 0;
-
-        //Collect all the existing structures of the matches and count their occurences
-        for(uint32_t localIdx = 0;localIdx < localViewpointsCount;localIdx++){
-            uint32_t trainIdx = correlationsPtr[localIdx];
-            if(trainIdx != 0xFFFFFFFF){
-                matchCount++;
-                auto localFeature = (*localViewpoints)[localIdx]->getFeatureFromCvIndex(trainIdx);
-                auto localStructure = localFeature->structure;
-                if(localStructure){
-                    uint32_t cacheIdx;
-                    for(cacheIdx = 0;cacheIdx < structuresCount; cacheIdx++){
-                        if(structures[cacheIdx] == localStructure){
-                            structuresOccurences[cacheIdx]++;
-                            break;
-                        }
-                    }
-                    if(cacheIdx == structuresCount){ //No cache hit
-                        structures[cacheIdx] = localStructure;
-                        structuresOccurences[cacheIdx] = 1;
-                        structuresCount++;
-                    }
-                }
-            }
-        }
-
-        //Figure out which structure will be used to integrate the newViewpoint feature
-        if(matchCount == 0) continue; //No match => no integration
-        Structure *structure = NULL;
-        switch(structuresCount){
-            case 0: {
-                structure = this->newStructure();
-                structureNewCount++;
-            }break;
-            case 1: {
-                if(structuresOccurences[0] < 2) continue; //Not good enough
-                structure = structures[0];
-                structureAggregationCount++;
-            }break;
-            default: {
-                structureFusionCount++;
-                continue;
-            }break;
-        }
-
-        //Populate pre-existing viewpoint usage from the structure
-        for(auto f : structure->features){
-            viewpointsUsage[f->viewpoint->index] = queryIdx;
-        }
-
-        //Integrate all orphan feature into the common structure
-        for(uint32_t localIdx = 0;localIdx < localViewpointsCount;localIdx++){
-            uint32_t trainIdx = correlationsPtr[localIdx];
-            if(trainIdx != 0xFFFFFFFF){
-                auto localFeature = (*localViewpoints)[localIdx]->getFeatureFromCvIndex(trainIdx);
-                auto viewpointId = (*localViewpoints)[localIdx]->index;
-                if(!localFeature->structure && viewpointsUsage[viewpointId] != queryIdx){
-                    viewpointsUsage[viewpointId] = queryIdx;
-                    structure->addFeature((*localViewpoints)[localIdx]->getFeatureFromCvIndex(trainIdx));
-                }
-            }
-        }
-
-        auto newFeature = newViewpoint->getFeatureFromCvIndex(queryIdx);
-        if(newFeature->structure) throw std::runtime_error("New feature already had a structure");
-        if(viewpointsUsage[viewpoints.size()] != queryIdx){
-            structure->addFeature(newFeature);
-        } else {
-            std::cout << "prout" << std::endl;
-        }
-    }
-    delete[] viewpointsUsage;
-    delete[] structures;
-    delete[] structuresOccurences;
-    std::cout << "structureNewCount=" << structureNewCount << " structureAggregationCount=" << structureAggregationCount << " structureFusionCount=" << structureFusionCount << std::endl;
-
 }
 

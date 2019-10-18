@@ -103,7 +103,7 @@ bool FrontendPicture::next() {
 
 	database->addViewpoint(newViewpoint);
 	database->extrapolateStructure();
-	database->displayViewpointStructures(newViewpoint.get());
+	database->_displayViewpointStructures(newViewpoint.get());
 	cv::waitKey(100); //Wait 100 ms give opencv the time to display the GUI
 
 	//As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
