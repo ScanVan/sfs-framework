@@ -99,18 +99,6 @@ void Structure::computeFeaturesState(bool state){
     }
 }
 
-void Structure::computeStatisticsMean(){
-    for(auto & element: features){
-        element->getViewpoint()->pushStatisticsMean(element->getDisparity());
-    }
-}
-
-void Structure::computeStatisticsSD(){
-    for(auto & element: features){
-        element->getViewpoint()->pushStatisticsSD(element->getDisparity());
-    }
-}
-
 bool Structure::computeFilter(double configDisparity, double configRadiusMin, double configRadiusMax ){
     for(auto element: features){
         if (element->getDisparity()>element->getViewpoint()->getDisparitySD()*configDisparity) {

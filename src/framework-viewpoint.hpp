@@ -75,13 +75,7 @@ public:
     double getDisparityMean();
     double getDisparitySD();
     double getdistReference();
-    void resetStatistics();
-    void pushStatisticsMean(double pushValue);
-    void computeStatisticsMean();
-    void pushStatisticsSD(double pushValue);
-    void computeStatisticsSD();
     void setReferenceDistance(double newReference);
-
     void computeStatistics();
 
 };

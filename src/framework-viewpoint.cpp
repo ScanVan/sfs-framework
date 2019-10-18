@@ -82,32 +82,6 @@ double Viewpoint::getdistReference(){
     return distReference;
 }
 
-void Viewpoint::resetStatistics(){
-    dispMean=0.;
-    dispSD=0.;
-    dispCount=0;
-}
-
-void Viewpoint::pushStatisticsMean(double pushValue){
-    dispMean+=pushValue;
-    dispCount++;
-}
-
-void Viewpoint::computeStatisticsMean(){
-    dispMean/=double(dispCount);
-    std::cerr << "MN(old) : (" << index << ") : " << dispMean << std::endl;
-}
-
-void Viewpoint::pushStatisticsSD(double pushValue){
-    pushValue-=dispMean;
-    dispSD+=pushValue*pushValue;
-}
-
-void Viewpoint::computeStatisticsSD(){
-    dispSD=std::sqrt(dispSD/double(dispCount-1));
-    std::cerr << "SD(old) : (" << index << ") : " << dispSD << std::endl;
-}
-
 void Viewpoint::setReferenceDistance(double newReference){
     distReference=newReference;
 }
@@ -132,7 +106,5 @@ void Viewpoint::computeStatistics(){
         }
     }
     dispSD=std::sqrt(dispSD/double(count-1));
-    std::cerr << "MN(new) : (" << index << ") : " << dispMean << std::endl;
-    std::cerr << "SD(new) : (" << index << ") : " << dispSD << std::endl;
 }
 

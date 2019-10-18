@@ -45,8 +45,6 @@ public:
     void computeOptimalPosition();
     void computeRadius();
     void computeFeaturesState(bool state);
-    void computeStatisticsMean();
-    void computeStatisticsSD();
     bool computeFilter(double configDisparity, double configRadiusMin, double configRadiusMax );
     void extrapolate();
 

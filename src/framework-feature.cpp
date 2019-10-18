@@ -41,8 +41,16 @@ Viewpoint * Feature::getViewpoint(){
     return viewpoint;
 }
 
+Structure * Feature::getStructure(){
+    return structure;
+}
+
 bool Feature::getState(){
-    return state;
+    if(structure!=NULL){
+        return state;
+    } else {
+        return false;
+    }
 }
 
 void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){

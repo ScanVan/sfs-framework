@@ -221,7 +221,6 @@ void Database::computeRadii(){
 }
 
 void Database::computeStatistics(){
-
     for(auto & element: structures){
         if(element->getFeaturesCount()>=configStructure){
             element->computeFeaturesState(true);
@@ -231,28 +230,6 @@ void Database::computeStatistics(){
     }
     for(auto & element: viewpoints){
         element->computeStatistics();
-    }
-
-    // new // old
-
-    for(auto & element: viewpoints){
-        element->resetStatistics();
-    }
-    for(auto & element: structures){
-        if(element->getFeaturesCount()>=configStructure){
-            element->computeStatisticsMean();
-        }
-    }
-    for(auto & element:viewpoints){
-        element->computeStatisticsMean();
-    }
-    for(auto & element: structures){
-        if(element->getFeaturesCount()>=configStructure){
-            element->computeStatisticsSD();
-        }
-    }
-    for(auto & element: viewpoints){
-        element->computeStatisticsSD();
     }
     for(unsigned int i(0); i<transforms.size(); i++){
         viewpoints[i]->setReferenceDistance((*transforms[i]->getTranslation()).norm());
@@ -274,14 +251,14 @@ void Database::computeFilters(){
     unsigned int j(structures.size());
     while (i < j){
         if(structures[i]->getFeaturesCount()>=configStructure){
-        if (structures[i]->computeFilter(configDisparity,configRadiusMin,configRadiusMax)==false){
-            for(auto f : *structures[i]->getFeatures()){
-                f->structure = NULL;
+            if (structures[i]->computeFilter(configDisparity,configRadiusMin,configRadiusMax)==false){
+                for(auto f : *structures[i]->getFeatures()){
+                    f->structure = NULL;
+                }
+                std::swap(structures[i],structures[--j]);
+            } else {
+                i++;
             }
-            std::swap(structures[i],structures[--j]);
-        } else {
-            i++;
-        }
         }else{i++;}
     }
     structures.resize(j);
