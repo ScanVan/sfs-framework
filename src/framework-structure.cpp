@@ -99,9 +99,9 @@ void Structure::computeFeaturesState(bool state){
     }
 }
 
-bool Structure::computeFilter(double configDisparity, double configRadiusMin, double configRadiusMax ){
+bool Structure::computeFilter(double configRadiusMin, double configRadiusMax ){
     for(auto element: features){
-        if (element->getDisparity()>element->getViewpoint()->getDisparitySD()*configDisparity) {
+        if (element->getDisparity()>element->getViewpoint()->getDisparitySD()) {
             return false;
         }
         if (element->getRadius()<element->getViewpoint()->getdistReference()*configRadiusMin) {

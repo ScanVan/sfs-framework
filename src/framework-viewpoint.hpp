@@ -76,6 +76,6 @@ public:
     double getDisparitySD();
     double getdistReference();
     void setReferenceDistance(double newReference);
-    void computeStatistics();
+    void computeStatistics(double configDisparity);
 
 };

@@ -86,7 +86,7 @@ void Viewpoint::setReferenceDistance(double newReference){
     distReference=newReference;
 }
 
-void Viewpoint::computeStatistics(){
+void Viewpoint::computeStatistics(double configDisparity){
     unsigned long count(0);
     double component(0.);
     dispMean=0.;
@@ -105,6 +105,6 @@ void Viewpoint::computeStatistics(){
             dispSD+=component*component;
         }
     }
-    dispSD=std::sqrt(dispSD/double(count-1));
+    dispSD=std::sqrt(dispSD/double(count-1))*configDisparity;
 }
 

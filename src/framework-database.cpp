@@ -229,7 +229,7 @@ void Database::computeStatistics(){
         }
     }
     for(auto & element: viewpoints){
-        element->computeStatistics();
+        element->computeStatistics(configDisparity);
     }
     for(unsigned int i(0); i<transforms.size(); i++){
         viewpoints[i]->setReferenceDistance((*transforms[i]->getTranslation()).norm());
@@ -251,7 +251,7 @@ void Database::computeFilters(){
     unsigned int j(structures.size());
     while (i < j){
         if(structures[i]->getFeaturesCount()>=configStructure){
-            if (structures[i]->computeFilter(configDisparity,configRadiusMin,configRadiusMax)==false){
+            if (structures[i]->computeFilter(configRadiusMin,configRadiusMax)==false){
                 for(auto f : *structures[i]->getFeatures()){
                     f->structure = NULL;
                 }
