@@ -36,21 +36,19 @@ public:
     Eigen::Vector3d model;
 	double radius;
 	double disparity;
+	uint32_t inliner; /* redundant with selection per features count and deletion trough filtering ? + encapsulation fault */
+
 public:
-	uint32_t inliner;
-    // accessors
     Eigen::Vector3d * getDirection();
     Eigen::Vector3d * getModel();
     double getRadius();
     double getDisparity();
     Viewpoint * getViewpoint();
     Structure * getStructure();
-    // modifiers : assignation
     void setFeature(double x, double y, int imageWidth, int imageHeight);
     void setRadius(double newRadius, double newDisparity);
     void setViewpointPtr(Viewpoint * newViewpoint);
     void setStructurePtr(Structure * newStructure);
-    void setDirection(Eigen::Vector3d direction){ this->direction = direction;}
-    // modifiers
+    void setDirection(Eigen::Vector3d newDirection);
     void computeModel();
 };

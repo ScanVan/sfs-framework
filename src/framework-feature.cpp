@@ -63,6 +63,10 @@ void Feature::setStructurePtr(Structure * newStructure){
     structure=newStructure;
 }
 
+void Feature::setDirection(Eigen::Vector3d newDirection){
+    direction=newDirection;
+}
+
 void Feature::computeModel(){
     model=direction*radius;
 }
