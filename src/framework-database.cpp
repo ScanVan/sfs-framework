@@ -63,7 +63,6 @@ void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::sha
 }
 
 void Database::addViewpoint(std::shared_ptr<Viewpoint> viewpoint){
-    viewpoint->setIndex(viewpoints.size());
     if(viewpoint->getIndex() > 0) transforms.push_back(std::make_shared<Transform>());
     viewpoints.push_back(viewpoint);
 }
@@ -77,6 +76,7 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
     uint32_t structureFusionCount = 0;
     uint32_t *viewpointsUsage = new uint32_t[viewpoints.size() + 1];
     memset(viewpointsUsage, -1, (viewpoints.size() + 1)*sizeof(uint32_t));
+    newViewpoint->setIndex(viewpoints.size());
     for(uint32_t queryIdx = 0;queryIdx < newViewpoint->features.size(); queryIdx++){
         uint32_t *correlationsPtr = correlations + queryIdx*localViewpointsCount; //Used to iterate over the given lines
 
@@ -149,8 +149,6 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
         if(newFeature->structure) throw std::runtime_error("New feature already had a structure");
         if(viewpointsUsage[viewpoints.size()] != queryIdx){
             structure->addFeature(newFeature);
-        } else {
-            std::cout << "prout" << std::endl;
         }
     }
     delete[] viewpointsUsage;
@@ -371,12 +369,14 @@ void Database::_displayViewpointStructures(Viewpoint *viewpoint){
 }
 
 void Database::_sanityCheck(bool inliner){
-    //Sanity check
-    uint32_t *structureSizes = new uint32_t[100];
-    memset(structureSizes, 0, (100)*sizeof(uint32_t));
+    //How many structure have a given size (size is the index)
+    uint32_t *structureSizes = new uint32_t[viewpoints.size()+1];
+    memset(structureSizes, 0, (viewpoints.size()+1)*sizeof(uint32_t));
 
+    //Set<Viewpoint> to identify viewpoint duplication in structures
     uint32_t *viewpointsUsage = new uint32_t[viewpoints.size()];
     memset(viewpointsUsage, -1, (viewpoints.size())*sizeof(uint32_t));
+
     for(uint32_t structureId = 0;structureId < structures.size();structureId++){
         auto &s = structures[structureId];
         if(s->features.size() < 2) throw std::runtime_error("Structure with less than two feature");
@@ -393,7 +393,7 @@ void Database::_sanityCheck(bool inliner){
     delete []viewpointsUsage;
 
     std::cout << "Structure family ";
-    for(uint32_t size = 0;size < 100; size++){
+    for(uint32_t size = 0;size <= viewpoints.size(); size++){
         auto count = structureSizes[size];
         if(count) std::cout << size << "=>" << count << " ";
     }
