@@ -149,8 +149,6 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
         if(newFeature->structure) throw std::runtime_error("New feature already had a structure");
         if(viewpointsUsage[viewpoints.size()] != queryIdx){
             structure->addFeature(newFeature);
-        } else {
-            std::cout << "prout" << std::endl;
         }
     }
     delete[] viewpointsUsage;
