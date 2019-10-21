@@ -249,29 +249,9 @@ void Database::computeStatistics(){
 void Database::computeFilters(){
     unsigned int i(0);
     unsigned int j(structures.size());
-    unsigned int initialSize = j;
     while (i < j){
         if(structures[i]->getFeaturesCount()>=configStructure){
-            auto features = structures[i]->getFeatures();
-            unsigned int i2(0);
-            unsigned int j2(features->size());
-            while (i2 < j2){
-                auto f = (*features)[i2];
-                bool ko = false;
-                ko |= f->getDisparity()>f->getViewpoint()->getDisparityFilterSD();
-                ko |= f->getRadius()<f->getViewpoint()->getdistReference()*configRadiusMin;
-                ko |= f->getRadius()>f->getViewpoint()->getdistReference()*configRadiusMax;
-                if(ko){
-                    f->structure = NULL;
-                    std::swap((*features)[i2],(*features)[--j2]);
-                } else {
-                    i2++;
-                }
-            }
-            features->resize(j2);
-
-            if (features->size() < 2){
-//            if (structures[i]->computeFilter(configRadiusMin,configRadiusMax)==false){
+            if (structures[i]->computeFilter(configRadiusMin,configRadiusMax)==false){
                 for(auto f : *structures[i]->getFeatures()){
                     f->structure = NULL;
                 }
@@ -282,7 +262,6 @@ void Database::computeFilters(){
         }else{i++;}
     }
     structures.resize(j);
-    std::cout << "Filter " << (initialSize-j) << " / " << initialSize << std::endl;
 }
 
 void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
