@@ -195,10 +195,13 @@ void Database::computePoses(){
     for(unsigned int i(0); i<transforms.size(); i++){
         transforms[i]->computePose(viewpoints[i].get(),viewpoints[i+1].get());
     }
-    // adding normalisation
-    double initialNorm((*transforms[0]->getTranslation()).norm());
+    double normalFactor(0.);
+    for(unsigned int i(0); i<MIN(10,transforms.size()); i++){
+        normalFactor+=transforms[i]->getTranslation()->norm();
+    }
+    normalFactor/=MIN(10,transforms.size());
     for(unsigned int i(0); i<transforms.size(); i++){
-        transforms[i]->translation/=initialNorm;
+        transforms[i]->setTranslationScale(normalFactor);
     }
 }
 
