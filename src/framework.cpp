@@ -110,7 +110,7 @@ int main(int argc, char *argv[]){
             database.computeFilters();
 
             // development feature - begin
-            database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
+            //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
             // development feature - end
 
             // algorithm error management
