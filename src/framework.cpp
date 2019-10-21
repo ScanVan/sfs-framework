@@ -90,8 +90,8 @@ int main(int argc, char *argv[]){
         }
 
         // reset algorithm variables
-        loopError=1.;
-        pushError=0.;
+        loopError=0.;
+        pushError=1.;
         loopFlag=true;
         loopMinor=0;
 
@@ -115,10 +115,16 @@ int main(int argc, char *argv[]){
 
             // algorithm error management
             loopError = database.getError();
-            if (fabs( loopError - pushError ) < database.getConfigError()) {
-                loopFlag = false;
-            } else {
-                pushError=loopError;
+            if(loopMinor>1){
+                if(fabs( loopError - pushError ) < database.getConfigError()) {
+                    loopFlag = false;
+                } else {
+                    if(( pushError - loopError ) < 0.) {
+                        loopFlag = false;
+                    } else {
+                        pushError=loopError;
+                    }
+                }
             }
 
             // update minor iterator
