@@ -22,19 +22,21 @@
 #include "framework-database.hpp"
 
 Database::Database(
-    unsigned long initialBootstrap,
     double initialError,
     unsigned long initialStructure,
     double initialDisparity,
     double initialRadiusMin,
     double initialRadiusMax
 ){
-    configBootstrap=initialBootstrap;
     configError=initialError;
     configStructure=initialStructure;
     configDisparity=initialDisparity;
     configRadiusMin=initialRadiusMin;
     configRadiusMax=initialRadiusMax;
+}
+
+bool Database::getBootstrap(){
+    return viewpoints.size()<configStructure?true:false;
 }
 
 int Database::getViewpointCount(){
@@ -272,9 +274,10 @@ void Database::computeFilters(){
     structures.resize(j);
 }
 
+/* Note : called before viewpoint push on stack */
 void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
     auto viewpointCount(viewpoints.size());
-    if(viewpointCount<=configBootstrap){
+    if(viewpointCount<configStructure){
         pushedViewpoint->resetFrame();
     }else{
         Eigen::Matrix3d prevRotation((*transforms[viewpointCount-2]->getRotation()).transpose());
@@ -286,12 +289,12 @@ void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
     }
 }
 
+/* Note : called after viewpoint push on stack */
 void Database::extrapolateStructure(){
-    if (viewpoints.size()<=configBootstrap){
-        return;
-    }
-    for(auto element: structures){
-        element->extrapolate();
+    if(viewpoints.size()>configStructure){
+        for(auto & element: structures){
+            element->extrapolate();
+        }
     }
 }
 

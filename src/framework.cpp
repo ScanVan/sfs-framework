@@ -29,7 +29,6 @@ int main(int argc, char *argv[]){
     YAML::Node config = YAML::LoadFile(argv[1]);
 
     auto database = Database(
-        config["algorithm"]["bootstrap"].as<unsigned long>(),
         config["algorithm"]["error"].as<double>(),
         config["algorithm"]["structure"].as<unsigned long>(),
         config["algorithm"]["disparity"].as<double>(),
@@ -70,6 +69,10 @@ int main(int argc, char *argv[]){
     // pipeline loop
     while(true){
 
+        //
+        // image stream front-end
+        //
+
         // query image from source
         if(!frontend->next()){
             // drop the pushed image
@@ -84,8 +87,9 @@ int main(int argc, char *argv[]){
         // geometry estimation solver
         //
 
-        // check for at least two pushed viewpoints
-        if(database.getViewpointCount()<3) { /* need to be identical to configStructure of database */
+        // wait bootstrap image count
+        if(database.getBootstrap()){
+            // avoid optimisation
             continue;
         }
 
@@ -96,7 +100,7 @@ int main(int argc, char *argv[]){
         loopMinor=0;
 
         // development feature - begin
-        database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
+        //database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
         // development feature - end
 
         // algorithm loop
@@ -119,17 +123,10 @@ int main(int argc, char *argv[]){
 
             // algorithm error management
             loopError = database.getError();
-            if(loopMinor>1){
-                if(fabs( loopError - pushError ) < database.getConfigError()) {
-                    loopFlag = false;
-                } else {
-                    //if(( pushError - loopError ) < 0.) {
-                        //std::cerr << "Exit on error growth" << std::endl;
-                        //loopFlag = false;
-                    //} else {
-                        pushError=loopError;
-                    //}
-                }
+            if(fabs( loopError - pushError ) < database.getConfigError()) {
+                loopFlag = false;
+            } else {
+                pushError=loopError;
             }
 
             // update minor iterator

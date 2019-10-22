@@ -12,7 +12,6 @@ frontend:
 #  odometry: dev/odometry.xyz
 
 algorithm:
-  bootstrap: 3
   error: 1e-6
   structure: 3
   disparity: 5

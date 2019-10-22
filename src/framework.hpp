@@ -34,6 +34,7 @@
 #include "framework-utiles.hpp"
 #include "ThreadPool.h"
 
+/* is this still used ? */
 #define GETSET(type, var) \
 	private: \
 		type _##var; \
