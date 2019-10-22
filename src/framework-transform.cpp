@@ -29,6 +29,10 @@ Eigen::Vector3d * Transform::getTranslation(){
     return &translation;
 }
 
+void Transform::setTranslationScale(double scaleFactor){
+    translation/=scaleFactor;
+}
+
 void Transform::pushCorrelation(Eigen::Vector3d * firstComponent, Eigen::Vector3d * secondComponent){
     correlation+=((*firstComponent)-centerFirst)*((*secondComponent)-centerSecond).transpose();
 }

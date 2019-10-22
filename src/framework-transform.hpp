@@ -34,10 +34,9 @@ public:
     Eigen::Vector3d centerSecond;
     unsigned int centerCount;
 public:
-    // accessors
     Eigen::Matrix3d * getRotation();
     Eigen::Vector3d * getTranslation();
-    // modifiers
+    void setTranslationScale(double scaleFactor);
     void pushCorrelation(Eigen::Vector3d * firstComponent, Eigen::Vector3d * secondComponent);
     void pushCentroid(Eigen::Vector3d * pushFirst, Eigen::Vector3d * pushSecond);
     void resetCorrelation();

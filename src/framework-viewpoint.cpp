@@ -90,21 +90,28 @@ void Viewpoint::computeStatistics(double configDisparity){
     unsigned long count(0);
     double component(0.);
     dispMean=0.;
+    radMean=0.;
     for(auto & element: features){
         if(element.getState()==true){
             dispMean+=element.getDisparity();
+            radMean+=element.getRadius();
             count++;
         }
     }
     dispMean/=double(count);
+    radMean/=double(count);
 
     dispSD=0.;
+    radSD=0.;
     for(auto & element: features){
         if(element.getState()==true){
             component=element.getDisparity()-dispMean;
             dispSD+=component*component;
+            component=element.getRadius()-radMean;
+            radSD+=component*component;
         }
     }
     dispSD=std::sqrt(dispSD/double(count-1))*configDisparity;
+    radSD=std::sqrt(radSD/double(count-1))*3.;
 }
 

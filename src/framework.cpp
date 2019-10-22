@@ -29,7 +29,6 @@ int main(int argc, char *argv[]){
     YAML::Node config = YAML::LoadFile(argv[1]);
 
     auto database = Database(
-        config["algorithm"]["bootstrap"].as<unsigned long>(),
         config["algorithm"]["error"].as<double>(),
         config["algorithm"]["structure"].as<unsigned long>(),
         config["algorithm"]["disparity"].as<double>(),
@@ -77,6 +76,10 @@ int main(int argc, char *argv[]){
     // pipeline loop
     while(true){
 
+        //
+        // image stream front-end
+        //
+
         // query image from source
         if(!frontend->next()){
             // drop the pushed image
@@ -91,16 +94,21 @@ int main(int argc, char *argv[]){
         // geometry estimation solver
         //
 
-        // check for at least two pushed viewpoints
-        if(database.getViewpointCount()<3) {
+        // wait bootstrap image count
+        if(database.getBootstrap()){
+            // avoid optimisation
             continue;
         }
 
         // reset algorithm variables
-        loopError=1.;
-        pushError=0.;
+        loopError=0.;
+        pushError=1.;
         loopFlag=true;
         loopMinor=0;
+
+        // development feature - begin
+        database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
+        // development feature - end
 
         // algorithm loop
         while ( loopFlag == true ) {
@@ -117,12 +125,12 @@ int main(int argc, char *argv[]){
             database.computeFilters();
 
             // development feature - begin
-            database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
+            //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
             // development feature - end
 
             // algorithm error management
             loopError = database.getError();
-            if (fabs( loopError - pushError ) < database.getConfigError()) {
+            if(fabs( loopError - pushError ) < database.getConfigError()) {
                 loopFlag = false;
             } else {
                 pushError=loopError;

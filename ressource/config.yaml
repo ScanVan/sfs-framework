@@ -16,7 +16,6 @@ frontend:
 #  badMatchRate: 0.1
 
 algorithm:
-  bootstrap: 3
   error: 1e-6
   structure: 3
   disparity: 5

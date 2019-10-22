@@ -22,14 +22,12 @@
 #include "framework-database.hpp"
 
 Database::Database(
-    unsigned long initialBootstrap,
     double initialError,
     unsigned long initialStructure,
     double initialDisparity,
     double initialRadiusMin,
     double initialRadiusMax
 ){
-    configBootstrap=initialBootstrap;
     configError=initialError;
     configStructure=initialStructure;
     configDisparity=initialDisparity;
@@ -37,8 +35,8 @@ Database::Database(
     configRadiusMax=initialRadiusMax;
 }
 
-int Database::getViewpointCount(){
-    return viewpoints.size();
+bool Database::getBootstrap(){
+    return viewpoints.size()<configStructure?true:false;
 }
 
 double Database::getConfigError(){
@@ -195,6 +193,14 @@ void Database::computePoses(){
     for(unsigned int i(0); i<transforms.size(); i++){
         transforms[i]->computePose(viewpoints[i].get(),viewpoints[i+1].get());
     }
+    double normalFactor(0.);
+    for(unsigned int i(0); i<MIN(10,transforms.size()); i++){
+        normalFactor+=transforms[i]->getTranslation()->norm();
+    }
+    normalFactor/=MIN(10,transforms.size());
+    for(unsigned int i(0); i<transforms.size(); i++){
+        transforms[i]->setTranslationScale(normalFactor);
+    }
 }
 
 void Database::computeFrames(){
@@ -249,29 +255,9 @@ void Database::computeStatistics(){
 void Database::computeFilters(){
     unsigned int i(0);
     unsigned int j(structures.size());
-    unsigned int initialSize = j;
     while (i < j){
         if(structures[i]->getFeaturesCount()>=configStructure){
-            auto features = structures[i]->getFeatures();
-            unsigned int i2(0);
-            unsigned int j2(features->size());
-            while (i2 < j2){
-                auto f = (*features)[i2];
-                bool ko = false;
-                ko |= f->getDisparity()>f->getViewpoint()->getDisparityFilterSD();
-                ko |= f->getRadius()<f->getViewpoint()->getdistReference()*configRadiusMin;
-                ko |= f->getRadius()>f->getViewpoint()->getdistReference()*configRadiusMax;
-                if(ko){
-                    f->structure = NULL;
-                    std::swap((*features)[i2],(*features)[--j2]);
-                } else {
-                    i2++;
-                }
-            }
-            features->resize(j2);
-
-            if (features->size() < 2){
-//            if (structures[i]->computeFilter(configRadiusMin,configRadiusMax)==false){
+            if (structures[i]->computeFilter(configRadiusMin,configRadiusMax)==false){
                 for(auto f : *structures[i]->getFeatures()){
                     f->structure = NULL;
                 }
@@ -282,12 +268,12 @@ void Database::computeFilters(){
         }else{i++;}
     }
     structures.resize(j);
-    std::cout << "Filter " << (initialSize-j) << " / " << initialSize << std::endl;
 }
 
+/* Note : called before viewpoint push on stack */
 void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
     auto viewpointCount(viewpoints.size());
-    if(viewpointCount<=configBootstrap){
+    if(viewpointCount<configStructure){
         pushedViewpoint->resetFrame();
     }else{
         Eigen::Matrix3d prevRotation((*transforms[viewpointCount-2]->getRotation()).transpose());
@@ -299,12 +285,12 @@ void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
     }
 }
 
+/* Note : called after viewpoint push on stack */
 void Database::extrapolateStructure(){
-    if (viewpoints.size()<=configBootstrap){
-        return;
-    }
-    for(auto element: structures){
-        element->extrapolate();
+    if(viewpoints.size()>configStructure){
+        for(auto & element: structures){
+            element->extrapolate();
+        }
     }
 }
 
@@ -408,7 +394,7 @@ void Database::_sanityCheck(bool inliner){
     }
 }
 
-// Note : this function does not respect encapsulation (development function)
+// Note : this function does not respect encapsulation (development function) - need to be removed
 void Database::_exportState(std::string path, int major, int iter){
     int vpcount(255/viewpoints.size());
     std::fstream stream;
@@ -434,6 +420,29 @@ void Database::_exportState(std::string path, int major, int iter){
                 stream << Position(0) << " "
                        << Position(1) << " "
                        << Position(2) << " 255 " << j*vpcount << " 0" << std::endl;
+            }
+        }
+    }
+    stream.close();
+}
+
+// Note : this function does not respect encapsulation (development function) - need to be removed
+void Database::_exportMatchDistribution(std::string path, unsigned int major, std::string type){
+    if(viewpoints.size()<configStructure){
+        return;
+    }
+    std::fstream stream;
+    stream.open( path + "/debug/" + std::to_string(major) + "_" + type + ".mat", std::ios::out );
+    if(stream.is_open()==false){
+        std::cerr << "unable to create match distribution exportation file" << std::endl;
+    }
+    stream << viewpoints.size() << " -1" << std::endl;
+    for(auto & element: structures){
+        if(element->getFeaturesCount()>=configStructure){
+            for(unsigned int i(0); i<element->features.size(); i++){
+                for(unsigned int j(0); j<element->features.size(); j++){
+                    stream << element->features[i]->viewpoint->index+1 << " " << element->features[j]->viewpoint->index+1 << std::endl;
+                }
             }
         }
     }

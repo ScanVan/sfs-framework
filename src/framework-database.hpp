@@ -38,7 +38,6 @@ public:
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Structure>> structures;
 
-    unsigned long configBootstrap;
     double configError;
     unsigned long configStructure;
     double configDisparity;
@@ -46,8 +45,8 @@ public:
     double configRadiusMax;
 
 public:
-    Database(unsigned long initialBootstrap, double initialError, unsigned long initialStructure, double initialDisparity, double initialRadiusMin, double initialRadiusMax);
-    int getViewpointCount();
+    Database(double initialError, unsigned long initialStructure, double initialDisparity, double initialRadiusMin, double initialRadiusMax);
+    bool getBootstrap();
     double getConfigError();
     double getError();
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
@@ -72,6 +71,7 @@ public:
 public:
     void _displayViewpointStructures(Viewpoint *viewpoint);
     void _sanityCheck(bool inliner);
-    void _exportState(std::string path,int major, int iter);
+    void _exportState(std::string path,int major, int iter); /* need deletion */
+    void _exportMatchDistribution(std::string path, unsigned int major, std::string type); /* need deletion */
 };
 
