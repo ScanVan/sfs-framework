@@ -104,12 +104,16 @@ bool Structure::computeFilter(double configRadiusMin, double configRadiusMax ){
         if (element->getDisparity()>element->getViewpoint()->getDisparityFilterSD()) {
             return false;
         }
-        if (element->getRadius()<element->getViewpoint()->getdistReference()*configRadiusMin) {
+        if (fabs(element->getRadius()-element->viewpoint->radMean)>element->viewpoint->radSD){
             return false;
         }
-        if (element->getRadius()>element->getViewpoint()->getdistReference()*configRadiusMax) {
-            return false;
-        }
+
+        //if (element->getRadius()<element->getViewpoint()->getdistReference()*configRadiusMin) {
+        //    return false;
+        //}
+        //if (element->getRadius()>element->getViewpoint()->getdistReference()*configRadiusMax) {
+        //    return false;
+        //}
     }
     return true;
 }

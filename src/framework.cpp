@@ -85,7 +85,7 @@ int main(int argc, char *argv[]){
         //
 
         // check for at least two pushed viewpoints
-        if(database.getViewpointCount()<3) {
+        if(database.getViewpointCount()<3) { /* need to be identical to configStructure of database */
             continue;
         }
 
@@ -94,6 +94,10 @@ int main(int argc, char *argv[]){
         pushError=1.;
         loopFlag=true;
         loopMinor=0;
+
+        // development feature - begin
+        database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
+        // development feature - end
 
         // algorithm loop
         while ( loopFlag == true ) {
@@ -119,11 +123,12 @@ int main(int argc, char *argv[]){
                 if(fabs( loopError - pushError ) < database.getConfigError()) {
                     loopFlag = false;
                 } else {
-                    if(( pushError - loopError ) < 0.) {
-                        loopFlag = false;
-                    } else {
+                    //if(( pushError - loopError ) < 0.) {
+                        //std::cerr << "Exit on error growth" << std::endl;
+                        //loopFlag = false;
+                    //} else {
                         pushError=loopError;
-                    }
+                    //}
                 }
             }
 

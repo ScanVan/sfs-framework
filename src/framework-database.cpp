@@ -395,7 +395,7 @@ void Database::_sanityCheck(bool inliner){
     }
 }
 
-// Note : this function does not respect encapsulation (development function)
+// Note : this function does not respect encapsulation (development function) - need to be removed
 void Database::_exportState(std::string path, int major, int iter){
     int vpcount(255/viewpoints.size());
     std::fstream stream;
@@ -421,6 +421,29 @@ void Database::_exportState(std::string path, int major, int iter){
                 stream << Position(0) << " "
                        << Position(1) << " "
                        << Position(2) << " 255 " << j*vpcount << " 0" << std::endl;
+            }
+        }
+    }
+    stream.close();
+}
+
+// Note : this function does not respect encapsulation (development function) - need to be removed
+void Database::_exportMatchDistribution(std::string path, unsigned int major, std::string type){
+    if(viewpoints.size()<configStructure){
+        return;
+    }
+    std::fstream stream;
+    stream.open( path + "/debug/" + std::to_string(major) + "_" + type + ".mat", std::ios::out );
+    if(stream.is_open()==false){
+        std::cerr << "unable to create match distribution exportation file" << std::endl;
+    }
+    stream << viewpoints.size() << " -1" << std::endl;
+    for(auto & element: structures){
+        if(element->getFeaturesCount()>=configStructure){
+            for(unsigned int i(0); i<element->features.size(); i++){
+                for(unsigned int j(0); j<element->features.size(); j++){
+                    stream << element->features[i]->viewpoint->index+1 << " " << element->features[j]->viewpoint->index+1 << std::endl;
+                }
             }
         }
     }

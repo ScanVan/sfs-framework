@@ -44,8 +44,12 @@ public:
     Eigen::Vector3d position;
     double dispMean;
     double dispSD;
-    double distReference;
-    unsigned int dispCount;
+
+    double radMean; /* new */
+    double radSD; /* new */
+
+    double distReference; /* to be deleted */
+    unsigned int dispCount; /* to be deleted */
     time_t time;
     int microsecond;
 

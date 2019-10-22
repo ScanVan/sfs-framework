@@ -72,6 +72,7 @@ public:
 public:
     void _displayViewpointStructures(Viewpoint *viewpoint);
     void _sanityCheck(bool inliner);
-    void _exportState(std::string path,int major, int iter);
+    void _exportState(std::string path,int major, int iter); /* need deletion */
+    void _exportMatchDistribution(std::string path, unsigned int major, std::string type); /* need deletion */
 };
 
