@@ -35,7 +35,7 @@ void Structure::addFeature(Feature * feature){
 }
 
 void Structure::computeModel(){
-    for(auto element: features){
+    for(auto & element: features){
         element->computeModel();
     }
 }
@@ -71,7 +71,7 @@ void Structure::computeOptimalPosition(){
     Eigen::Vector3d vacc(Eigen::Vector3d::Zero());
     Eigen::Matrix3d weight;
     Eigen::Vector3d vector;
-    for(auto element: features){
+    for(auto & element: features){
         vector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
         weight=Eigen::Matrix3d::Identity()-vector*vector.transpose();
         vacc+=weight*(*element->getViewpoint()->getPosition());
@@ -85,7 +85,7 @@ void Structure::computeRadius(){
     Eigen::Vector3d fvector;
     Eigen::Vector3d fposition;
     double radius(0.);
-    for(auto element: features){
+    for(auto & element: features){
         fvector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
         radius=fvector.dot(position-(*element->getViewpoint()->getPosition()));
         fposition=(*element->getViewpoint()->getPosition())+fvector*radius;
@@ -100,7 +100,7 @@ void Structure::computeFeaturesState(bool state){
 }
 
 bool Structure::computeFilter(double configRadiusMin, double configRadiusMax ){
-    for(auto element: features){
+    for(auto & element: features){
         if (element->getDisparity()>element->getViewpoint()->getDisparityFilterSD()) {
             return false;
         }

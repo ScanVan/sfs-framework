@@ -112,6 +112,6 @@ void Viewpoint::computeStatistics(double configDisparity){
         }
     }
     dispSD=std::sqrt(dispSD/double(count-1))*configDisparity;
-    radSD=std::sqrt(radSD/double(count-1))*3.;
+    radSD=std::sqrt(radSD/double(count-1))*10.;
 }
 
