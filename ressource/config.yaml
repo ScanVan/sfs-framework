@@ -10,6 +10,10 @@ frontend:
 #  type: CLOUDPOINT
 #  model: dev/model.xyz
 #  odometry: dev/odometry.xyz
+#  distanceMax: 30.0
+#  baseNoise: 0.001
+#  badMatchNoise: 0.2
+#  badMatchRate: 0.1
 
 algorithm:
   bootstrap: 3

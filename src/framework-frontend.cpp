@@ -113,7 +113,14 @@ bool FrontendPicture::next() {
 
 
 
-FrontendCloudpoint::FrontendCloudpoint(Database *database, std::string modelPath, std::string odometryPath) : database(database){
+FrontendCloudpoint::FrontendCloudpoint(
+        Database *database,
+        std::string modelPath,
+        std::string odometryPath,
+        double distanceMax,
+        double badMatchRate,
+        double baseNoise, double
+        badMatchNoise) : database(database), distanceMax(distanceMax), badMatchRate(badMatchRate), baseNoise(baseNoise), badMatchNoise(badMatchNoise){
 	std::ifstream m(modelPath);
 	while(true){
 		Eigen::Vector3d p;
@@ -134,17 +141,15 @@ bool FrontendCloudpoint::next(){
 	auto newViewpoint = std::make_shared<Viewpoint>();
 
 	//Extract feature from nearby model points
-	double dMax = 30;
-    double badmatchRate = 0.10;
 	auto o = odometry[viewpointIndex++];
 //	auto origin = odometry[0];
 	for(uint32_t mid = 0;mid < model.size();mid++){
 		auto m = model[mid];
 		auto position = (m-o);
-		if((m-o).norm() < dMax){
+		if((m-o).norm() < distanceMax){
 			Feature f;
-			auto noiseFactor = 0.001 + (1.0*rand()/RAND_MAX < badmatchRate ? 0.2 : 0);
-			auto noise = Eigen::Vector3d(dMax*noiseFactor*rand()/RAND_MAX,dMax*noiseFactor*rand()/RAND_MAX,dMax*noiseFactor*rand()/RAND_MAX);
+			auto noiseFactor = baseNoise + (1.0*rand()/RAND_MAX < badMatchRate ? badMatchNoise : 0);
+			auto noise = Eigen::Vector3d(distanceMax*noiseFactor*rand()/RAND_MAX,distanceMax*noiseFactor*rand()/RAND_MAX,distanceMax*noiseFactor*rand()/RAND_MAX);
 	        f.setDirection((position + noise).normalized());
 //	        f.setRadius(position.norm()+0.1, 0.);
 	        f.setRadius(1., 0.);

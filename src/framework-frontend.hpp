@@ -38,8 +38,9 @@ private:
 	Database *database;
 	std::vector<Eigen::Vector3d> model, odometry;
 	uint32_t viewpointIndex = 0;
+	double distanceMax, badMatchRate, baseNoise, badMatchNoise;
 public:
-	FrontendCloudpoint(Database *database, std::string modelPath, std::string odometryPath);
+	FrontendCloudpoint(Database *database, std::string modelPath, std::string odometryPath, double distanceMax, double badMatchRate, double baseNoise, double badMatchNoise);
 	virtual ~FrontendCloudpoint(){}
 
 	virtual bool next();

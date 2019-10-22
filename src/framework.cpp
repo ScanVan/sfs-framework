@@ -52,7 +52,14 @@ int main(int argc, char *argv[]){
     }
 
     if(frontendType == "CLOUDPOINT"){
-        frontend = new FrontendCloudpoint(&database, config["frontend"]["model"].as<std::string>(), config["frontend"]["odometry"].as<std::string>());
+        auto fn = config["frontend"];
+        frontend = new FrontendCloudpoint(
+                &database, fn["model"].as<std::string>(),
+                fn["odometry"].as<std::string>(),
+                fn["distanceMax"].as<double>(),
+                fn["badMatchRate"].as<double>(),
+                fn["baseNoise"].as<double>(),
+                fn["badMatchNoise"].as<double>());
         inlinerEnabled = true;
     }
 
