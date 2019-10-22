@@ -47,7 +47,6 @@ public:
 public:
     Database(double initialError, unsigned long initialStructure, double initialDisparity, double initialRadiusMin, double initialRadiusMax);
     bool getBootstrap();
-    int getViewpointCount();
     double getConfigError();
     double getError();
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);

@@ -39,10 +39,6 @@ bool Database::getBootstrap(){
     return viewpoints.size()<configStructure?true:false;
 }
 
-int Database::getViewpointCount(){
-    return viewpoints.size();
-}
-
 double Database::getConfigError(){
     return configError;
 }

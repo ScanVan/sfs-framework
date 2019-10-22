@@ -100,7 +100,7 @@ int main(int argc, char *argv[]){
         loopMinor=0;
 
         // development feature - begin
-        //database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
+        database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
         // development feature - end
 
         // algorithm loop
