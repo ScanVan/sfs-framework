@@ -30,6 +30,7 @@ unsigned int Structure::getFeaturesCount(){
 }
 
 void Structure::addFeature(Feature * feature){
+    feature->reset();
     feature->setStructurePtr(this);
     features.push_back(feature);
 }

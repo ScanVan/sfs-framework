@@ -53,5 +53,6 @@ public:
     void setStructurePtr(Structure * newStructure);
     void setDirection(Eigen::Vector3d newDirection);
     void setState(bool newState);
+    void reset();
     void computeModel();
 };
