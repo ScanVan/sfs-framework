@@ -53,8 +53,8 @@ ViewPointSourceFs::ViewPointSourceFs(std::string folder, double scale) : scale(s
 std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
 	auto viewpoint = std::make_shared<Viewpoint>();
 	std::string path = files[fileIndex];
-	auto image = cv::imread(path, cv::IMREAD_COLOR);
-	cv::resize( image, image, cv::Size(), scale, scale, cv::INTER_AREA );
+	auto image = cv::Mat();
+	cv::resize(cv::imread(path, cv::IMREAD_COLOR), image, cv::Size(), scale, scale, cv::INTER_AREA );
 
 	if (image.empty()) throw new std::runtime_error("imread path failure : " + path );
 	viewpoint->setImage(image);
