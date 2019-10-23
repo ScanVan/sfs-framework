@@ -49,4 +49,9 @@ public:
     void extrapolate();
 
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */
+
+    // // development segment : the following functions are not validated and unstable // //
+
+    bool getIsHeadStructure(unsigned long lastViewpointIndex);
+
 };

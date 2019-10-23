@@ -250,6 +250,8 @@ void Database::computeFilters(){
     unsigned int i(0);
     unsigned int j(structures.size());
     while (i < j){
+        if(structures[i]->getIsHeadStructure(viewpoints.size()-1)==true){
+
         if(structures[i]->getFeaturesCount()>=configStructure){
             if (structures[i]->computeFilter()==false){
                 for(auto f : *structures[i]->getFeatures()){
@@ -259,6 +261,8 @@ void Database::computeFilters(){
             } else {
                 i++;
             }
+        }else{i++;}
+
         }else{i++;}
     }
     structures.resize(j);

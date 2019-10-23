@@ -118,3 +118,14 @@ void Structure::extrapolate(){
     computeRadius();
 }
 
+// // development segment : the following functions are not validated and unstable // //
+
+bool Structure::getIsHeadStructure(unsigned long lastViewpointIndex){
+    for(auto & element: features){
+        if(element->getViewpoint()->getIndex()==lastViewpointIndex){
+            return true;
+        }
+    }
+    return false;
+}
+

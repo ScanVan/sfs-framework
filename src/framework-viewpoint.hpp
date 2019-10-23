@@ -33,7 +33,7 @@
 class Viewpoint {
 public:
     std::string uid;
-    int index;
+    int index; /* changing to long ? */
 	cv::Mat image;
     int width; /* maybe to delete : only used in allocateFeaturesFromCvFeatures : passed as parameter ? */
     int height; /* maybe to delete : only used in allocateFeaturesFromCvFeatures : passed as parameter ? */
@@ -72,6 +72,8 @@ public:
     void addFeature(Feature f){ features.push_back(f); }
     double getSecondFrom(Viewpoint *ref);
     Feature *getFeatureFromCvIndex(uint32_t i){ return &features[i]; }
+
+    // // development segment : the following functions are not validated and unstable // //
 
      /* need decision : local vs global statistics ? */
     double getDisparityMean();

@@ -68,7 +68,7 @@ double Viewpoint::getSecondFrom(Viewpoint *ref){
 	return s;
 }
 
-////
+// // development segment : the following functions are not validated and unstable // //
 
 double Viewpoint::getDisparityMean(){
     return dispMean;

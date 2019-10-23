@@ -19,8 +19,7 @@ algorithm:
   error: 1e-6
   structure: 3
   disparity: 5
-  radius_min: 1
-  radius_max: 500
+  radius: 10
 
 # note : path has to contain a dev/ and debug/ directory
 export:
