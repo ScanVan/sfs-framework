@@ -4,6 +4,7 @@ frontend:
     type: FOLDER
     path: /home/dolu/pro/scanvan/dataset/e
     mask: /home/dolu/pro/scanvan/dataset/mask.png
+    scale: 0.125
 
 #To use datapoints as viewpoint source, replace the frontend stuff with
 #frontend:

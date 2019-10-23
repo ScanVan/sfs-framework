@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
         ViewPointSource *source = NULL;
         auto sourceType = config["frontend"]["source"]["type"].as<std::string>();
         if(sourceType == "FOLDER") {
-            source = new ViewPointSourceFs(config["frontend"]["source"]["path"].as<std::string>());
+            source = new ViewPointSourceFs(config["frontend"]["source"]["path"].as<std::string>(), config["frontend"]["source"]["scale"].as<double>());
         }
         auto mask = cv::imread(config["frontend"]["source"]["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
         frontend = new FrontendPicture(source, mask, &threadpool, &database);
