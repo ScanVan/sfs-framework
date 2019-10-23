@@ -42,14 +42,12 @@ public:
 	cv::Mat cvDescriptor;
     Eigen::Matrix3d orientation;
     Eigen::Vector3d position;
-    double dispMean;
-    double dispSD;
 
-    double radMean; /* new */
-    double radSD; /* new */
+    double dispMean; /* need decision : local vs global statistics ? */
+    double dispSD; /* need decision : local vs global statistics ? */
+    double radMean; /* need decision : local vs global statistics ? */
+    double radSD; /* need decision : local vs global statistics ? */
 
-    double distReference; /* to be deleted */
-    unsigned int dispCount; /* to be deleted */
     time_t time;
     int microsecond;
 
@@ -75,11 +73,13 @@ public:
     double getSecondFrom(Viewpoint *ref);
     Feature *getFeatureFromCvIndex(uint32_t i){ return &features[i]; }
 
-
+     /* need decision : local vs global statistics ? */
     double getDisparityMean();
     double getDisparityFilterSD();
+    double getRadiusMean();
+    double getRadiusFilterSD();
     double getdistReference();
     void setReferenceDistance(double newReference);
-    void computeStatistics(double configDisparity);
+    void computeStatistics(double configDisparity, double configRadius);
 
 };

@@ -45,7 +45,7 @@ public:
     void computeOptimalPosition();
     void computeRadius();
     void computeFeaturesState(bool state);
-    bool computeFilter(double configRadiusMin, double configRadiusMax );
+    bool computeFilter();
     void extrapolate();
 
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */

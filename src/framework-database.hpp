@@ -37,15 +37,13 @@ public:
 	std::vector<std::shared_ptr<Viewpoint>> viewpoints;
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Structure>> structures;
-
     double configError;
     unsigned long configStructure;
     double configDisparity;
-    double configRadiusMin;
-    double configRadiusMax;
+    double configRadius;
 
 public:
-    Database(double initialError, unsigned long initialStructure, double initialDisparity, double initialRadiusMin, double initialRadiusMax);
+    Database(double initialError, unsigned long initialStructure, double initialDisparity, double initialRadius);
     bool getBootstrap();
     double getConfigError();
     double getError();

@@ -99,21 +99,14 @@ void Structure::computeFeaturesState(bool state){
     }
 }
 
-bool Structure::computeFilter(double configRadiusMin, double configRadiusMax ){
+bool Structure::computeFilter(){
     for(auto & element: features){
         if (element->getDisparity()>element->getViewpoint()->getDisparityFilterSD()) {
             return false;
         }
-        if (fabs(element->getRadius()-element->viewpoint->radMean)>element->viewpoint->radSD){
+        if(fabs(element->getRadius()-element->getViewpoint()->getRadiusMean())>element->getViewpoint()->getRadiusFilterSD()){
             return false;
         }
-
-        //if (element->getRadius()<element->getViewpoint()->getdistReference()*configRadiusMin) {
-        //    return false;
-        //}
-        //if (element->getRadius()>element->getViewpoint()->getdistReference()*configRadiusMax) {
-        //    return false;
-        //}
     }
     return true;
 }

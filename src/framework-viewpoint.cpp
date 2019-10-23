@@ -78,15 +78,15 @@ double Viewpoint::getDisparityFilterSD(){
     return dispSD;
 }
 
-double Viewpoint::getdistReference(){
-    return distReference;
+double Viewpoint::getRadiusMean(){
+    return radMean;
 }
 
-void Viewpoint::setReferenceDistance(double newReference){
-    distReference=newReference;
+double Viewpoint::getRadiusFilterSD(){
+    return radSD;
 }
 
-void Viewpoint::computeStatistics(double configDisparity){
+void Viewpoint::computeStatistics(double configDisparity, double configRadius){
     unsigned long count(0);
     double component(0.);
     dispMean=0.;
@@ -112,6 +112,6 @@ void Viewpoint::computeStatistics(double configDisparity){
         }
     }
     dispSD=std::sqrt(dispSD/double(count-1))*configDisparity;
-    radSD=std::sqrt(radSD/double(count-1))*10.;
+    radSD=std::sqrt(radSD/double(count-1))*configRadius;
 }
 

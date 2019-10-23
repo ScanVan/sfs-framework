@@ -32,8 +32,7 @@ int main(int argc, char *argv[]){
         config["algorithm"]["error"].as<double>(),
         config["algorithm"]["structure"].as<unsigned long>(),
         config["algorithm"]["disparity"].as<double>(),
-        config["algorithm"]["radius_min"].as<double>(),
-        config["algorithm"]["radius_max"].as<double>()
+        config["algorithm"]["radius"].as<double>()
     );
     ThreadPool threadpool(8);
 
@@ -107,7 +106,7 @@ int main(int argc, char *argv[]){
         loopMinor=0;
 
         // development feature - begin
-        database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
+        //database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
         // development feature - end
 
         // algorithm loop

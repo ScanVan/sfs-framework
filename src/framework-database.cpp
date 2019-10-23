@@ -25,14 +25,12 @@ Database::Database(
     double initialError,
     unsigned long initialStructure,
     double initialDisparity,
-    double initialRadiusMin,
-    double initialRadiusMax
+    double initialRadius
 ){
     configError=initialError;
     configStructure=initialStructure;
     configDisparity=initialDisparity;
-    configRadiusMin=initialRadiusMin;
-    configRadiusMax=initialRadiusMax;
+    configRadius=initialRadius;
 }
 
 bool Database::getBootstrap(){
@@ -235,12 +233,8 @@ void Database::computeStatistics(){
         }
     }
     for(auto & element: viewpoints){
-        element->computeStatistics(configDisparity);
+        element->computeStatistics(configDisparity,configRadius);
     }
-    for(unsigned int i(0); i<transforms.size(); i++){
-        viewpoints[i]->setReferenceDistance((*transforms[i]->getTranslation()).norm());
-    }
-    viewpoints.back()->setReferenceDistance((*transforms.back()->getTranslation()).norm());
 }
 
 //Issue index of following elements will be modifed, can't be use in computeFilter as this
@@ -257,7 +251,7 @@ void Database::computeFilters(){
     unsigned int j(structures.size());
     while (i < j){
         if(structures[i]->getFeaturesCount()>=configStructure){
-            if (structures[i]->computeFilter(configRadiusMin,configRadiusMax)==false){
+            if (structures[i]->computeFilter()==false){
                 for(auto f : *structures[i]->getFeatures()){
                     f->structure = NULL;
                 }
