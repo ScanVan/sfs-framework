@@ -27,3 +27,7 @@ algorithm:
 export:
   path: /media/user/Documents/model
 
+debug:
+  lastViewPointGui:
+    structureSizeMin: 5
+

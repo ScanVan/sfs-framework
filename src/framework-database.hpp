@@ -69,7 +69,7 @@ public:
     Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();} /* need deletion */
 
 public:
-    void _displayViewpointStructures(Viewpoint *viewpoint);
+    void _displayViewpointStructures(Viewpoint *viewpoint, int structSizeMin);
     void _sanityCheck(bool inliner);
     void _exportState(std::string path,int major, int iter); /* need deletion */
     void _exportMatchDistribution(std::string path, unsigned int major, std::string type); /* need deletion */

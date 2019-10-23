@@ -148,6 +148,16 @@ int main(int argc, char *argv[]){
         database._sanityCheck(inlinerEnabled);
         // development feature - end
 
+        if(config["debug"].IsDefined()){
+            auto lastViewPointGui = config["debug"]["lastViewPointGui"];
+            if(lastViewPointGui.IsDefined()){
+                database._displayViewpointStructures(database.viewpoints.back().get(), lastViewPointGui["structureSizeMin"].as<int>());
+                cv::waitKey(100); //Wait 100 ms give opencv the time to display the GUI
+            }
+        }
+        database.viewpoints.back()->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
+
+
         // major iteration exportation : model and odometry
         database.exportModel   (config["export"]["path"].as<std::string>(),loopMajor);
         database.exportOdometry(config["export"]["path"].as<std::string>(),loopMajor);
