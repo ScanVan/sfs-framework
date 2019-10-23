@@ -53,5 +53,6 @@ public:
     // // development segment : the following functions are not validated and unstable // //
 
     bool getIsHeadStructure(unsigned long lastViewpointIndex);
+    void killFeaturesLinks();
 
 };

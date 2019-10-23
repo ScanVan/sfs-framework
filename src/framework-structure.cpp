@@ -101,6 +101,9 @@ void Structure::computeFeaturesState(bool state){
 
 bool Structure::computeFilter(){
     for(auto & element: features){
+        if (element->getRadius()<0.){
+            return false;
+        }
         if (element->getDisparity()>element->getViewpoint()->getDisparityFilterSD()) {
             return false;
         }
@@ -127,5 +130,12 @@ bool Structure::getIsHeadStructure(unsigned long lastViewpointIndex){
         }
     }
     return false;
+}
+
+void Structure::killFeaturesLinks(){
+    for(auto & element: features){
+        element->setStructurePtr(NULL);
+        element->setState(false);
+    }
 }
 

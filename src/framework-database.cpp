@@ -44,8 +44,8 @@ double Database::getConfigError(){
 double Database::getError(){
     double maxValue(0.);
     for(auto & element: viewpoints){
-        if (element->getDisparityMean()>maxValue){
-            maxValue=element->getDisparityMean();
+        if (fabs(element->getDisparityMean())>maxValue){
+            maxValue=fabs(element->getDisparityMean());
         }
     }
     return( maxValue );
@@ -254,9 +254,10 @@ void Database::computeFilters(){
 
         if(structures[i]->getFeaturesCount()>=configStructure){
             if (structures[i]->computeFilter()==false){
-                for(auto f : *structures[i]->getFeatures()){
-                    f->structure = NULL;
-                }
+                //for(auto f : *structures[i]->getFeatures()){
+                //    f->structure = NULL;
+                //}
+                structures[i]->killFeaturesLinks();
                 std::swap(structures[i],structures[--j]);
             } else {
                 i++;
