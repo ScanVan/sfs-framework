@@ -42,13 +42,7 @@ double Database::getConfigError(){
 }
 
 double Database::getError(){
-    double maxValue(0.);
-    for(auto & element: viewpoints){
-        if (fabs(element->getDisparityMean())>maxValue){
-            maxValue=fabs(element->getDisparityMean());
-        }
-    }
-    return( maxValue );
+    return( dispMean );
 }
 
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
@@ -225,16 +219,36 @@ void Database::computeRadii(){
 }
 
 void Database::computeStatistics(){
+    unsigned long count(0);
+    double component;
+    dispMean=0.;
+    radMean=0.;
     for(auto & element: structures){
         if(element->getFeaturesCount()>=configStructure){
-            element->computeFeaturesState(true);
-        }else{
-            element->computeFeaturesState(false);
+            for(auto & f: element->features){
+                dispMean+=f->disparity;
+                radMean+=f->radius;
+            }
+            count+=element->getFeaturesCount();
         }
     }
-    for(auto & element: viewpoints){
-        element->computeStatistics(configDisparity,configRadius);
+    dispMean/=double(count);
+    radMean/=double(count);
+
+    dispSD=0.;
+    radSD=0.;
+    for(auto & element: structures){
+        if(element->getFeaturesCount()>=configStructure){
+            for(auto & f: element->features){
+                component=f->disparity-dispMean;
+                dispSD+=component*component;
+                component=f->radius-radMean;
+                radSD+=component*component;
+            }
+        }
     }
+    dispSD=std::sqrt(dispSD/double(count-1))*configDisparity;
+    radSD=std::sqrt(radSD/double(count-1))*configRadius;
 }
 
 //Issue index of following elements will be modifed, can't be use in computeFilter as this
@@ -250,20 +264,15 @@ void Database::computeFilters(){
     unsigned int i(0);
     unsigned int j(structures.size());
     while (i < j){
-        if(structures[i]->getIsHeadStructure(viewpoints.size()-1)==true){
-
-        if(structures[i]->getFeaturesCount()>=configStructure){
-            if (structures[i]->computeFilter()==false){
-                //for(auto f : *structures[i]->getFeatures()){
-                //    f->structure = NULL;
-                //}
-                structures[i]->killFeaturesLinks();
-                std::swap(structures[i],structures[--j]);
-            } else {
-                i++;
-            }
-        }else{i++;}
-
+        if(structures[i]->getActiveStructure(viewpoints.size()-1)==true){
+            if(structures[i]->getFeaturesCount()>=configStructure){
+                if (structures[i]->computeFilter(dispSD,radMean,radSD)==false){
+                    structures[i]->setFeaturesState();
+                    std::swap(structures[i],structures[--j]);
+                } else {
+                    i++;
+                }
+            }else{i++;}
         }else{i++;}
     }
     structures.resize(j);

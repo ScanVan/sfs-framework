@@ -41,6 +41,10 @@ public:
     unsigned long configStructure;
     double configDisparity;
     double configRadius;
+    double dispMean;
+    double dispSD;
+    double radMean;
+    double radSD;
 
 public:
     Database(double initialError, unsigned long initialStructure, double initialDisparity, double initialRadius);
@@ -71,5 +75,6 @@ public:
     void _sanityCheck(bool inliner);
     void _exportState(std::string path,int major, int iter); /* need deletion */
     void _exportMatchDistribution(std::string path, unsigned int major, std::string type); /* need deletion */
+
 };
 

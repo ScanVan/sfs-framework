@@ -38,6 +38,8 @@ public:
     Structure() : flag(false) {}
     Eigen::Vector3d * getPosition();
     unsigned int getFeaturesCount();
+    bool getActiveStructure(long lastViewpointIndex);
+    void setFeaturesState();
     void addFeature(Feature * feature);
     void computeModel();
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
@@ -45,14 +47,9 @@ public:
     void computeOptimalPosition();
     void computeRadius();
     void computeFeaturesState(bool state);
-    bool computeFilter();
+    bool computeFilter(double dispFilterSD, double radMean, double radFilterSD);
     void extrapolate();
 
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */
-
-    // // development segment : the following functions are not validated and unstable // //
-
-    bool getIsHeadStructure(unsigned long lastViewpointIndex);
-    void killFeaturesLinks();
 
 };

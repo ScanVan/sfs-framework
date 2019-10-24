@@ -72,16 +72,4 @@ public:
     void addFeature(Feature f){ features.push_back(f); }
     double getSecondFrom(Viewpoint *ref);
     Feature *getFeatureFromCvIndex(uint32_t i){ return &features[i]; }
-
-    // // development segment : the following functions are not validated and unstable // //
-
-     /* need decision : local vs global statistics ? */
-    double getDisparityMean();
-    double getDisparityFilterSD();
-    double getRadiusMean();
-    double getRadiusFilterSD();
-    double getdistReference();
-    void setReferenceDistance(double newReference);
-    void computeStatistics(double configDisparity, double configRadius);
-
 };

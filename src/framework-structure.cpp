@@ -29,6 +29,22 @@ unsigned int Structure::getFeaturesCount(){
     return features.size();
 }
 
+bool Structure::getActiveStructure(long lastViewpointIndex){
+    for(auto & element: features){
+        if(element->getViewpoint()->getIndex()==lastViewpointIndex){
+            return true;
+        }
+    }
+    return false;
+}
+
+void Structure::setFeaturesState(){
+    for(auto & element: features){
+        element->setStructurePtr(NULL);
+        element->setState(false);
+    }
+}
+
 void Structure::addFeature(Feature * feature){
     feature->setStructurePtr(this);
     features.push_back(feature);
@@ -99,15 +115,15 @@ void Structure::computeFeaturesState(bool state){
     }
 }
 
-bool Structure::computeFilter(){
+bool Structure::computeFilter(double dispFilterSD, double radMean, double radFilterSD){
     for(auto & element: features){
         if (element->getRadius()<0.){
             return false;
         }
-        if (element->getDisparity()>element->getViewpoint()->getDisparityFilterSD()) {
+        if (element->getDisparity()>dispFilterSD) {
             return false;
         }
-        if(fabs(element->getRadius()-element->getViewpoint()->getRadiusMean())>element->getViewpoint()->getRadiusFilterSD()){
+        if(fabs(element->getRadius()-radMean)>radFilterSD){
             return false;
         }
     }
@@ -121,21 +137,4 @@ void Structure::extrapolate(){
     computeRadius();
 }
 
-// // development segment : the following functions are not validated and unstable // //
-
-bool Structure::getIsHeadStructure(unsigned long lastViewpointIndex){
-    for(auto & element: features){
-        if(element->getViewpoint()->getIndex()==lastViewpointIndex){
-            return true;
-        }
-    }
-    return false;
-}
-
-void Structure::killFeaturesLinks(){
-    for(auto & element: features){
-        element->setStructurePtr(NULL);
-        element->setState(false);
-    }
-}
 
