@@ -61,6 +61,7 @@ public:
     void computeFrames();
     void computeOptimals();
     void computeRadii();
+    void filterRadii();
     void computeStatistics();
 //    void deleteAndUnlinkStructure(int id); /* need decision */
     void computeFilters();

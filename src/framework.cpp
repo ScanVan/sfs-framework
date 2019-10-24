@@ -125,7 +125,11 @@ int main(int argc, char *argv[]){
             database.computeOptimals();
             database.computeRadii();
             database.computeStatistics();
-            database.computeFilters();
+            if(loopMinor > -1){
+                database.filterRadii();
+                database.computeStatistics();
+                database.computeFilters();
+            }
 
             // development feature - begin
             //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
@@ -133,7 +137,7 @@ int main(int argc, char *argv[]){
 
             // algorithm error management
             loopError = database.getError();
-            if(fabs( loopError - pushError ) < database.getConfigError()) {
+            if(loopMinor > -1 && fabs( loopError - pushError ) < database.getConfigError()) {
                 loopFlag = false;
             } else {
                 pushError=loopError;
@@ -143,7 +147,7 @@ int main(int argc, char *argv[]){
             loopMinor ++;
 
             // display information
-            std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | error : " << loopError << std::endl;
+            std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | error : " << loopError << " | dispSD : " << database.dispSD << std::endl;
 
         }
 

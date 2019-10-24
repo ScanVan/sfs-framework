@@ -46,6 +46,7 @@ public:
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition();
     void computeRadius();
+    void filterRadius(double min, double max);
     void computeFeaturesState(bool state);
     bool computeFilter(double dispFilterSD, double radMean, double radFilterSD);
     void extrapolate();

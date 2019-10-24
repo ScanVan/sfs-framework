@@ -110,6 +110,18 @@ void Structure::computeRadius(){
     }
 }
 
+void Structure::filterRadius(double min, double max){
+    int size = features.size();
+    for(int elementId = 0;elementId < size; elementId++){
+        auto element = features[elementId];
+        if(element->getRadius() < min || element->getRadius() > max){
+            element->structure = NULL;
+            features[elementId--] = features[--size];
+            features.resize(size);
+        }
+    }
+}
+
 void Structure::computeFeaturesState(bool state){
     for(auto & element: features){
         element->setState(state);
