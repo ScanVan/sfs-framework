@@ -60,7 +60,7 @@ void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
 
 void Feature::setRadius(double newRadius, double newDisparity){
     radius=newRadius;
-    disparity=newDisparity/newRadius;
+    disparity=abs(newDisparity/newRadius);
 }
 
 void Feature::setViewpointPtr(Viewpoint * newViewpoint){
