@@ -46,6 +46,10 @@ int main(int argc, char *argv[]){
             source = new ViewPointSourceFs(config["frontend"]["source"]["path"].as<std::string>(), config["frontend"]["source"]["scale"].as<double>());
         }
         auto mask = cv::imread(config["frontend"]["source"]["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
+        if(config["frontend"]["source"]["scale"].IsDefined()){
+            auto scale = config["frontend"]["source"]["scale"].as<double>();
+            cv::resize(mask, mask, cv::Size(), scale, scale, cv::INTER_AREA );
+        }
         frontend = new FrontendPicture(source, mask, &threadpool, &database);
     }
 
