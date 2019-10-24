@@ -45,13 +45,13 @@ Structure * Feature::getStructure(){
     return structure;
 }
 
-bool Feature::getState(){
-    if(structure!=NULL){
-        return state;
-    } else {
-        return false;
-    }
-}
+//bool Feature::getState(){
+//    if(structure!=NULL){
+//        return state;
+//    } else {
+//        return false;
+//    }
+//}
 
 void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
     position=Eigen::Vector2f(x,y);
@@ -75,13 +75,13 @@ void Feature::setDirection(Eigen::Vector3d newDirection){
     direction=newDirection;
 }
 
-void Feature::setState(bool newState){
-    state=newState;
-}
+//void Feature::setState(bool newState){
+//    state=newState;
+//}
 
 void Feature::reset(){
     setRadius(1., 0.);
-    setState(false);
+    //setState(false);
 }
 
 void Feature::computeModel(){

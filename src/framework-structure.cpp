@@ -41,7 +41,7 @@ bool Structure::getActiveStructure(long lastViewpointIndex){
 void Structure::setFeaturesState(){
     for(auto & element: features){
         element->setStructurePtr(NULL);
-        element->setState(false);
+        //element->setState(false);
     }
 }
 
@@ -98,32 +98,45 @@ void Structure::computeOptimalPosition(){
     flag=true;
 }
 
-void Structure::computeRadius(){
+void Structure::computeRadius(long indexLimit){
     Eigen::Vector3d fvector;
     Eigen::Vector3d fposition;
     double radius(0.);
     for(auto & element: features){
-        fvector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
-        radius=fvector.dot(position-(*element->getViewpoint()->getPosition()));
-        fposition=(*element->getViewpoint()->getPosition())+fvector*radius;
-        element->setRadius(radius,(fposition-position).norm());
+        if(element->getViewpoint()->getIndex()>=indexLimit){
+            fvector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
+            radius=fvector.dot(position-(*element->getViewpoint()->getPosition()));
+            fposition=(*element->getViewpoint()->getPosition())+fvector*radius;
+            element->setRadius(radius,(fposition-position).norm());
+        }
     }
 }
+//void Structure::computeRadius(){
+//    Eigen::Vector3d fvector;
+//    Eigen::Vector3d fposition;
+//    double radius(0.);
+//    for(auto & element: features){
+//        fvector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
+//        radius=fvector.dot(position-(*element->getViewpoint()->getPosition()));
+//        fposition=(*element->getViewpoint()->getPosition())+fvector*radius;
+//        element->setRadius(radius,(fposition-position).norm());
+//    }
+//}
 
-void Structure::computeFeaturesState(bool state){
-    for(auto & element: features){
-        element->setState(state);
-    }
-}
+//void Structure::computeFeaturesState(bool state){
+//    for(auto & element: features){
+//        element->setState(state);
+//    }
+//}
 
 bool Structure::computeFilter(double dispFilterSD, double radMean, double radFilterSD){
     for(auto & element: features){
         if (element->getRadius()<0.){
             return false;
         }
-        if (element->getDisparity()>dispFilterSD) {
-            return false;
-        }
+        //if (element->getDisparity()>dispFilterSD) {
+        //    return false;
+        //}
         if(fabs(element->getRadius()-radMean)>radFilterSD){
             return false;
         }
@@ -132,10 +145,9 @@ bool Structure::computeFilter(double dispFilterSD, double radMean, double radFil
 }
 
 void Structure::extrapolate(){
-    if (flag==false){
-        computeOptimalPosition();
-    }
-    computeRadius();
+    //if (flag==false){
+    //    computeOptimalPosition();
+    //}
+    //computeRadius();
 }
-
 

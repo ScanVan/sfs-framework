@@ -202,21 +202,41 @@ void Database::computeFrames(){
     }
 }
 
-void Database::computeOptimals(){
-    for(auto & element: structures){
-        if(element->getFeaturesCount()>=configStructure){
-            element->computeOptimalPosition();
+void Database::computeOptimals(long loopState){
+    if((loopState==2)||(loopState==0)){
+        for(auto & element: structures){
+            if(element->getFeaturesCount()>=configStructure){
+                element->computeOptimalPosition();
+            }
         }
     }
 }
+//void Database::computeOptimals(){
+//    for(auto & element: structures){
+//        if(element->getFeaturesCount()>=configStructure){
+//            element->computeOptimalPosition();
+//        }
+//    }
+//}
 
-void Database::computeRadii(){
+void Database::computeRadii(long loopState){
+    long mode(0);
+    if(loopState==1){
+        mode=viewpoints.size()-1;
+    }
     for(auto & element: structures){
         if(element->getFeaturesCount()>=configStructure){
-            element->computeRadius();
+            element->computeRadius(mode);
         }
     }
 }
+//void Database::computeRadii(){
+//    for(auto & element: structures){
+//        if(element->getFeaturesCount()>=configStructure){
+//            element->computeRadius();
+//        }
+//    }
+//}
 
 void Database::computeStatistics(){
     unsigned long count(0);
@@ -224,12 +244,14 @@ void Database::computeStatistics(){
     dispMean=0.;
     radMean=0.;
     for(auto & element: structures){
+        if(element->flag==true){
         if(element->getFeaturesCount()>=configStructure){
             for(auto & f: element->features){
                 dispMean+=f->disparity;
                 radMean+=f->radius;
             }
             count+=element->getFeaturesCount();
+        }
         }
     }
     dispMean/=double(count);
@@ -238,6 +260,7 @@ void Database::computeStatistics(){
     dispSD=0.;
     radSD=0.;
     for(auto & element: structures){
+        if(element->flag==true){
         if(element->getFeaturesCount()>=configStructure){
             for(auto & f: element->features){
                 component=f->disparity-dispMean;
@@ -245,6 +268,7 @@ void Database::computeStatistics(){
                 component=f->radius-radMean;
                 radSD+=component*component;
             }
+        }
         }
     }
     dispSD=std::sqrt(dispSD/double(count-1))*configDisparity;
@@ -280,27 +304,38 @@ void Database::computeFilters(){
 
 /* Note : called before viewpoint push on stack */
 void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
-    auto viewpointCount(viewpoints.size());
-    if(viewpointCount<configStructure){
-        pushedViewpoint->resetFrame();
-    }else{
-        Eigen::Matrix3d prevRotation((*transforms[viewpointCount-2]->getRotation()).transpose());
-        Eigen::Vector3d prevTranslation(prevRotation*(*transforms[viewpointCount-2]->getTranslation()));
-        pushedViewpoint->setPose(
-            (*viewpoints[viewpointCount-1]->getOrientation())*prevRotation,
-            (*viewpoints[viewpointCount-1]->getPosition())-prevTranslation
-        );
-    }
+    pushedViewpoint->resetFrame();
 }
+//void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
+//    auto viewpointCount(viewpoints.size());
+//    if(viewpointCount<configStructure){
+//        pushedViewpoint->resetFrame();
+//    }else{
+//        Eigen::Matrix3d prevRotation((*transforms[viewpointCount-2]->getRotation()).transpose());
+//        Eigen::Vector3d prevTranslation(prevRotation*(*transforms[viewpointCount-2]->getTranslation()));
+//        pushedViewpoint->setPose(
+//            (*viewpoints[viewpointCount-1]->getOrientation())*prevRotation,
+//            (*viewpoints[viewpointCount-1]->getPosition())-prevTranslation
+//        );
+//    }
+//}
 
 /* Note : called after viewpoint push on stack */
 void Database::extrapolateStructure(){
+    return;
     if(viewpoints.size()>configStructure){
         for(auto & element: structures){
             element->extrapolate();
         }
     }
 }
+//void Database::extrapolateStructure(){
+//    if(viewpoints.size()>configStructure){
+//        for(auto & element: structures){
+//            element->extrapolate();
+//        }
+//    }
+//}
 
 void Database::exportModel(std::string path, unsigned int major){
     std::fstream exportStream;

@@ -45,7 +45,8 @@ public:
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition();
-    void computeRadius();
+    //void computeRadius();
+    void computeRadius(long indexLimit);
     void computeFeaturesState(bool state);
     bool computeFilter(double dispFilterSD, double radMean, double radFilterSD);
     void extrapolate();

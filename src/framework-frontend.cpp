@@ -138,6 +138,11 @@ bool FrontendCloudpoint::next(){
 	//Extract feature from nearby model points
 	auto o = odometry[viewpointIndex++];
 //	auto origin = odometry[0];
+    Eigen::Matrix3d randRot(
+        Eigen::AngleAxisd((2.0*rand()*M_PI)/RAND_MAX, Eigen::Vector3d::UnitX()) *
+        Eigen::AngleAxisd((2.0*rand()*M_PI)/RAND_MAX, Eigen::Vector3d::UnitY()) *
+        Eigen::AngleAxisd((2.0*rand()*M_PI)/RAND_MAX, Eigen::Vector3d::UnitZ())
+    );
 	for(uint32_t mid = 0;mid < model.size();mid++){
 		auto m = model[mid];
 		auto position = (m-o);
@@ -145,12 +150,12 @@ bool FrontendCloudpoint::next(){
 			Feature f;
 			auto noiseFactor = baseNoise + (1.0*rand()/RAND_MAX < badMatchRate ? badMatchNoise : 0);
 			auto noise = Eigen::Vector3d(distanceMax*noiseFactor*rand()/RAND_MAX,distanceMax*noiseFactor*rand()/RAND_MAX,distanceMax*noiseFactor*rand()/RAND_MAX);
-	        f.setDirection((position + noise).normalized());
+	        f.setDirection((randRot*(position + noise)).normalized());
 //	        f.setRadius(position.norm()+0.1, 0.);
 	        f.setRadius(1., 0.);
 	        f.setViewpointPtr(newViewpoint.get());
 	        f.setStructurePtr(NULL);
-            f.setState(false);
+            //f.setState(false);
 	        f.inliner = mid;
 			newViewpoint->addFeature(f);
 		}

@@ -71,6 +71,7 @@ int main(int argc, char *argv[]){
     double loopError( 1. );
     double pushError( 0. );
     bool loopFlag( true );
+    long loopState=0;
 
     // pipeline loop
     while(true){
@@ -118,8 +119,8 @@ int main(int argc, char *argv[]){
             database.computeCorrelations();
             database.computePoses();
             database.computeFrames();
-            database.computeOptimals();
-            database.computeRadii();
+            database.computeOptimals(loopState);
+            database.computeRadii(loopState);
             database.computeStatistics();
             database.computeFilters();
 
@@ -130,7 +131,12 @@ int main(int argc, char *argv[]){
             // algorithm error management
             loopError = database.getError();
             if(fabs( loopError - pushError ) < database.getConfigError()) {
-                loopFlag = false;
+                if((++loopState)==2){
+                    loopFlag = false;
+                } else {
+                    loopError=0.;
+                    pushError=1.;
+                }
             } else {
                 pushError=loopError;
             }
@@ -142,6 +148,8 @@ int main(int argc, char *argv[]){
             std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | error : " << loopError << std::endl;
 
         }
+
+        loopState=1;
 
         // development feature - begin
         database._sanityCheck(inlinerEnabled);

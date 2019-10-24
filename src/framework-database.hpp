@@ -59,8 +59,10 @@ public:
     void computeCentroids();
     void computePoses();
     void computeFrames();
-    void computeOptimals();
-    void computeRadii();
+    //void computeOptimals();
+    void computeOptimals(long loopState);
+    //void computeRadii();
+    void computeRadii(long loopState);
     void computeStatistics();
 //    void deleteAndUnlinkStructure(int id); /* need decision */
     void computeFilters();
