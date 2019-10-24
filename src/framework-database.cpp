@@ -341,13 +341,14 @@ static cv::Point _f2i(Eigen::Vector2f value){
 }
 
 //Do  cv::waitKey(0); if you want to stop after it.
-void Database::_displayViewpointStructures(Viewpoint *viewpoint){
+void Database::_displayViewpointStructures(Viewpoint *viewpoint, int structSizeMin){
     cv::RNG rng(12345);
     cv::Rect myROI(0, 0, viewpoint->getImage()->cols, viewpoint->getImage()->rows);
     cv::Mat res(myROI.width,myROI.height, CV_8UC3, cv::Scalar(0,0,0));
     res = *viewpoint->getImage();
     for(auto f : *viewpoint->getFeatures()){
         if(!f.structure) continue;
+        if(f.structure->features.size() < structSizeMin) continue;
         cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
 
         auto features = f.structure->getFeatures();

@@ -34,7 +34,7 @@ ViewPointSourceFs::ViewPointSourceFs(std::vector<std::string> files){
 	this->fileIndex = 0;
 }
 
-ViewPointSourceFs::ViewPointSourceFs(std::string folder){
+ViewPointSourceFs::ViewPointSourceFs(std::string folder, double scale) : scale(scale){
 	this->fileIndex = 0;
 
 	// read the contents of the directory where the images are located
@@ -53,7 +53,9 @@ ViewPointSourceFs::ViewPointSourceFs(std::string folder){
 std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
 	auto viewpoint = std::make_shared<Viewpoint>();
 	std::string path = files[fileIndex];
-	auto image = cv::imread(path, cv::IMREAD_COLOR);
+	auto image = cv::Mat();
+	cv::resize(cv::imread(path, cv::IMREAD_COLOR), image, cv::Size(), scale, scale, cv::INTER_AREA );
+
 	if (image.empty()) throw new std::runtime_error("imread path failure : " + path );
 	viewpoint->setImage(image);
 	viewpoint->setImageDimension(image.cols, image.rows);

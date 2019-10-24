@@ -23,6 +23,7 @@ private:
 	BlockingQueue<std::shared_ptr<Viewpoint>> featureExtractionQueue;
 	Database *database;
 	std::thread featureExtractionThread;
+	double scale;
 public:
 
 	void featureExtraction();

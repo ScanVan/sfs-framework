@@ -79,6 +79,11 @@ void Feature::setState(bool newState){
     state=newState;
 }
 
+void Feature::reset(){
+    setRadius(1., 0.);
+    setState(false);
+}
+
 void Feature::computeModel(){
     model=direction*radius;
 }

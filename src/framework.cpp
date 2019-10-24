@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
         ViewPointSource *source = NULL;
         auto sourceType = config["frontend"]["source"]["type"].as<std::string>();
         if(sourceType == "FOLDER") {
-            source = new ViewPointSourceFs(config["frontend"]["source"]["path"].as<std::string>());
+            source = new ViewPointSourceFs(config["frontend"]["source"]["path"].as<std::string>(), config["frontend"]["source"]["scale"].as<double>());
         }
         auto mask = cv::imread(config["frontend"]["source"]["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
         frontend = new FrontendPicture(source, mask, &threadpool, &database);
@@ -146,6 +146,16 @@ int main(int argc, char *argv[]){
         // development feature - begin
         database._sanityCheck(inlinerEnabled);
         // development feature - end
+
+        if(config["debug"].IsDefined()){
+            auto lastViewPointGui = config["debug"]["lastViewPointGui"];
+            if(lastViewPointGui.IsDefined()){
+                database._displayViewpointStructures(database.viewpoints.back().get(), lastViewPointGui["structureSizeMin"].as<int>());
+                cv::waitKey(100); //Wait 100 ms give opencv the time to display the GUI
+            }
+        }
+        database.viewpoints.back()->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
+
 
         // major iteration exportation : model and odometry
         database.exportModel   (config["export"]["path"].as<std::string>(),loopMajor);
