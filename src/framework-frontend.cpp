@@ -150,6 +150,7 @@ bool FrontendCloudpoint::next(){
 	        f.setRadius(1., 0.);
 	        f.setViewpointPtr(newViewpoint.get());
 	        f.setStructurePtr(NULL);
+            f.setState(false);
 	        f.inliner = mid;
 			newViewpoint->addFeature(f);
 		}
