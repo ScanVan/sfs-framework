@@ -21,6 +21,8 @@
 
 #pragma once
 
+//#define _DEBUG_FLAG
+
 #include <iostream>
 #include <cmath>
 #include <yaml-cpp/yaml.h>

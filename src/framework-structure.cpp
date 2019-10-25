@@ -98,6 +98,7 @@ void Structure::computeOptimalPosition(){
     flag=true;
 }
 
+# ifndef _DEBUG_FLAG
 void Structure::computeRadius(long indexLimit){
     Eigen::Vector3d fvector;
     Eigen::Vector3d fposition;
@@ -111,17 +112,19 @@ void Structure::computeRadius(long indexLimit){
         }
     }
 }
-//void Structure::computeRadius(){
-//    Eigen::Vector3d fvector;
-//    Eigen::Vector3d fposition;
-//    double radius(0.);
-//    for(auto & element: features){
-//        fvector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
-//        radius=fvector.dot(position-(*element->getViewpoint()->getPosition()));
-//        fposition=(*element->getViewpoint()->getPosition())+fvector*radius;
-//        element->setRadius(radius,(fposition-position).norm());
-//    }
-//}
+# else
+void Structure::computeRadius(){
+    Eigen::Vector3d fvector;
+    Eigen::Vector3d fposition;
+    double radius(0.);
+    for(auto & element: features){
+        fvector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
+        radius=fvector.dot(position-(*element->getViewpoint()->getPosition()));
+        fposition=(*element->getViewpoint()->getPosition())+fvector*radius;
+        element->setRadius(radius,(fposition-position).norm());
+    }
+}
+# endif
 
 //void Structure::computeFeaturesState(bool state){
 //    for(auto & element: features){
@@ -131,6 +134,11 @@ void Structure::computeRadius(long indexLimit){
 
 bool Structure::computeFilter(double dispFilterSD, double radMean, double radFilterSD){
     for(auto & element: features){
+# ifndef _DEBUG_FLAG
+        //if (element->getRadius()<0.){
+        //    return false;
+        //}
+# else
         if (element->getRadius()<0.){
             return false;
         }
@@ -140,14 +148,21 @@ bool Structure::computeFilter(double dispFilterSD, double radMean, double radFil
         if(fabs(element->getRadius()-radMean)>radFilterSD){
             return false;
         }
+# endif
     }
     return true;
 }
 
+# ifndef _DEBUG_FLAG
 void Structure::extrapolate(){
-    //if (flag==false){
-    //    computeOptimalPosition();
-    //}
-    //computeRadius();
+    return;
 }
+# else
+void Structure::extrapolate(){
+    if (flag==false){
+        computeOptimalPosition();
+    }
+    computeRadius();
+}
+# endif
 

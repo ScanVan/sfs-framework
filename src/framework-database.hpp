@@ -21,6 +21,8 @@
 
 #pragma once
 
+//#define _DEBUG_FLAG
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -57,12 +59,22 @@ public:
     void computeModels();
     void computeCorrelations();
     void computeCentroids();
+# ifndef _DEBUG_FLAG
+    void computePoses(long loopState);
+# else
     void computePoses();
+# endif
     void computeFrames();
-    //void computeOptimals();
+# ifndef _DEBUG_FLAG
     void computeOptimals(long loopState);
-    //void computeRadii();
+# else
+    void computeOptimals();
+# endif
+# ifndef _DEBUG_FLAG
     void computeRadii(long loopState);
+# else
+    void computeRadii();
+# endif
     void computeStatistics();
 //    void deleteAndUnlinkStructure(int id); /* need decision */
     void computeFilters();

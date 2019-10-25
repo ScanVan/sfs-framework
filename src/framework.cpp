@@ -71,7 +71,9 @@ int main(int argc, char *argv[]){
     double loopError( 1. );
     double pushError( 0. );
     bool loopFlag( true );
+# ifndef _DEBUG_FLAG
     long loopState=0;
+# endif
 
     // pipeline loop
     while(true){
@@ -117,10 +119,19 @@ int main(int argc, char *argv[]){
             database.computeModels();
             database.computeCentroids();
             database.computeCorrelations();
+# ifndef _DEBUG_FLAG
+            database.computePoses(loopState);
+# else
             database.computePoses();
+# endif
             database.computeFrames();
+# ifndef _DEBUG_FLAG
             database.computeOptimals(loopState);
             database.computeRadii(loopState);
+# else
+            database.computeOptimals();
+            database.computeRadii();
+# endif
             database.computeStatistics();
             database.computeFilters();
 
@@ -131,12 +142,23 @@ int main(int argc, char *argv[]){
             // algorithm error management
             loopError = database.getError();
             if(fabs( loopError - pushError ) < database.getConfigError()) {
-                if((++loopState)==2){
+# ifndef _DEBUG_FLAG
+                if(loopState==2){
                     loopFlag = false;
                 } else {
+                    if(loopState==0){
+                        loopFlag = false;
+                    }
+                    loopState=2;
                     loopError=0.;
                     pushError=1.;
+                    //for(auto & element: database.viewpoints.back()->features){
+                    //    element.radius*=1.5;
+                    //}
                 }
+# else
+                loopFlag = false;
+# endif
             } else {
                 pushError=loopError;
             }
@@ -149,7 +171,9 @@ int main(int argc, char *argv[]){
 
         }
 
+# ifndef _DEBUG_FLAG
         loopState=1;
+# endif
 
         // development feature - begin
         database._sanityCheck(inlinerEnabled);

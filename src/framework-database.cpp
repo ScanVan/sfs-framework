@@ -41,9 +41,15 @@ double Database::getConfigError(){
     return configError;
 }
 
+# ifndef _DEBUG_FLAG
 double Database::getError(){
-    return( dispMean );
+    return (viewpoints.back()->position - viewpoints.front()->position).norm();
 }
+# else
+double Database::getError(){
+    return dispMean;
+}
+# endif
 
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
     int localCount = MIN(5, viewpoints.size());
@@ -181,6 +187,25 @@ void Database::computeCentroids(){
     }
 }
 
+# ifndef _DEBUG_FLAG
+void Database::computePoses(long loopState){
+    int mode(0);
+    if (loopState==1){
+        mode=transforms.size()-1;
+    }
+    for(unsigned int i(mode); i<transforms.size(); i++){
+        transforms[i]->computePose(viewpoints[i].get(),viewpoints[i+1].get());
+    }
+    double normalFactor(0.);
+    for(unsigned int i(0); i<MIN(10,transforms.size()); i++){
+        normalFactor+=transforms[i]->getTranslation()->norm();
+    }
+    normalFactor/=MIN(10,transforms.size());
+    for(unsigned int i(0); i<transforms.size(); i++){
+        transforms[i]->setTranslationScale(normalFactor);
+    }
+}
+# else
 void Database::computePoses(){
     for(unsigned int i(0); i<transforms.size(); i++){
         transforms[i]->computePose(viewpoints[i].get(),viewpoints[i+1].get());
@@ -194,6 +219,7 @@ void Database::computePoses(){
         transforms[i]->setTranslationScale(normalFactor);
     }
 }
+# endif
 
 void Database::computeFrames(){
     viewpoints[0]->resetFrame();
@@ -202,6 +228,7 @@ void Database::computeFrames(){
     }
 }
 
+# ifndef _DEBUG_FLAG
 void Database::computeOptimals(long loopState){
     if((loopState==2)||(loopState==0)){
         for(auto & element: structures){
@@ -211,32 +238,39 @@ void Database::computeOptimals(long loopState){
         }
     }
 }
-//void Database::computeOptimals(){
-//    for(auto & element: structures){
-//        if(element->getFeaturesCount()>=configStructure){
-//            element->computeOptimalPosition();
-//        }
-//    }
-//}
+# else
+void Database::computeOptimals(){
+    for(auto & element: structures){
+        if(element->getFeaturesCount()>=configStructure){
+            element->computeOptimalPosition();
+        }
+    }
+}
+# endif
 
+# ifndef _DEBUG_FLAG
 void Database::computeRadii(long loopState){
     long mode(0);
     if(loopState==1){
         mode=viewpoints.size()-1;
     }
     for(auto & element: structures){
+        if(element->flag==true){
         if(element->getFeaturesCount()>=configStructure){
             element->computeRadius(mode);
         }
+        }
     }
 }
-//void Database::computeRadii(){
-//    for(auto & element: structures){
-//        if(element->getFeaturesCount()>=configStructure){
-//            element->computeRadius();
-//        }
-//    }
-//}
+# else
+void Database::computeRadii(){
+    for(auto & element: structures){
+        if(element->getFeaturesCount()>=configStructure){
+            element->computeRadius();
+        }
+    }
+}
+# endif
 
 void Database::computeStatistics(){
     unsigned long count(0);
@@ -303,24 +337,28 @@ void Database::computeFilters(){
 }
 
 /* Note : called before viewpoint push on stack */
+# ifndef _DEBUG_FLAG
 void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
     pushedViewpoint->resetFrame();
 }
-//void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
-//    auto viewpointCount(viewpoints.size());
-//    if(viewpointCount<configStructure){
-//        pushedViewpoint->resetFrame();
-//    }else{
-//        Eigen::Matrix3d prevRotation((*transforms[viewpointCount-2]->getRotation()).transpose());
-//        Eigen::Vector3d prevTranslation(prevRotation*(*transforms[viewpointCount-2]->getTranslation()));
-//        pushedViewpoint->setPose(
-//            (*viewpoints[viewpointCount-1]->getOrientation())*prevRotation,
-//            (*viewpoints[viewpointCount-1]->getPosition())-prevTranslation
-//        );
-//    }
-//}
+# else
+void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
+    auto viewpointCount(viewpoints.size());
+    if(viewpointCount<configStructure){
+        pushedViewpoint->resetFrame();
+    }else{
+        Eigen::Matrix3d prevRotation((*transforms[viewpointCount-2]->getRotation()).transpose());
+        Eigen::Vector3d prevTranslation(prevRotation*(*transforms[viewpointCount-2]->getTranslation()));
+        pushedViewpoint->setPose(
+            (*viewpoints[viewpointCount-1]->getOrientation())*prevRotation,
+            (*viewpoints[viewpointCount-1]->getPosition())-prevTranslation
+        );
+    }
+}
+# endif
 
 /* Note : called after viewpoint push on stack */
+# ifndef _DEBUG_FLAG
 void Database::extrapolateStructure(){
     return;
     if(viewpoints.size()>configStructure){
@@ -329,13 +367,15 @@ void Database::extrapolateStructure(){
         }
     }
 }
-//void Database::extrapolateStructure(){
-//    if(viewpoints.size()>configStructure){
-//        for(auto & element: structures){
-//            element->extrapolate();
-//        }
-//    }
-//}
+# else
+void Database::extrapolateStructure(){
+    if(viewpoints.size()>configStructure){
+        for(auto & element: structures){
+            element->extrapolate();
+        }
+    }
+}
+# endif
 
 void Database::exportModel(std::string path, unsigned int major){
     std::fstream exportStream;

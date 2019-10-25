@@ -21,6 +21,8 @@
 
 #pragma once
 
+//#define _DEBUG_FLAG
+
 #include <Eigen/Dense>
 #include <vector>
 #include <limits>
@@ -45,8 +47,11 @@ public:
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition();
-    //void computeRadius();
+# ifndef _DEBUG_FLAG
     void computeRadius(long indexLimit);
+# else
+    void computeRadius();
+# endif
     void computeFeaturesState(bool state);
     bool computeFilter(double dispFilterSD, double radMean, double radFilterSD);
     void extrapolate();
