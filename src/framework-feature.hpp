@@ -49,7 +49,7 @@ public:
     void setRadius(double newRadius, double newDisparity);
     void setViewpointPtr(Viewpoint * newViewpoint);
     void setStructurePtr(Structure * newStructure);
-    void setDirection(Eigen::Vector3d newDirection);
+    void setDirection(Eigen::Vector3d newDirection); /* only used for synthetic models */
     void reset();
     void computeModel();
 };

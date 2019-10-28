@@ -33,6 +33,7 @@ public:
     Eigen::Vector3d centerFirst;
     Eigen::Vector3d centerSecond;
     unsigned int centerCount;
+
 public:
     Eigen::Matrix3d * getRotation();
     Eigen::Vector3d * getTranslation();

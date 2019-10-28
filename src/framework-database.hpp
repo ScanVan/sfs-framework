@@ -53,7 +53,9 @@ public:
     bool getBootstrap();
     double getConfigError();
     double getError();
+# ifndef _DEBUG_FLAG
     double getTranslationMeanValue();
+# endif
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);

@@ -61,7 +61,6 @@ double Database::getTranslationMeanValue(){
 }
 # endif
 
-
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
     int localCount = MIN(5, viewpoints.size());
     for(auto i = viewpoints.end()-localCount;i != viewpoints.end(); ++i){
@@ -205,13 +204,10 @@ void Database::computePoses(long loopState){
     if (loopState==1){
         mode=transforms.size()-1;
     }
-    // compute transformation
     for(unsigned int i(mode); i<transforms.size(); i++){
         transforms[i]->computePose(viewpoints[i].get(),viewpoints[i+1].get());
     }
-    // compute translation norms mean value
     normalValue=getTranslationMeanValue();
-    // renormalise translations
     for(auto & element: transforms){
         element->setTranslationScale(normalValue);
     }
