@@ -51,6 +51,17 @@ double Database::getError(){
 }
 # endif
 
+# ifndef _DEBUG_FLAG
+double Database::getTranslationMeanValue(){
+    double meanValue(0.);
+    for(auto & element: transforms){
+        meanValue+=element->getTranslation()->norm();
+    }
+    return meanValue/double(transforms.size());
+}
+# endif
+
+
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
     int localCount = MIN(5, viewpoints.size());
     for(auto i = viewpoints.end()-localCount;i != viewpoints.end(); ++i){
@@ -189,20 +200,20 @@ void Database::computeCentroids(){
 
 # ifndef _DEBUG_FLAG
 void Database::computePoses(long loopState){
+    double normalValue(0.);
     int mode(0);
     if (loopState==1){
         mode=transforms.size()-1;
     }
+    // compute transformation
     for(unsigned int i(mode); i<transforms.size(); i++){
         transforms[i]->computePose(viewpoints[i].get(),viewpoints[i+1].get());
     }
-    double normalFactor(0.);
-    for(unsigned int i(0); i<MIN(10,transforms.size()); i++){
-        normalFactor+=transforms[i]->getTranslation()->norm();
-    }
-    normalFactor/=MIN(10,transforms.size());
-    for(unsigned int i(0); i<transforms.size(); i++){
-        transforms[i]->setTranslationScale(normalFactor);
+    // compute translation norms mean value
+    normalValue=getTranslationMeanValue();
+    // renormalise translations
+    for(auto & element: transforms){
+        element->setTranslationScale(normalValue);
     }
 }
 # else
