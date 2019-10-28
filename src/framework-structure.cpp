@@ -41,7 +41,6 @@ bool Structure::getActiveStructure(long lastViewpointIndex){
 void Structure::setFeaturesState(){
     for(auto & element: features){
         element->setStructurePtr(NULL);
-        //element->setState(false);
     }
 }
 
@@ -125,12 +124,6 @@ void Structure::computeRadius(){
     }
 }
 # endif
-
-//void Structure::computeFeaturesState(bool state){
-//    for(auto & element: features){
-//        element->setState(state);
-//    }
-//}
 
 bool Structure::computeFilter(double dispFilterSD, double radMean, double radFilterSD){
     for(auto & element: features){

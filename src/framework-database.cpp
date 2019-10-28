@@ -416,7 +416,7 @@ static cv::Point _f2i(Eigen::Vector2f value){
 }
 
 //Do  cv::waitKey(0); if you want to stop after it.
-void Database::_displayViewpointStructures(Viewpoint *viewpoint, int structSizeMin){
+void Database::_displayViewpointStructures(Viewpoint *viewpoint, unsigned int structSizeMin){
     cv::RNG rng(12345);
     cv::Rect myROI(0, 0, viewpoint->getImage()->cols, viewpoint->getImage()->rows);
     cv::Mat res(myROI.width,myROI.height, CV_8UC3, cv::Scalar(0,0,0));

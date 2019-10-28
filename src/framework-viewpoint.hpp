@@ -42,12 +42,6 @@ public:
 	cv::Mat cvDescriptor;
     Eigen::Matrix3d orientation;
     Eigen::Vector3d position;
-
-    double dispMean; /* need decision : local vs global statistics ? */
-    double dispSD; /* need decision : local vs global statistics ? */
-    double radMean; /* need decision : local vs global statistics ? */
-    double radSD; /* need decision : local vs global statistics ? */
-
     time_t time;
     int microsecond;
 
