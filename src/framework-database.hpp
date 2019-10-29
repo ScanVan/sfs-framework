@@ -32,6 +32,12 @@
 #include "framework-transform.hpp"
 #include "framework-structure.hpp"
 
+#define DB_LOOP_MODE_BOOT ( 0 ) /* initial structure */
+#define DB_LOOP_MODE_LAST ( 1 ) /* optimising last viewpoint */
+#define DB_LOOP_MODE_HEAD ( 2 ) /* optimising active head */
+#define DB_LOOP_MODE_FULL ( 3 ) /* optimising all structure */
+
+
 class Database {
 
 //private:
@@ -43,10 +49,15 @@ public:
     unsigned long configStructure;
     double configDisparity;
     double configRadius;
+# ifndef _DEBUG_FLAG
+    double meanValue;
+    double stdValue;
+# else
     double dispMean;
     double dispSD;
     double radMean;
     double radSD;
+# endif
 
 public:
     Database(double initialError, unsigned long initialStructure, double initialDisparity, double initialRadius);
@@ -78,9 +89,18 @@ public:
 # else
     void computeRadii();
 # endif
+# ifndef _DEBUG_FLAG
+# else
     void computeStatistics();
+# endif
 //    void deleteAndUnlinkStructure(int id); /* need decision */
+# ifndef _DEBUG_FLAG
     void computeFilters();
+    void computeFiltersStatistics(double(Feature::*getValue)());
+    void computeFiltersEliminate(double(Feature::*getValue)(), bool (Structure::*filterMethod)(double(Feature::*)(),double,double), double filteringValue, double dummy);
+# else
+    void computeFilters();
+# endif
     void extrapolateViewpoint(Viewpoint * v);
     void extrapolateStructure();
     void exportModel(std::string path, unsigned int major);

@@ -164,6 +164,13 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 
 }
 
+/* only needed for computed radius : \
+   0 : all
+   1 : only last viewpoint
+   2 : only head viewpoints
+   3 : all
+*/
+
 void Database::computeModels(){
     for(auto & element: structures){
         if(element->getFeaturesCount()>=configStructure){
@@ -262,7 +269,7 @@ void Database::computeRadii(long loopState){
         mode=viewpoints.size()-1;
     }
     for(auto & element: structures){
-        if(element->flag==true){
+        if(element->flag==true){ // not needed if configStruc==2 : to be checked
         if(element->getFeaturesCount()>=configStructure){
             element->computeRadius(mode);
         }
@@ -279,6 +286,8 @@ void Database::computeRadii(){
 }
 # endif
 
+# ifndef _DEBUG_FLAG
+# else
 void Database::computeStatistics(){
     unsigned long count(0);
     double component;
@@ -315,6 +324,7 @@ void Database::computeStatistics(){
     dispSD=std::sqrt(dispSD/double(count-1))*configDisparity;
     radSD=std::sqrt(radSD/double(count-1))*configRadius;
 }
+# endif
 
 //Issue index of following elements will be modifed, can't be use in computeFilter as this
 //void Database::deleteAndUnlinkStructure(int i){
@@ -325,6 +335,56 @@ void Database::computeStatistics(){
 //  structures.resize(structures.size()-1);
 //}
 
+# ifndef _DEBUG_FLAG
+void Database::computeFilters(){
+    return;
+    computeFiltersEliminate(&Feature::getRadius, &Structure::computeFilterDownClamp,1.0,0.0);
+    computeFiltersStatistics(&Feature::getRadius);
+    std::cerr << meanValue << " " << stdValue << std::endl;
+    computeFiltersEliminate(&Feature::getRadius, &Structure::computeFilterStatistics,meanValue,stdValue*configRadius);
+}
+
+/* this member should to be private */
+void Database::computeFiltersStatistics(double(Feature::*getValue)()){
+    unsigned long countValue(0);
+    double componentValue(0.);
+    meanValue=0.;
+    for(auto & element: structures){
+        for(auto & feature: element->features){
+            meanValue+=(feature->*getValue)();
+            countValue++;
+        }
+    }
+    meanValue/=double(countValue);
+    stdValue=0.;
+    for(auto & element: structures){
+        for(auto & feature: element->features){
+            componentValue=(feature->*getValue)()-meanValue;
+            stdValue+=componentValue*componentValue;
+        }
+    }
+    stdValue=std::sqrt(stdValue/(countValue-1));
+}
+
+/* this member should to be private */
+void Database::computeFiltersEliminate(double(Feature::*getValue)(), bool (Structure::*filterMethod)(double(Feature::*)(),double,double), double filteringValue, double dummy){
+    unsigned int i(0);
+    unsigned int j(structures.size());
+    while (i < j){
+        //if(structures[i]->getActiveStructure(viewpoints.size()-1)==true){
+            if(structures[i]->getFeaturesCount()>=configStructure){
+                if ((structures[i].get()->*filterMethod)(getValue, filteringValue, dummy)==false){
+                    structures[i]->setFeaturesState();
+                    std::swap(structures[i],structures[--j]);
+                } else {
+                    i++;
+                }
+            }else{i++;}
+        //}else{i++;}
+    }
+    structures.resize(j);
+}
+# else
 void Database::computeFilters(){
     unsigned int i(0);
     unsigned int j(structures.size());
@@ -342,6 +402,7 @@ void Database::computeFilters(){
     }
     structures.resize(j);
 }
+# endif
 
 /* Note : called before viewpoint push on stack */
 # ifndef _DEBUG_FLAG

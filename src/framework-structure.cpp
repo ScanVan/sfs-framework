@@ -125,13 +125,30 @@ void Structure::computeRadius(){
 }
 # endif
 
+# ifndef _DEBUG_FLAG
+bool Structure::computeFilterDownClamp(double(Feature::*getValue)(), double radialClamp, double dummy){
+    for(auto & element: features){
+        if((element->*getValue)()<radialClamp){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Structure::computeFilterStatistics(double(Feature::*getValue)(), double meanFilterValue, double stdFilterValue){
+    for(auto & element: features){
+        if(fabs((element->*getValue)()-meanFilterValue)>stdFilterValue){
+            return false;
+        }
+    }
+    return true;
+}
+# else
 bool Structure::computeFilter(double dispFilterSD, double radMean, double radFilterSD){
     for(auto & element: features){
-# ifndef _DEBUG_FLAG
         //if (element->getRadius()<0.){
         //    return false;
         //}
-# else
         if (element->getRadius()<0.){
             return false;
         }
@@ -141,10 +158,11 @@ bool Structure::computeFilter(double dispFilterSD, double radMean, double radFil
         if(fabs(element->getRadius()-radMean)>radFilterSD){
             return false;
         }
-# endif
     }
     return true;
 }
+# endif
+
 
 # ifndef _DEBUG_FLAG
 void Structure::extrapolate(){

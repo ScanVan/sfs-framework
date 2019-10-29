@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
     double pushError( 0. );
     bool loopFlag( true );
 # ifndef _DEBUG_FLAG
-    long loopState=0; /* choose the state value more wisely : 0 bootstrap; 1 optimise last; 2 optimise all */
+    long loopState=0;
 # endif
 
     // pipeline loop
@@ -132,7 +132,10 @@ int main(int argc, char *argv[]){
             database.computeOptimals();
             database.computeRadii();
 # endif
+# ifndef _DEBUG_FLAG
+# else
             database.computeStatistics();
+# endif
             database.computeFilters();
 
             // development feature - begin
