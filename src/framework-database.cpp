@@ -312,16 +312,6 @@ void Database::computeFiltersEliminate(double(Feature::*getValue)(), bool (Struc
     structures.resize(j);
 }
 
-/* Note : called before viewpoint push on stack */
-void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
-    pushedViewpoint->resetFrame();
-}
-
-/* Note : called after viewpoint push on stack */
-void Database::extrapolateStructure(){
-    return;
-}
-
 void Database::exportModel(std::string path, unsigned int major){
     std::fstream exportStream;
     exportStream.open(path+"/dev/"+std::to_string(major)+"_structure.xyz",std::ios::out);

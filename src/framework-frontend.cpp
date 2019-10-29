@@ -56,7 +56,7 @@ bool FrontendPicture::next() {
 	newViewpoint->allocateFeaturesFromCvFeatures();
 
 	//Extrapolate the position of the newViewpoint
-	database->extrapolateViewpoint(newViewpoint.get());
+    newViewpoint->resetFrame();
 
 	//Get local viewpoints
 	std::vector<std::shared_ptr<Viewpoint>> localViewpoints;
@@ -102,7 +102,6 @@ bool FrontendPicture::next() {
 	lastViewpoint = newViewpoint;
 
 	database->addViewpoint(newViewpoint);
-	database->extrapolateStructure();
 	return true;
 }
 
@@ -162,7 +161,7 @@ bool FrontendCloudpoint::next(){
 	}
 
 //	newViewpoint->setPose(Eigen::Matrix3d::Identity(), o-origin);
-	database->extrapolateViewpoint(newViewpoint.get());
+    newViewpoint->resetFrame();
 
 	std::vector<std::shared_ptr<Viewpoint>> localViewpoints;
 	database->getLocalViewpoints(newViewpoint->position, &localViewpoints);
@@ -190,7 +189,6 @@ bool FrontendCloudpoint::next(){
 	delete[] correlations;
 
 	database->addViewpoint(newViewpoint);
-	database->extrapolateStructure();
 
 	return true;
 }
