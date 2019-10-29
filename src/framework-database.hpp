@@ -43,7 +43,6 @@ public:
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Structure>> structures;
     double configError;
-    unsigned long configStructure;
     double configDisparity;
     double configRadius;
     int lastActiveViewpoint;
@@ -51,7 +50,7 @@ public:
     double stdValue;
 
 public:
-    Database(double initialError, unsigned long initialStructure, double initialDisparity, double initialRadius);
+    Database(double initialError, double initialDisparity, double initialRadius);
     bool getBootstrap();
     double getConfigError();
     double getError();
@@ -61,8 +60,8 @@ public:
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
     void computeModels();
-    void computeCorrelations();
     void computeCentroids();
+    void computeCorrelations();
     void computePoses(long loopState);
     void computeFrames();
     void computeOptimals(long loopState);

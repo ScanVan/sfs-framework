@@ -30,7 +30,6 @@ int main(int argc, char *argv[]){
 
     auto database = Database(
         config["algorithm"]["error"].as<double>(),
-        config["algorithm"]["structure"].as<unsigned long>(),
         config["algorithm"]["disparity"].as<double>(),
         config["algorithm"]["radius"].as<double>()
     );

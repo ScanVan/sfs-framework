@@ -17,10 +17,9 @@ frontend:
 #  badMatchRate: 0.1
 
 algorithm:
-  error: 1e-6
-  structure: 3
+  error: 1e-4
   disparity: 5
-  radius: 10
+  radius: 5
 
 # note : path has to contain a dev/ and debug/ directory
 export:

@@ -21,20 +21,14 @@
 
 #include "framework-database.hpp"
 
-Database::Database(
-    double initialError,
-    unsigned long initialStructure,
-    double initialDisparity,
-    double initialRadius
-){
+Database::Database(double initialError, double initialDisparity, double initialRadius){
     configError=initialError;
-    configStructure=initialStructure;
     configDisparity=initialDisparity;
     configRadius=initialRadius;
 }
 
 bool Database::getBootstrap(){
-    return viewpoints.size()<configStructure?true:false;
+    return viewpoints.size()<2?true:false;
 }
 
 double Database::getConfigError(){
@@ -176,21 +170,8 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 }
 
 void Database::computeModels(){
-    for(auto & element: structures){
-        if(element->getFeaturesCount()>=configStructure){
-            element->computeModel();
-        }
-    }
-}
-
-void Database::computeCorrelations(){
-    for(auto & element: transforms){
-        element->resetCorrelation();
-    }
-    for(auto & element: structures){
-        if(element->getFeaturesCount()>=configStructure){
-            element->computeCorrelation(transforms);
-        }
+    for(auto & structure: structures){
+        structure->computeModel();
     }
 }
 
@@ -199,12 +180,19 @@ void Database::computeCentroids(){
         element->resetCentroid();
     }
     for(auto & element: structures){
-        if(element->getFeaturesCount()>=configStructure){
-            element->computeCentroid(transforms);
-        }
+        element->computeCentroid(transforms);
     }
     for(auto & element: transforms){
         element->computeCentroid();
+    }
+}
+
+void Database::computeCorrelations(){
+    for(auto & element: transforms){
+        element->resetCorrelation();
+    }
+    for(auto & element: structures){
+        element->computeCorrelation(transforms);
     }
 }
 
@@ -233,9 +221,7 @@ void Database::computeFrames(){
 void Database::computeOptimals(long loopState){
     if((loopState==2)||(loopState==0)){
         for(auto & element: structures){
-            if(element->getFeaturesCount()>=configStructure){
-                element->computeOptimalPosition();
-            }
+            element->computeOptimalPosition();
         }
     }
 }
@@ -247,9 +233,7 @@ void Database::computeRadii(long loopState){
     }
     for(auto & element: structures){
         if(element->flag==true){ // not needed if configStruc==2 : to be checked
-        if(element->getFeaturesCount()>=configStructure){
             element->computeRadius(mode);
-        }
         }
     }
 }
@@ -299,14 +283,12 @@ void Database::computeFiltersEliminate(double(Feature::*getValue)(), bool (Struc
     unsigned int j(structures.size());
     while (i < j){
         //if(structures[i]->getActiveStructure(viewpoints.size()-1)==true){
-            if(structures[i]->getFeaturesCount()>=configStructure){
                 if ((structures[i].get()->*filterMethod)(getValue, filteringValue, dummy)==false){
                     structures[i]->setFeaturesState();
                     std::swap(structures[i],structures[--j]);
                 } else {
                     i++;
                 }
-            }else{i++;}
         //}else{i++;}
     }
     structures.resize(j);
@@ -320,10 +302,8 @@ void Database::exportModel(std::string path, unsigned int major){
         return;
     }
     for(auto & element: structures){
-        if(element->getFeaturesCount()>=configStructure){
-            Eigen::Vector3d * position(element->getPosition());
-            exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 0 0" << std::endl;
-        }
+        Eigen::Vector3d * position(element->getPosition());
+        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 0 0" << std::endl;
     }
     exportStream.close();
 }
@@ -428,18 +408,16 @@ void Database::_exportState(std::string path, int major, int iter){
                << element->position(2) << " 0 0 255" << std::endl;
     }
     for(auto & element: structures){
-        if(element->getFeaturesCount()>=configStructure){
-            stream << element->position(0) << " "
-                   << element->position(1) << " "
-                   << element->position(2) << " 255 0 255" << std::endl;
-            for(unsigned int j(0); j<element->features.size(); j++){
-                Eigen::Matrix3d matrix(*element->features[j]->getViewpoint()->getOrientation());
-                Eigen::Vector3d vector(*element->features[j]->getViewpoint()->getPosition());
-                Eigen::Vector3d Position(matrix*(element->features[j]->direction*element->features[j]->radius)+vector);
-                stream << Position(0) << " "
-                       << Position(1) << " "
-                       << Position(2) << " 255 " << j*vpcount << " 0" << std::endl;
-            }
+        stream << element->position(0) << " "
+               << element->position(1) << " "
+               << element->position(2) << " 255 0 255" << std::endl;
+        for(unsigned int j(0); j<element->features.size(); j++){
+            Eigen::Matrix3d matrix(*element->features[j]->getViewpoint()->getOrientation());
+            Eigen::Vector3d vector(*element->features[j]->getViewpoint()->getPosition());
+            Eigen::Vector3d Position(matrix*(element->features[j]->direction*element->features[j]->radius)+vector);
+            stream << Position(0) << " "
+                   << Position(1) << " "
+                   << Position(2) << " 255 " << j*vpcount << " 0" << std::endl;
         }
     }
     stream.close();
@@ -447,7 +425,7 @@ void Database::_exportState(std::string path, int major, int iter){
 
 // Note : this function does not respect encapsulation (development function) - need to be removed
 void Database::_exportMatchDistribution(std::string path, unsigned int major, std::string type){
-    if(viewpoints.size()<configStructure){
+    if(viewpoints.size()<2){
         return;
     }
     std::fstream stream;
@@ -457,11 +435,9 @@ void Database::_exportMatchDistribution(std::string path, unsigned int major, st
     }
     stream << viewpoints.size() << " -1" << std::endl;
     for(auto & element: structures){
-        if(element->getFeaturesCount()>=configStructure){
-            for(unsigned int i(0); i<element->features.size(); i++){
-                for(unsigned int j(0); j<element->features.size(); j++){
-                    stream << element->features[i]->viewpoint->index+1 << " " << element->features[j]->viewpoint->index+1 << std::endl;
-                }
+        for(unsigned int i(0); i<element->features.size(); i++){
+            for(unsigned int j(0); j<element->features.size(); j++){
+                stream << element->features[i]->viewpoint->index+1 << " " << element->features[j]->viewpoint->index+1 << std::endl;
             }
         }
     }
