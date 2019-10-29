@@ -41,17 +41,10 @@ double Database::getConfigError(){
     return configError;
 }
 
-# ifndef _DEBUG_FLAG
 double Database::getError(){
     return (viewpoints.back()->position - viewpoints.front()->position).norm();
 }
-# else
-double Database::getError(){
-    return dispMean;
-}
-# endif
 
-# ifndef _DEBUG_FLAG
 double Database::getTranslationMeanValue(){
     double meanValue(0.);
     for(auto & element: transforms){
@@ -59,12 +52,30 @@ double Database::getTranslationMeanValue(){
     }
     return meanValue/double(transforms.size());
 }
-# endif
 
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
     int localCount = MIN(5, viewpoints.size());
     for(auto i = viewpoints.end()-localCount;i != viewpoints.end(); ++i){
         localViewpoints->push_back(*i);
+    }
+}
+
+void Database::setActiveViewpoints(int loopState){
+    if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){
+        lastActiveViewpoint=0;
+    }else if (loopState==DB_LOOP_MODE_LAST){
+        lastActiveViewpoint=viewpoints.size()-1;
+    //}else if (loopState==DB_LOOP_MODE_HEAD){
+    //    int lastCandidate(0.);
+    //    lastActiveViewpoint=viewpoints.size()-1;
+    //    for(auto & element: structures){
+    //        if(element->getActiveStructure(viewpoints.size()-1)==true){
+    //            if((lastCandidate=element->getLastViewpoint())<lastActiveViewpoint){
+    //                lastActiveViewpoint=lastCandidate;
+    //            }
+    //        }
+    //    }
+    //}
     }
 }
 
@@ -164,13 +175,6 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 
 }
 
-/* only needed for computed radius : \
-   0 : all
-   1 : only last viewpoint
-   2 : only head viewpoints
-   3 : all
-*/
-
 void Database::computeModels(){
     for(auto & element: structures){
         if(element->getFeaturesCount()>=configStructure){
@@ -204,7 +208,6 @@ void Database::computeCentroids(){
     }
 }
 
-# ifndef _DEBUG_FLAG
 void Database::computePoses(long loopState){
     double normalValue(0.);
     int mode(0);
@@ -219,21 +222,6 @@ void Database::computePoses(long loopState){
         element->setTranslationScale(normalValue);
     }
 }
-# else
-void Database::computePoses(){
-    for(unsigned int i(0); i<transforms.size(); i++){
-        transforms[i]->computePose(viewpoints[i].get(),viewpoints[i+1].get());
-    }
-    double normalFactor(0.);
-    for(unsigned int i(0); i<MIN(10,transforms.size()); i++){
-        normalFactor+=transforms[i]->getTranslation()->norm();
-    }
-    normalFactor/=MIN(10,transforms.size());
-    for(unsigned int i(0); i<transforms.size(); i++){
-        transforms[i]->setTranslationScale(normalFactor);
-    }
-}
-# endif
 
 void Database::computeFrames(){
     viewpoints[0]->resetFrame();
@@ -242,7 +230,6 @@ void Database::computeFrames(){
     }
 }
 
-# ifndef _DEBUG_FLAG
 void Database::computeOptimals(long loopState){
     if((loopState==2)||(loopState==0)){
         for(auto & element: structures){
@@ -252,17 +239,7 @@ void Database::computeOptimals(long loopState){
         }
     }
 }
-# else
-void Database::computeOptimals(){
-    for(auto & element: structures){
-        if(element->getFeaturesCount()>=configStructure){
-            element->computeOptimalPosition();
-        }
-    }
-}
-# endif
 
-# ifndef _DEBUG_FLAG
 void Database::computeRadii(long loopState){
     long mode(0);
     if(loopState==1){
@@ -276,55 +253,6 @@ void Database::computeRadii(long loopState){
         }
     }
 }
-# else
-void Database::computeRadii(){
-    for(auto & element: structures){
-        if(element->getFeaturesCount()>=configStructure){
-            element->computeRadius();
-        }
-    }
-}
-# endif
-
-# ifndef _DEBUG_FLAG
-# else
-void Database::computeStatistics(){
-    unsigned long count(0);
-    double component;
-    dispMean=0.;
-    radMean=0.;
-    for(auto & element: structures){
-        if(element->flag==true){
-        if(element->getFeaturesCount()>=configStructure){
-            for(auto & f: element->features){
-                dispMean+=f->disparity;
-                radMean+=f->radius;
-            }
-            count+=element->getFeaturesCount();
-        }
-        }
-    }
-    dispMean/=double(count);
-    radMean/=double(count);
-
-    dispSD=0.;
-    radSD=0.;
-    for(auto & element: structures){
-        if(element->flag==true){
-        if(element->getFeaturesCount()>=configStructure){
-            for(auto & f: element->features){
-                component=f->disparity-dispMean;
-                dispSD+=component*component;
-                component=f->radius-radMean;
-                radSD+=component*component;
-            }
-        }
-        }
-    }
-    dispSD=std::sqrt(dispSD/double(count-1))*configDisparity;
-    radSD=std::sqrt(radSD/double(count-1))*configRadius;
-}
-# endif
 
 //Issue index of following elements will be modifed, can't be use in computeFilter as this
 //void Database::deleteAndUnlinkStructure(int i){
@@ -335,7 +263,6 @@ void Database::computeStatistics(){
 //  structures.resize(structures.size()-1);
 //}
 
-# ifndef _DEBUG_FLAG
 void Database::computeFilters(){
     return;
     computeFiltersEliminate(&Feature::getRadius, &Structure::computeFilterDownClamp,1.0,0.0);
@@ -384,66 +311,16 @@ void Database::computeFiltersEliminate(double(Feature::*getValue)(), bool (Struc
     }
     structures.resize(j);
 }
-# else
-void Database::computeFilters(){
-    unsigned int i(0);
-    unsigned int j(structures.size());
-    while (i < j){
-        if(structures[i]->getActiveStructure(viewpoints.size()-1)==true){
-            if(structures[i]->getFeaturesCount()>=configStructure){
-                if (structures[i]->computeFilter(dispSD,radMean,radSD)==false){
-                    structures[i]->setFeaturesState();
-                    std::swap(structures[i],structures[--j]);
-                } else {
-                    i++;
-                }
-            }else{i++;}
-        }else{i++;}
-    }
-    structures.resize(j);
-}
-# endif
 
 /* Note : called before viewpoint push on stack */
-# ifndef _DEBUG_FLAG
 void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
     pushedViewpoint->resetFrame();
 }
-# else
-void Database::extrapolateViewpoint(Viewpoint * pushedViewpoint){
-    auto viewpointCount(viewpoints.size());
-    if(viewpointCount<configStructure){
-        pushedViewpoint->resetFrame();
-    }else{
-        Eigen::Matrix3d prevRotation((*transforms[viewpointCount-2]->getRotation()).transpose());
-        Eigen::Vector3d prevTranslation(prevRotation*(*transforms[viewpointCount-2]->getTranslation()));
-        pushedViewpoint->setPose(
-            (*viewpoints[viewpointCount-1]->getOrientation())*prevRotation,
-            (*viewpoints[viewpointCount-1]->getPosition())-prevTranslation
-        );
-    }
-}
-# endif
 
 /* Note : called after viewpoint push on stack */
-# ifndef _DEBUG_FLAG
 void Database::extrapolateStructure(){
     return;
-    if(viewpoints.size()>configStructure){
-        for(auto & element: structures){
-            element->extrapolate();
-        }
-    }
 }
-# else
-void Database::extrapolateStructure(){
-    if(viewpoints.size()>configStructure){
-        for(auto & element: structures){
-            element->extrapolate();
-        }
-    }
-}
-# endif
 
 void Database::exportModel(std::string path, unsigned int major){
     std::fstream exportStream;

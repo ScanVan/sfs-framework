@@ -29,13 +29,23 @@ unsigned int Structure::getFeaturesCount(){
     return features.size();
 }
 
-bool Structure::getActiveStructure(long lastViewpointIndex){
+bool Structure::getActiveStructure(int lastViewpointIndex){
     for(auto & element: features){
         if(element->getViewpoint()->getIndex()==lastViewpointIndex){
             return true;
         }
     }
     return false;
+}
+
+int Structure::getLastViewpoint(){
+    int lastCandidate(INT_MAX);
+    for(auto & element: features){
+        if(element->getViewpoint()->getIndex()<lastCandidate){
+            lastCandidate=element->getViewpoint()->getIndex();
+        }
+    }
+    return lastCandidate;
 }
 
 void Structure::setFeaturesState(){
@@ -97,7 +107,6 @@ void Structure::computeOptimalPosition(){
     flag=true;
 }
 
-# ifndef _DEBUG_FLAG
 void Structure::computeRadius(long indexLimit){
     Eigen::Vector3d fvector;
     Eigen::Vector3d fposition;
@@ -111,21 +120,7 @@ void Structure::computeRadius(long indexLimit){
         }
     }
 }
-# else
-void Structure::computeRadius(){
-    Eigen::Vector3d fvector;
-    Eigen::Vector3d fposition;
-    double radius(0.);
-    for(auto & element: features){
-        fvector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
-        radius=fvector.dot(position-(*element->getViewpoint()->getPosition()));
-        fposition=(*element->getViewpoint()->getPosition())+fvector*radius;
-        element->setRadius(radius,(fposition-position).norm());
-    }
-}
-# endif
 
-# ifndef _DEBUG_FLAG
 bool Structure::computeFilterDownClamp(double(Feature::*getValue)(), double radialClamp, double dummy){
     for(auto & element: features){
         if((element->*getValue)()<radialClamp){
@@ -143,37 +138,8 @@ bool Structure::computeFilterStatistics(double(Feature::*getValue)(), double mea
     }
     return true;
 }
-# else
-bool Structure::computeFilter(double dispFilterSD, double radMean, double radFilterSD){
-    for(auto & element: features){
-        //if (element->getRadius()<0.){
-        //    return false;
-        //}
-        if (element->getRadius()<0.){
-            return false;
-        }
-        //if (element->getDisparity()>dispFilterSD) {
-        //    return false;
-        //}
-        if(fabs(element->getRadius()-radMean)>radFilterSD){
-            return false;
-        }
-    }
-    return true;
-}
-# endif
 
-
-# ifndef _DEBUG_FLAG
 void Structure::extrapolate(){
     return;
 }
-# else
-void Structure::extrapolate(){
-    if (flag==false){
-        computeOptimalPosition();
-    }
-    computeRadius();
-}
-# endif
 

@@ -21,8 +21,6 @@
 
 #pragma once
 
-//#define _DEBUG_FLAG
-
 #include <Eigen/Dense>
 #include <vector>
 #include <limits>
@@ -40,27 +38,19 @@ public:
     Structure() : flag(false) {}
     Eigen::Vector3d * getPosition();
     unsigned int getFeaturesCount();
-    bool getActiveStructure(long lastViewpointIndex);
+    bool getActiveStructure(int lastViewpointIndex);
+    int getLastViewpoint();
     void setFeaturesState();
     void addFeature(Feature * feature);
     void computeModel();
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition();
-# ifndef _DEBUG_FLAG
     void computeRadius(long indexLimit);
-# else
-    void computeRadius();
-# endif
     void computeFeaturesState(bool state);
-# ifndef _DEBUG_FLAG
     bool computeFilterDownClamp(double(Feature::*getValue)(), double radialClamp, double dummy);
     bool computeFilterStatistics(double(Feature::*getValue)(), double meanFilterValue, double stdFilterValue);
-# else
-    bool computeFilter(double dispFilterSD, double radMean, double radFilterSD);
-# endif
     void extrapolate();
-
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */
 
 };

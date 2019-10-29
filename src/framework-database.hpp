@@ -21,8 +21,6 @@
 
 #pragma once
 
-//#define _DEBUG_FLAG
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -34,9 +32,8 @@
 
 #define DB_LOOP_MODE_BOOT ( 0 ) /* initial structure */
 #define DB_LOOP_MODE_LAST ( 1 ) /* optimising last viewpoint */
-#define DB_LOOP_MODE_HEAD ( 2 ) /* optimising active head */
-#define DB_LOOP_MODE_FULL ( 3 ) /* optimising all structure */
-
+//#define DB_LOOP_MODE_HEAD ( 2 ) /* optimising active head */
+#define DB_LOOP_MODE_FULL ( 2 ) /* optimising all structure */
 
 class Database {
 
@@ -49,58 +46,31 @@ public:
     unsigned long configStructure;
     double configDisparity;
     double configRadius;
-# ifndef _DEBUG_FLAG
+    int lastActiveViewpoint;
     double meanValue;
     double stdValue;
-# else
-    double dispMean;
-    double dispSD;
-    double radMean;
-    double radSD;
-# endif
 
 public:
     Database(double initialError, unsigned long initialStructure, double initialDisparity, double initialRadius);
     bool getBootstrap();
     double getConfigError();
     double getError();
-# ifndef _DEBUG_FLAG
     double getTranslationMeanValue();
-# endif
+    void setActiveViewpoints(int loopState);
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
     void computeModels();
     void computeCorrelations();
     void computeCentroids();
-# ifndef _DEBUG_FLAG
     void computePoses(long loopState);
-# else
-    void computePoses();
-# endif
     void computeFrames();
-# ifndef _DEBUG_FLAG
     void computeOptimals(long loopState);
-# else
-    void computeOptimals();
-# endif
-# ifndef _DEBUG_FLAG
     void computeRadii(long loopState);
-# else
-    void computeRadii();
-# endif
-# ifndef _DEBUG_FLAG
-# else
-    void computeStatistics();
-# endif
 //    void deleteAndUnlinkStructure(int id); /* need decision */
-# ifndef _DEBUG_FLAG
     void computeFilters();
     void computeFiltersStatistics(double(Feature::*getValue)());
     void computeFiltersEliminate(double(Feature::*getValue)(), bool (Structure::*filterMethod)(double(Feature::*)(),double,double), double filteringValue, double dummy);
-# else
-    void computeFilters();
-# endif
     void extrapolateViewpoint(Viewpoint * v);
     void extrapolateStructure();
     void exportModel(std::string path, unsigned int major);

@@ -61,19 +61,17 @@ int main(int argc, char *argv[]){
         inlinerEnabled = true;
     }
 
-    // pipeline major iteration
+    // pipeline iterations
     int loopMajor(1);
+    int loopMinor(0);
 
-    // pipeline minor iteration
-    int loopMinor( 0 );
-
-    // algorithm variables
-    double loopError( 1. );
-    double pushError( 0. );
-    bool loopFlag( true );
-# ifndef _DEBUG_FLAG
+    // algorithm loop
+    bool loopFlag(true);
     long loopState=0;
-# endif
+
+    // algorithm error
+    double loopError(1.);
+    double pushError(0.);
 
     // pipeline loop
     while(true){
@@ -102,9 +100,7 @@ int main(int argc, char *argv[]){
             continue;
         }
 
-        // reset algorithm variables
-        loopError=0.;
-        pushError=1.;
+        // reset algorithm loop
         loopFlag=true;
         loopMinor=0;
 
@@ -112,71 +108,60 @@ int main(int argc, char *argv[]){
         //database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
         // development feature - end
 
-        // algorithm loop
+        // algorithm state loop
         while ( loopFlag == true ) {
 
-            // algorithm core
-            database.computeModels();
-            database.computeCentroids();
-            database.computeCorrelations();
-# ifndef _DEBUG_FLAG
-            database.computePoses(loopState);
-# else
-            database.computePoses();
-# endif
-            database.computeFrames();
-# ifndef _DEBUG_FLAG
-            database.computeOptimals(loopState);
-            database.computeRadii(loopState);
-# else
-            database.computeOptimals();
-            database.computeRadii();
-# endif
-# ifndef _DEBUG_FLAG
-# else
-            database.computeStatistics();
-# endif
-            database.computeFilters();
+            // detect last active viewpoint
+            database.setActiveViewpoints(loopState);
 
-            // development feature - begin
-            //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
-            // development feature - end
+            // reset algorithm
+            loopError=0.;
+            pushError=1.;
 
-            // algorithm error management
-            loopError = database.getError();
-            if(fabs( loopError - pushError ) < database.getConfigError()) {
-# ifndef _DEBUG_FLAG
-                if(loopState==2){
+            // algorithm optimisation loop
+            while ( loopFlag == true ) {
+
+                // algorithm core
+                database.computeModels();
+                database.computeCentroids();
+                database.computeCorrelations();
+                database.computePoses(loopState);
+                database.computeFrames();
+                database.computeOptimals(loopState);
+                database.computeRadii(loopState);
+                database.computeFilters();
+
+                // development feature - begin
+                //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
+                // development feature - end
+
+                // get error value
+                loopError = database.getError();
+
+                // update minor iterator
+                loopMinor ++;
+
+                // display information
+                std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopError << std::endl;
+
+                // optimisation loop management
+                if(fabs( loopError - pushError ) < database.getConfigError()) {
                     loopFlag = false;
                 } else {
-                    if(loopState==0){
-                        loopFlag = false;
-                    }
-                    loopState=2;
-                    loopError=0.;
-                    pushError=1.;
-                    //for(auto & element: database.viewpoints.back()->features){
-                    //    element.radius*=1.5;
-                    //}
+                    pushError=loopError;
                 }
-# else
-                loopFlag = false;
-# endif
-            } else {
-                pushError=loopError;
+
             }
 
-            // update minor iterator
-            loopMinor ++;
-
-            // display information
-            std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | error : " << loopError << std::endl;
+            // state loop management
+            if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){
+                loopState=DB_LOOP_MODE_LAST;
+            } else if (loopState==DB_LOOP_MODE_LAST){
+                loopState=DB_LOOP_MODE_FULL;
+                loopFlag=true;
+            }
 
         }
-
-# ifndef _DEBUG_FLAG
-        loopState=1;
-# endif
 
         // development feature - begin
         database._sanityCheck(inlinerEnabled);
