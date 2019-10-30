@@ -60,16 +60,17 @@ public:
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
     void computeModels();
-    void computeCentroids();
-    void computeCorrelations();
+    void computeCentroids(int loopState);
+    void computeCorrelations(int loopState);
     void computePoses(long loopState);
     void computeFrames();
-    void computeOptimals(long loopState);
-    void computeRadii(long loopState);
+    void computeOptimals(long loopState, int loopIteration);
+    void computeRadii(long loopState, int loopIteration);
 //    void deleteAndUnlinkStructure(int id); /* need decision */
     void computeFilters();
     void computeFiltersStatistics(double(Feature::*getValue)());
     void computeFiltersEliminate(double(Feature::*getValue)(), bool (Structure::*filterMethod)(double(Feature::*)(),double,double), double filteringValue, double dummy);
+    void computePost(int loopState);
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);
     Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();} /* need deletion */

@@ -48,6 +48,17 @@ int Structure::getLastViewpoint(){
     return lastCandidate;
 }
 
+bool Structure::getbootstrap(unsigned int lastViewpointIndex){
+    if (features.size()==2){
+        for(auto & feature: features){
+            if(feature->getViewpoint()->getIndex()==lastViewpointIndex){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void Structure::setFeaturesState(){
     for(auto & element: features){
         element->setStructurePtr(NULL);

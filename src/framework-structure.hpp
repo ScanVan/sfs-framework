@@ -39,7 +39,8 @@ public:
     Eigen::Vector3d * getPosition();
     unsigned int getFeaturesCount();
     bool getActiveStructure(int lastViewpointIndex);
-    int getLastViewpoint();
+    int getLastViewpoint(); /* delete */
+    bool getbootstrap(unsigned int lastViewpointIndex);
     void setFeaturesState();
     void addFeature(Feature * feature);
     void computeModel();

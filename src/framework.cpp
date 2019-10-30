@@ -122,12 +122,12 @@ int main(int argc, char *argv[]){
 
                 // algorithm core
                 database.computeModels();
-                database.computeCentroids();
-                database.computeCorrelations();
+                database.computeCentroids(loopState);
+                database.computeCorrelations(loopState);
                 database.computePoses(loopState);
                 database.computeFrames();
-                database.computeOptimals(loopState);
-                database.computeRadii(loopState);
+                database.computeOptimals(loopState,loopMinor);
+                database.computeRadii(loopState,loopMinor);
                 database.computeFilters();
 
                 // development feature - begin
@@ -151,6 +151,9 @@ int main(int argc, char *argv[]){
                 }
 
             }
+
+            // post algorithm process
+            database.computePost(loopState);
 
             // state loop management
             if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){
