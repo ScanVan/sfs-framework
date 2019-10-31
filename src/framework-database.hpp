@@ -69,6 +69,7 @@ public:
 //    void deleteAndUnlinkStructure(int id); /* need decision */
     void computeFiltersRadialClamp(int loopState);
     void computeFiltersRadialStatistics(int loopState);
+    void computeFiltersDisparityStatistics(int loopState);
     void computeFiltersStatistics(double(Feature::*getValue)(), int indexRange);
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);

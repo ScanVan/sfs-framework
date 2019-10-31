@@ -134,3 +134,14 @@ bool Structure::filterRadiusStatistics(double meanValue, double stdValue, int in
     return true;
 }
 
+bool Structure::filterDisparityStatistics(double stdValue, int indexRange){
+    for(auto & feature: features){
+        if(feature->getViewpoint()->getIndex()>=indexRange){
+            if(feature->getDisparity()>stdValue){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+

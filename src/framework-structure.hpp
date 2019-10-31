@@ -47,6 +47,7 @@ public:
     void computeRadius(long indexLimit);
     bool filterRadiusClamp(double clampValue, int indexRange);
     bool filterRadiusStatistics(double meanValue, double stdValue, int indexRange);
+    bool filterDisparityStatistics(double stdValue, int indexRange);
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */
 
 };

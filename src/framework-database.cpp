@@ -293,6 +293,26 @@ void Database::computeFiltersRadialStatistics(int loopState){
     structures.resize(j);
 }
 
+void Database::computeFiltersDisparityStatistics(int loopState){
+    int i(0), j(structures.size());
+    int indexRange(0);
+
+    if(loopState==DB_LOOP_MODE_LAST){
+        indexRange=viewpoints.size()-1;
+    }
+
+    computeFiltersStatistics(&Feature::getDisparity,indexRange);
+
+    while (i < j){
+        if (structures[i]->filterDisparityStatistics(stdValue*configDisparity, indexRange)==false){
+            structures[i]->setFeaturesState();
+            std::swap(structures[i],structures[--j]);
+        }else{ i++; }
+    }
+    std::cerr << "Disp:s : " << j << "/" << structures.size() << std::endl;
+    structures.resize(j);
+}
+
 /* this member should to be private */
 void Database::computeFiltersStatistics(double(Feature::*getValue)(), int indexRange){
     unsigned long countValue(0);
