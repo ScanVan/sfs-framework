@@ -160,7 +160,7 @@ void Database::computeCentroids(int loopState){
     for(auto & element: transforms){
         element->resetCentroid();
     }
-    if(loopState==1){
+    if(loopState==DB_LOOP_MODE_LAST){
         for(auto & element: structures){
             if(element->getBootstrap(viewpoints.size()-1)==false){
                 element->computeCentroid(transforms);
@@ -180,7 +180,7 @@ void Database::computeCorrelations(int loopState){
     for(auto & element: transforms){
         element->resetCorrelation();
     }
-    if(loopState==1){
+    if(loopState==DB_LOOP_MODE_LAST){
         for(auto & element: structures){
             if(element->getBootstrap(viewpoints.size()-1)==false){
                 element->computeCorrelation(transforms);
@@ -196,7 +196,7 @@ void Database::computeCorrelations(int loopState){
 void Database::computePoses(long loopState){
     double normalValue(0.);
     int mode(0);
-    if (loopState==1){
+    if (loopState==DB_LOOP_MODE_LAST){
         mode=transforms.size()-1;
     }
     for(unsigned int i(mode); i<transforms.size(); i++){
@@ -215,12 +215,12 @@ void Database::computeFrames(){
     }
 }
 
-void Database::computeOptimals(long loopState, int loopIteration){ /* need to optimise new 2-wise structures */
-    if((loopState==2)||(loopState==0)){
+void Database::computeOptimals(long loopState, int loopIteration){
+    if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){
         for(auto & element: structures){
             element->computeOptimalPosition();
         }
-    }else if((loopState==1)&&(loopIteration>1)){
+    }else if((loopState==DB_LOOP_MODE_LAST)&&(loopIteration>1)){
         for(auto & element: structures){
             if(element->getBootstrap(viewpoints.size()-1)==true){
                 element->computeOptimalPosition();
@@ -231,11 +231,10 @@ void Database::computeOptimals(long loopState, int loopIteration){ /* need to op
 
 void Database::computeRadii(long loopState, int loopIteration){
     long mode(0);
-    if(loopState==1){
+    if(loopState==DB_LOOP_MODE_LAST){
         mode=viewpoints.size()-1;
     }
     for(auto & element: structures){
-        //if(element->flag==true){ // not needed if configStruc==2 : to be checked
         if(element->getBootstrap(viewpoints.size()-1)==false){
             element->computeRadius(mode);
         //}
