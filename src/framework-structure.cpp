@@ -96,7 +96,7 @@ void Structure::computeOptimalPosition(){
         wacc+=weight;
     }
     position=wacc.inverse()*vacc;
-    flag=true;
+    //flag=true;
 }
 
 void Structure::computeRadius(long indexLimit){

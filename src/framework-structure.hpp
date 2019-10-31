@@ -32,10 +32,9 @@ class Structure {
 public:
     Eigen::Vector3d position;
     std::vector<Feature*> features;
-    bool flag;
 
 public:
-    Structure() : flag(false) {}
+    //Structure() : flag(false) {}
     Eigen::Vector3d * getPosition();
     int getFeaturesCount();
     bool getBootstrap(int lastViewpointIndex);
