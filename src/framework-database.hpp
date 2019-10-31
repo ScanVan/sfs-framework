@@ -45,7 +45,6 @@ public:
     double configError;
     double configDisparity;
     double configRadius;
-    int lastActiveViewpoint;
     double meanValue;
     double stdValue;
 
@@ -55,7 +54,6 @@ public:
     double getConfigError();
     double getError();
     double getTranslationMeanValue();
-    void setActiveViewpoints(int loopState);
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
@@ -70,7 +68,6 @@ public:
     void computeFilters();
     void computeFiltersStatistics(double(Feature::*getValue)());
     void computeFiltersEliminate(double(Feature::*getValue)(), bool (Structure::*filterMethod)(double(Feature::*)(),double,double), double filteringValue, double dummy);
-    void computePost(int loopState);
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);
     Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();} /* need deletion */

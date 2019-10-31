@@ -110,9 +110,6 @@ int main(int argc, char *argv[]){
         // algorithm state loop
         while ( loopFlag == true ) {
 
-            // detect last active viewpoint
-            database.setActiveViewpoints(loopState);
-
             // reset algorithm
             loopError=0.;
             pushError=1.;
@@ -152,13 +149,12 @@ int main(int argc, char *argv[]){
 
             }
 
-            // post algorithm process
-            database.computePost(loopState);
-
             // state loop management
-            if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){
+            if( (loopState==DB_LOOP_MODE_BOOT) ||
+                (loopState==DB_LOOP_MODE_FULL) ){
                 loopState=DB_LOOP_MODE_LAST;
-            } else if (loopState==DB_LOOP_MODE_LAST){
+            } else
+            if (loopState==DB_LOOP_MODE_LAST){
                 loopState=DB_LOOP_MODE_FULL;
                 loopFlag=true;
             }

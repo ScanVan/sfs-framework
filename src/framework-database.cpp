@@ -54,25 +54,6 @@ void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::sha
     }
 }
 
-void Database::setActiveViewpoints(int loopState){
-    if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){
-        lastActiveViewpoint=0;
-    }else if (loopState==DB_LOOP_MODE_LAST){
-        lastActiveViewpoint=viewpoints.size()-1;
-    //}else if (loopState==DB_LOOP_MODE_HEAD){
-    //    int lastCandidate(0.);
-    //    lastActiveViewpoint=viewpoints.size()-1;
-    //    for(auto & element: structures){
-    //        if(element->getActiveStructure(viewpoints.size()-1)==true){
-    //            if((lastCandidate=element->getLastViewpoint())<lastActiveViewpoint){
-    //                lastActiveViewpoint=lastCandidate;
-    //            }
-    //        }
-    //    }
-    //}
-    }
-}
-
 void Database::addViewpoint(std::shared_ptr<Viewpoint> viewpoint){
     if(viewpoint->getIndex() > 0) transforms.push_back(std::make_shared<Transform>());
     viewpoints.push_back(viewpoint);
@@ -181,7 +162,7 @@ void Database::computeCentroids(int loopState){
     }
     if(loopState==1){
         for(auto & element: structures){
-            if(element->getbootstrap(viewpoints.size()-1)==false){
+            if(element->getBootstrap(viewpoints.size()-1)==false){
                 element->computeCentroid(transforms);
             }
         }
@@ -201,7 +182,7 @@ void Database::computeCorrelations(int loopState){
     }
     if(loopState==1){
         for(auto & element: structures){
-            if(element->getbootstrap(viewpoints.size()-1)==false){
+            if(element->getBootstrap(viewpoints.size()-1)==false){
                 element->computeCorrelation(transforms);
             }
         }
@@ -241,7 +222,7 @@ void Database::computeOptimals(long loopState, int loopIteration){ /* need to op
         }
     }else if((loopState==1)&&(loopIteration>1)){
         for(auto & element: structures){
-            if(element->getbootstrap(viewpoints.size()-1)==true){
+            if(element->getBootstrap(viewpoints.size()-1)==true){
                 element->computeOptimalPosition();
             }
         }
@@ -255,7 +236,7 @@ void Database::computeRadii(long loopState, int loopIteration){
     }
     for(auto & element: structures){
         //if(element->flag==true){ // not needed if configStruc==2 : to be checked
-        if(element->getbootstrap(viewpoints.size()-1)==false){
+        if(element->getBootstrap(viewpoints.size()-1)==false){
             element->computeRadius(mode);
         //}
         }else{
@@ -320,18 +301,6 @@ void Database::computeFiltersEliminate(double(Feature::*getValue)(), bool (Struc
         //}else{i++;}
     }
     structures.resize(j);
-}
-
-void Database::computePost(int loopState){
-    return;
-    if(loopState==DB_LOOP_MODE_LAST){
-        for(auto & structure: structures){
-            if(structure->getbootstrap(viewpoints.size()-1)==true){
-                structure->computeOptimalPosition();
-                structure->computeRadius(0);
-            }
-        }
-    }
 }
 
 void Database::exportModel(std::string path, unsigned int major){

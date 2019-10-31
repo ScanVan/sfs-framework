@@ -29,26 +29,7 @@ unsigned int Structure::getFeaturesCount(){
     return features.size();
 }
 
-bool Structure::getActiveStructure(int lastViewpointIndex){
-    for(auto & element: features){
-        if(element->getViewpoint()->getIndex()==lastViewpointIndex){
-            return true;
-        }
-    }
-    return false;
-}
-
-int Structure::getLastViewpoint(){
-    int lastCandidate(INT_MAX);
-    for(auto & element: features){
-        if(element->getViewpoint()->getIndex()<lastCandidate){
-            lastCandidate=element->getViewpoint()->getIndex();
-        }
-    }
-    return lastCandidate;
-}
-
-bool Structure::getbootstrap(unsigned int lastViewpointIndex){
+bool Structure::getBootstrap(unsigned int lastViewpointIndex){
     if (features.size()==2){
         for(auto & feature: features){
             if(feature->getViewpoint()->getIndex()==lastViewpointIndex){
