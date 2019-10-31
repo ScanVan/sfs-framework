@@ -60,7 +60,7 @@ public:
     void computeModels();
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);
-    void computePoses(long loopState);
+    void computePoses(int loopState);
     void computeFrames();
     void computeOptimals(long loopState, int loopIteration);
     void computeRadii(long loopState, int loopIteration);

@@ -193,7 +193,7 @@ void Database::computeCorrelations(int loopState){
     }
 }
 
-void Database::computePoses(long loopState){
+void Database::computePoses(int loopState){
     double normalValue(0.);
     int mode(0);
     if (loopState==DB_LOOP_MODE_LAST){
@@ -230,7 +230,7 @@ void Database::computeOptimals(long loopState, int loopIteration){
 }
 
 void Database::computeRadii(long loopState, int loopIteration){
-    long mode(0);
+    int mode(0);
     if(loopState==DB_LOOP_MODE_LAST){
         mode=viewpoints.size()-1;
     }

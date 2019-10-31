@@ -25,11 +25,11 @@ Eigen::Vector3d * Structure::getPosition(){
     return &position;
 }
 
-unsigned int Structure::getFeaturesCount(){
+int Structure::getFeaturesCount(){
     return features.size();
 }
 
-bool Structure::getBootstrap(unsigned int lastViewpointIndex){
+bool Structure::getBootstrap(int lastViewpointIndex){
     if (features.size()==2){
         for(auto & feature: features){
             if(feature->getViewpoint()->getIndex()==lastViewpointIndex){
@@ -59,7 +59,7 @@ void Structure::computeModel(){
 }
 
 void Structure::computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms){
-    unsigned int i_index(0), j_index(0);
+    int i_index(0), j_index(0);
     for(unsigned int i(0); i<features.size(); i++){
         i_index=features[i]->getViewpoint()->getIndex();
         for(unsigned int j(0); j<features.size(); j++){
@@ -72,7 +72,7 @@ void Structure::computeCentroid(std::vector<std::shared_ptr<Transform>> & transf
 }
 
 void Structure::computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms){
-    unsigned int i_index(0), j_index(0);
+    int i_index(0), j_index(0);
     for(unsigned int i(0); i<features.size(); i++){
         i_index=features[i]->getViewpoint()->getIndex();
         for(unsigned int j(0); j<features.size(); j++){
