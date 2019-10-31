@@ -28,13 +28,14 @@ Database::Database(double initialError, double initialDisparity, double initialR
 }
 
 bool Database::getBootstrap(){
-    return viewpoints.size()<2?true:false;
+    return viewpoints.size()<DB_LOOP_BOOT_COUNT?true:false;
 }
 
 double Database::getConfigError(){
     return configError;
 }
 
+/* encapsulation fault */
 double Database::getError(){
     return (viewpoints.back()->position - viewpoints.front()->position).norm();
 }
@@ -237,7 +238,6 @@ void Database::computeRadii(long loopState, int loopIteration){
     for(auto & element: structures){
         if(element->getBootstrap(viewpoints.size()-1)==false){
             element->computeRadius(mode);
-        //}
         }else{
             if(loopIteration>1){
                 element->computeRadius(mode-1);
@@ -255,51 +255,68 @@ void Database::computeRadii(long loopState, int loopIteration){
 //  structures.resize(structures.size()-1);
 //}
 
-void Database::computeFilters(){
-    return;
-    computeFiltersEliminate(&Feature::getRadius, &Structure::computeFilterDownClamp,1.0,0.0);
-    computeFiltersStatistics(&Feature::getRadius);
-    std::cerr << meanValue << " " << stdValue << std::endl;
-    computeFiltersEliminate(&Feature::getRadius, &Structure::computeFilterStatistics,meanValue,stdValue*configRadius);
+void Database::computeFiltersRadialClamp(int loopState){
+    int i(0), j(structures.size());
+    int indexRange(0);
+
+    if(loopState==DB_LOOP_MODE_LAST){
+        indexRange=viewpoints.size()-1;
+    }
+
+    while (i < j){
+        if (structures[i]->filterRadiusClamp(1.0,indexRange)==false){
+            structures[i]->setFeaturesState();
+            std::swap(structures[i],structures[--j]);
+        }else{ i++; }
+    }
+    std::cerr << "Radial:c : " << j << "/" << structures.size() << std::endl;
+    structures.resize(j);
+}
+
+void Database::computeFiltersRadialStatistics(int loopState){
+    int i(0), j(structures.size());
+    int indexRange(0);
+
+    if(loopState==DB_LOOP_MODE_LAST){
+        indexRange=viewpoints.size()-1;
+    }
+
+    computeFiltersStatistics(&Feature::getRadius,indexRange);
+
+    while (i < j){
+        if (structures[i]->filterRadiusStatistics(meanValue, stdValue*configRadius, indexRange)==false){
+            structures[i]->setFeaturesState();
+            std::swap(structures[i],structures[--j]);
+        }else{ i++; }
+    }
+    std::cerr << "Radial:s : " << j << "/" << structures.size() << std::endl;
+    structures.resize(j);
 }
 
 /* this member should to be private */
-void Database::computeFiltersStatistics(double(Feature::*getValue)()){
+void Database::computeFiltersStatistics(double(Feature::*getValue)(), int indexRange){
     unsigned long countValue(0);
     double componentValue(0.);
     meanValue=0.;
     for(auto & element: structures){
         for(auto & feature: element->features){
-            meanValue+=(feature->*getValue)();
-            countValue++;
+            if(feature->getViewpoint()->getIndex()>=indexRange){
+                meanValue+=(feature->*getValue)();
+                countValue++;
+            }
         }
     }
     meanValue/=double(countValue);
     stdValue=0.;
     for(auto & element: structures){
         for(auto & feature: element->features){
-            componentValue=(feature->*getValue)()-meanValue;
-            stdValue+=componentValue*componentValue;
+            if(feature->getViewpoint()->getIndex()>=indexRange){
+                componentValue=(feature->*getValue)()-meanValue;
+                stdValue+=componentValue*componentValue;
+            }
         }
     }
     stdValue=std::sqrt(stdValue/(countValue-1));
-}
-
-/* this member should to be private */
-void Database::computeFiltersEliminate(double(Feature::*getValue)(), bool (Structure::*filterMethod)(double(Feature::*)(),double,double), double filteringValue, double dummy){
-    unsigned int i(0);
-    unsigned int j(structures.size());
-    while (i < j){
-        //if(structures[i]->getActiveStructure(viewpoints.size()-1)==true){
-                if ((structures[i].get()->*filterMethod)(getValue, filteringValue, dummy)==false){
-                    structures[i]->setFeaturesState();
-                    std::swap(structures[i],structures[--j]);
-                } else {
-                    i++;
-                }
-        //}else{i++;}
-    }
-    structures.resize(j);
 }
 
 void Database::exportModel(std::string path, unsigned int major){

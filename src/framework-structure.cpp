@@ -96,7 +96,6 @@ void Structure::computeOptimalPosition(){
         wacc+=weight;
     }
     position=wacc.inverse()*vacc;
-    //flag=true;
 }
 
 void Structure::computeRadius(long indexLimit){
@@ -113,25 +112,25 @@ void Structure::computeRadius(long indexLimit){
     }
 }
 
-bool Structure::computeFilterDownClamp(double(Feature::*getValue)(), double radialClamp, double dummy){
-    for(auto & element: features){
-        if((element->*getValue)()<radialClamp){
-            return false;
+bool Structure::filterRadiusClamp(double clampValue, int indexRange){
+    for(auto & feature: features){
+        if(feature->getViewpoint()->getIndex()>=indexRange){
+            if(feature->getRadius()<clampValue){
+                return false;
+            }
         }
     }
     return true;
 }
 
-bool Structure::computeFilterStatistics(double(Feature::*getValue)(), double meanFilterValue, double stdFilterValue){
-    for(auto & element: features){
-        if(fabs((element->*getValue)()-meanFilterValue)>stdFilterValue){
-            return false;
+bool Structure::filterRadiusStatistics(double meanValue, double stdValue, int indexRange){
+    for(auto & feature: features){
+        if(feature->getViewpoint()->getIndex()>=indexRange){
+            if(fabs(feature->getRadius()-meanValue)>stdValue){
+                return false;
+            }
         }
     }
     return true;
-}
-
-void Structure::extrapolate(){
-    return;
 }
 

@@ -45,10 +45,8 @@ public:
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition();
     void computeRadius(long indexLimit);
-    void computeFeaturesState(bool state);
-    bool computeFilterDownClamp(double(Feature::*getValue)(), double radialClamp, double dummy);
-    bool computeFilterStatistics(double(Feature::*getValue)(), double meanFilterValue, double stdFilterValue);
-    void extrapolate();
+    bool filterRadiusClamp(double clampValue, int indexRange);
+    bool filterRadiusStatistics(double meanValue, double stdValue, int indexRange);
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */
 
 };

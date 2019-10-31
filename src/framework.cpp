@@ -129,7 +129,8 @@ int main(int argc, char *argv[]){
                 database.computeFrames();
                 database.computeOptimals(loopState,loopMinor);
                 database.computeRadii(loopState,loopMinor);
-                database.computeFilters();
+                database.computeFiltersRadialClamp(loopState);
+                database.computeFiltersRadialStatistics(loopState);
 
                 // development feature - begin
                 //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);

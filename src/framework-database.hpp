@@ -30,10 +30,12 @@
 #include "framework-transform.hpp"
 #include "framework-structure.hpp"
 
-#define DB_LOOP_MODE_BOOT ( 0 ) /* initial structure */
-#define DB_LOOP_MODE_LAST ( 1 ) /* optimising last viewpoint */
-//#define DB_LOOP_MODE_HEAD ( 2 ) /* optimising active head */
-#define DB_LOOP_MODE_FULL ( 2 ) /* optimising all structure */
+#define DB_LOOP_BOOT_COUNT ( 3 ) /* amount of viewpoint to wait to trigger the initial boot optimisation */
+
+#define DB_LOOP_MODE_BOOT  ( 0 ) /* initial structure */
+#define DB_LOOP_MODE_LAST  ( 1 ) /* optimising last viewpoint */
+//#define DB_LOOP_MODE_HEAD  ( 2 ) /* optimising active head */
+#define DB_LOOP_MODE_FULL  ( 2 ) /* optimising all structure */
 
 class Database {
 
@@ -65,9 +67,9 @@ public:
     void computeOptimals(long loopState, int loopIteration);
     void computeRadii(long loopState, int loopIteration);
 //    void deleteAndUnlinkStructure(int id); /* need decision */
-    void computeFilters();
-    void computeFiltersStatistics(double(Feature::*getValue)());
-    void computeFiltersEliminate(double(Feature::*getValue)(), bool (Structure::*filterMethod)(double(Feature::*)(),double,double), double filteringValue, double dummy);
+    void computeFiltersRadialClamp(int loopState);
+    void computeFiltersRadialStatistics(int loopState);
+    void computeFiltersStatistics(double(Feature::*getValue)(), int indexRange);
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);
     Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();} /* need deletion */
