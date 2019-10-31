@@ -113,8 +113,7 @@ FrontendCloudpoint::FrontendCloudpoint(
         std::string odometryPath,
         double distanceMax,
         double badMatchRate,
-        double baseNoise, double
-        badMatchNoise) : database(database), distanceMax(distanceMax), badMatchRate(badMatchRate), baseNoise(baseNoise), badMatchNoise(badMatchNoise){
+        double baseNoise, double badMatchNoise) : database(database), distanceMax(distanceMax), badMatchRate(badMatchRate), baseNoise(baseNoise), badMatchNoise(badMatchNoise){
 	std::ifstream m(modelPath);
 	while(true){
 		Eigen::Vector3d p;

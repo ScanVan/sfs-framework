@@ -338,22 +338,51 @@ static cv::Point _f2i(Eigen::Vector2f value){
     return cv::Point(value[0],value[1]);
 }
 
+struct featureSort
+{
+    inline bool operator() (const Feature* struct1, const Feature* struct2)
+    {
+        return (struct1->viewpoint->index < struct2->viewpoint->index);
+    }
+};
+
 //Do  cv::waitKey(0); if you want to stop after it.
 void Database::_displayViewpointStructures(Viewpoint *viewpoint, unsigned int structSizeMin){
     cv::RNG rng(12345);
     cv::Rect myROI(0, 0, viewpoint->getImage()->cols, viewpoint->getImage()->rows);
     cv::Mat res(myROI.width,myROI.height, CV_8UC3, cv::Scalar(0,0,0));
     res = *viewpoint->getImage();
-    for(auto f : *viewpoint->getFeatures()){
+    for(int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
+        auto f = (*viewpoint->getFeatures())[featureId];
+        if(!f.structure) continue;
+        if(f.structure->features.size() < structSizeMin) continue;
+        cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
+
+        std::vector<Feature*> features = *(f.structure->getFeatures());
+        std::sort(features.begin(), features.end(), featureSort());
+        for(uint32_t idx = 1;idx < features.size();idx++){
+            cv::line(res, _f2i((features)[idx-1]->position),  _f2i((features)[idx]->position), color, 2);
+        }
+    }
+
+    rng = cv::RNG(12345);
+    for(int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
+        auto f = (*viewpoint->getFeatures())[featureId];
         if(!f.structure) continue;
         if(f.structure->features.size() < structSizeMin) continue;
         cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
 
         auto features = f.structure->getFeatures();
-        for(uint32_t idx = 1;idx < features->size();idx++){
-            cv::line(res, _f2i((*features)[idx-1]->position),  _f2i((*features)[idx]->position), color, 2);
-        }
+        cv::putText(
+            res,
+            std::to_string(featureId),
+            _f2i((*features)[0]->position) + cv::Point(-5, -5),
+            cv::FONT_HERSHEY_SIMPLEX,
+            0.5,
+            color
+        );
     }
+
 
     cv::namedWindow( "miaou", cv::WINDOW_KEEPRATIO );
     imshow( "miaou", res);

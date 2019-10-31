@@ -45,6 +45,10 @@ int main(int argc, char *argv[]){
             source = new ViewPointSourceFs(config["frontend"]["source"]["path"].as<std::string>(), config["frontend"]["source"]["scale"].as<double>());
         }
         auto mask = cv::imread(config["frontend"]["source"]["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
+        if(config["frontend"]["source"]["scale"].IsDefined()){
+            auto scale = config["frontend"]["source"]["scale"].as<double>();
+            cv::resize(mask, mask, cv::Size(), scale, scale, cv::INTER_AREA );
+        }
         frontend = new FrontendPicture(source, mask, &threadpool, &database);
     }
 
@@ -167,7 +171,7 @@ int main(int argc, char *argv[]){
 
         if(config["debug"].IsDefined()){
             auto lastViewPointGui = config["debug"]["lastViewPointGui"];
-            if(lastViewPointGui.IsDefined()){
+            if(lastViewPointGui.IsDefined() && database.viewpoints.back()->getImage()->cols != 0){
                 database._displayViewpointStructures(database.viewpoints.back().get(), lastViewPointGui["structureSizeMin"].as<int>());
                 cv::waitKey(100); //Wait 100 ms give opencv the time to display the GUI
             }
