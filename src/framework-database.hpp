@@ -49,6 +49,7 @@ public:
     double configRadius;
     double meanValue;
     double stdValue;
+    double maxValue;
 
 public:
     Database(double initialError, double initialDisparity, double initialRadius);

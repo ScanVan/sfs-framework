@@ -130,7 +130,7 @@ int main(int argc, char *argv[]){
                 database.computeOptimals(loopState,loopMinor);
                 database.computeRadii(loopState,loopMinor);
                 database.computeFiltersRadialClamp(loopState);
-                database.computeFiltersRadialStatistics(loopState);
+                //database.computeFiltersRadialStatistics(loopState);
                 database.computeFiltersDisparityStatistics(loopState);
 
                 // development feature - begin

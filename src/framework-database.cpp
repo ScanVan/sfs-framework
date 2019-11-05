@@ -35,9 +35,9 @@ double Database::getConfigError(){
     return configError;
 }
 
-/* encapsulation fault */
+/* encapsulation fault - adding disparity in addition to position */
 double Database::getError(){
-    return (viewpoints.back()->position - viewpoints.front()->position).norm();
+    return (viewpoints.back()->position - viewpoints.front()->position).norm() + maxValue;
 }
 
 double Database::getTranslationMeanValue(){
@@ -264,7 +264,7 @@ void Database::computeFiltersRadialClamp(int loopState){
     }
 
     while (i < j){
-        if (structures[i]->filterRadiusClamp(1.0,indexRange)==false){
+        if (structures[i]->filterRadiusClamp(0.0,indexRange)==false){
             structures[i]->setFeaturesState();
             std::swap(structures[i],structures[--j]);
         }else{ i++; }
@@ -303,6 +303,8 @@ void Database::computeFiltersDisparityStatistics(int loopState){
 
     computeFiltersStatistics(&Feature::getDisparity,indexRange);
 
+    return;
+
     while (i < j){
         if (structures[i]->filterDisparityStatistics(stdValue*configDisparity, indexRange)==false){
             structures[i]->setFeaturesState();
@@ -328,11 +330,15 @@ void Database::computeFiltersStatistics(double(Feature::*getValue)(), int indexR
     }
     meanValue/=double(countValue);
     stdValue=0.;
+    maxValue=0.;
     for(auto & element: structures){
         for(auto & feature: element->features){
             if(feature->getViewpoint()->getIndex()>=indexRange){
                 componentValue=(feature->*getValue)()-meanValue;
                 stdValue+=componentValue*componentValue;
+                if(maxValue<(feature->*getValue)()){
+                    maxValue=(feature->*getValue)();
+                }
             }
         }
     }
