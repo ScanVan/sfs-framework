@@ -59,6 +59,8 @@ void Viewpoint::allocateFeaturesFromCvFeatures(){
         features[i].setRadius(1., 0.);
         features[i].setViewpointPtr(this);
         features[i].setStructurePtr(NULL);
+        auto color = image.empty() ? cv::Vec3b(255,255,255) : image.at<cv::Vec3b>(cvFeatures[i].pt.y, cvFeatures[i].pt.x);
+        features[i].setColor(color);
 	}
 }
 

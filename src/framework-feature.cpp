@@ -50,6 +50,15 @@ void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
     direction=convertCartesian2Spherical(x,y,imageWidth,imageHeight);
 }
 
+
+void Feature::setColor(cv::Vec3b color){
+    this->color = color;
+}
+
+cv::Vec3b Feature::getColor(){
+    return this->color;
+}
+
 void Feature::setRadius(double newRadius, double newDisparity){
     radius=newRadius;
     disparity=abs(newDisparity/newRadius);
