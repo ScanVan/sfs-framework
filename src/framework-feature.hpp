@@ -23,6 +23,7 @@
 
 #include <Eigen/Core>
 #include "framework-utiles.hpp"
+#include <opencv2/core.hpp>
 
 class Viewpoint;
 class Structure;
@@ -37,16 +38,19 @@ public:
 	double radius;
 	double disparity;
 	uint32_t inliner; /* redundant with selection per features count and deletion trough filtering ? + encapsulation fault */
+	cv::Vec3b color;
 
 public:
     Eigen::Vector3d * getDirection();
     Eigen::Vector3d * getModel();
     double getRadius();
     double getDisparity();
+    cv::Vec3b getColor();
     Viewpoint * getViewpoint();
     Structure * getStructure();
     void setFeature(double x, double y, int imageWidth, int imageHeight);
     void setRadius(double newRadius, double newDisparity);
+    void setColor(cv::Vec3b color);
     void setViewpointPtr(Viewpoint * newViewpoint);
     void setStructurePtr(Structure * newStructure);
     void setDirection(Eigen::Vector3d newDirection); /* only used for synthetic models */
