@@ -505,7 +505,7 @@ void Database::_exportState(std::string path, int major, int iter){
 
 // Note : this function does not respect encapsulation (development function) - need to be removed
 void Database::_exportMatchDistribution(std::string path, unsigned int major, std::string type){
-    if(viewpoints.size()<2){
+    if(viewpoints.size()<DB_LOOP_BOOT_COUNT){
         return;
     }
     std::fstream stream;
