@@ -34,9 +34,7 @@ ViewPointSourceFs::ViewPointSourceFs(std::vector<std::string> files){
 	this->fileIndex = 0;
 }
 
-ViewPointSourceFs::ViewPointSourceFs(std::string folder, double scale) : scale(scale){
-	this->fileIndex = 0;
-
+ViewPointSourceFs::ViewPointSourceFs(std::string folder, double scale, std::string firstFile, std::string lastFile) : scale(scale){
 	// read the contents of the directory where the images are located
 	fs::path pt = fs::u8path(folder);
 	for (auto& p : fs::directory_iterator(pt)) {
@@ -48,6 +46,15 @@ ViewPointSourceFs::ViewPointSourceFs(std::string folder, double scale) : scale(s
 
 	// sort the filenames alphabetically
 	std::sort(files.begin(), files.end());
+
+	firstFile = firstFile == "" ? files.front() : folder + "/" + firstFile;
+	lastFile = lastFile == "" ? files.back() : folder + "/" + lastFile;
+
+    fileIndex = findInVector(files, firstFile).second;
+    fileLastIndex = findInVector(files, lastFile).second;
+
+    if(fileIndex < 0) throw std::runtime_error("can't fine first file");
+    if(fileLastIndex < 0) throw std::runtime_error("can't fine last file");
 }
 
 std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
@@ -89,7 +96,7 @@ std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
 }
 
 bool ViewPointSourceFs::hasNext(){
-	return fileIndex != files.size();
+	return fileIndex <= fileLastIndex;
 }
 
 

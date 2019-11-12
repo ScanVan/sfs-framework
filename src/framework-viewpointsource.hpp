@@ -40,12 +40,13 @@ public:
 class ViewPointSourceFs : public ViewPointSource{
 private:
 	std::vector<std::string> files;
-	uint32_t fileIndex;
+    uint32_t fileIndex;
+    uint32_t fileLastIndex;
     double scale = 1.0;
 
 public:
 	ViewPointSourceFs(std::vector<std::string> files);
-	ViewPointSourceFs(std::string folder, double scale);
+	ViewPointSourceFs(std::string folder, double scale, std::string firstFile, std::string lastFile);
 	virtual ~ViewPointSourceFs() {}
 	virtual std::shared_ptr<Viewpoint> next();
 	virtual bool hasNext();
