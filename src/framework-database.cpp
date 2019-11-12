@@ -203,7 +203,8 @@ void Database::computePoses(int loopState){
     for(unsigned int i(mode); i<transforms.size(); i++){
         transforms[i]->computePose(viewpoints[i].get(),viewpoints[i+1].get());
     }
-    normalValue=getTranslationMeanValue();
+    normalValue=getTranslationMeanValue(); /* could be source of instabilities : not sure */
+    //normalValue=transforms[0]->translation.norm(); /* proposed correction */
     for(auto & element: transforms){
         element->setTranslationScale(normalValue);
     }
@@ -303,12 +304,16 @@ void Database::computeFiltersDisparityStatistics(int loopState){
 
     computeFiltersStatistics(&Feature::getDisparity,indexRange);
 
-    return;
+    if(loopState!=DB_LOOP_MODE_LAST){
+        return;
+    }
 
     while (i < j){
+        if(structures[i]->getBootstrap(viewpoints.size()-1)==false){
         if (structures[i]->filterDisparityStatistics(stdValue*configDisparity, indexRange)==false){
             structures[i]->setFeaturesState();
             std::swap(structures[i],structures[--j]);
+        }else{ i++; }
         }else{ i++; }
     }
     std::cerr << "Disp:s : " << j << "/" << structures.size() << std::endl;
