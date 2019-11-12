@@ -103,6 +103,7 @@ int main(int argc, char *argv[]){
         // wait bootstrap image count
         if(database.getBootstrap()){
             // avoid optimisation
+            exitRelease();
             continue;
         }
 
@@ -150,7 +151,7 @@ int main(int argc, char *argv[]){
                 std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopError << std::endl;
 
                 // optimisation loop management
-                if(fabs( loopError - pushError ) < database.getConfigError()) {
+                if(fabs( loopError - pushError ) < database.getConfigError() || isnan(loopError)) {
                     loopFlag = false;
                 } else {
                     pushError=loopError;
@@ -191,6 +192,7 @@ int main(int argc, char *argv[]){
         // update major iterator
         loopMajor ++;
 
+        exitRelease();
     }
 
     // system message

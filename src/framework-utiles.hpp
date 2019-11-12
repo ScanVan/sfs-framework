@@ -108,3 +108,7 @@ template<typename T> std::pair<bool, int> findInVector(
 
     return result;
 }
+
+
+void exitRetain();
+void exitRelease();
