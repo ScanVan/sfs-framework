@@ -15,4 +15,4 @@ yaml-merge $BASE_YAML $IN_YAML > $FULL_YAML
 
 cd $WORK_PATH
 echo $(pwd)
-$FLOW_EXE full.yaml
+$FLOW_EXE full.yaml > log.txt
