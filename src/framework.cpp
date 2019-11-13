@@ -151,7 +151,7 @@ int main(int argc, char *argv[]){
                 std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopError << std::endl;
 
                 // optimisation loop management
-                if(fabs( loopError - pushError ) < database.getConfigError() || isnan(loopError)) {
+                if(fabs( loopError - pushError ) < database.getConfigError() || std::isnan(loopError)) {
                     loopFlag = false;
                 } else {
                     pushError=loopError;
