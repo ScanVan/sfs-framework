@@ -14,6 +14,7 @@ FrontendPicture::FrontendPicture(ViewPointSource * source, cv::Mat mask, ThreadP
 
 
 void FrontendPicture::featureExtraction(){
+    exitRetain();
 	while(this->source->hasNext()){
 		//Collect the next view point and add it into the database
 		auto newViewpoint = source->next();
@@ -21,8 +22,10 @@ void FrontendPicture::featureExtraction(){
 			akazeFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor());
 			return newViewpoint;
 		});
+	    exitRetain();
 		featureExtractionQueue.push(m);
 	}
+	exitRelease();
 }
 
 
@@ -49,6 +52,7 @@ bool FrontendPicture::next() {
 		);
 //			std::cout << score << std::endl;
 		if(score < 0.0005){
+		    exitRelease();
 			return false;
 		}
 	}
@@ -127,14 +131,18 @@ FrontendCloudpoint::FrontendCloudpoint(
 		if(!(o >> p[0] >> p[1] >> p[2])) break;
 		odometry.push_back(p);
 	}
+	exitRetain();
 }
 
 bool FrontendCloudpoint::next(){
 	if(viewpointIndex == odometry.size()) return false;
+	exitRetain();
 	auto newViewpoint = std::make_shared<Viewpoint>();
 
 	//Extract feature from nearby model points
 	auto o = odometry[viewpointIndex++];
+    if(viewpointIndex == odometry.size()) exitRelease();
+
 //	auto origin = odometry[0];
     Eigen::Matrix3d randRot(
         Eigen::AngleAxisd((2.0*rand()*M_PI)/RAND_MAX, Eigen::Vector3d::UnitX()) *
@@ -188,6 +196,5 @@ bool FrontendCloudpoint::next(){
 	delete[] correlations;
 
 	database->addViewpoint(newViewpoint);
-
 	return true;
 }

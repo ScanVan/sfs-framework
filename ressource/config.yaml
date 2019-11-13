@@ -4,6 +4,8 @@ frontend:
     type: FOLDER
     path: /home/dolu/pro/scanvan/dataset/d2
     mask: /home/dolu/pro/scanvan/dataset/mask.png
+#    first: 20190319-103452-344895.bmp
+#    last: 20190319-103506-594998.bmp
     scale: 1.0
 
 #To use datapoints as viewpoint source, replace the frontend stuff with

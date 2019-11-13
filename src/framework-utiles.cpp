@@ -45,3 +45,20 @@ void profile(std::string msg){
     specOld = specNew;
     msgLast = msg;
 }
+
+std::mutex exitMutex;
+int exitCounter = 0;
+
+void exitRetain(){
+    exitMutex.lock();
+    exitCounter++;
+    exitMutex.unlock();
+}
+
+
+void exitRelease(){
+    exitMutex.lock();
+    exitCounter--;
+    if(exitCounter <= 0) exit(0);
+    exitMutex.unlock();
+}

@@ -39,14 +39,17 @@ int main(int argc, char *argv[]){
     Frontend *frontend = NULL;
     auto frontendType = config["frontend"]["type"].as<std::string>();
     if(frontendType == "IMAGE"){
+        auto fs = config["frontend"]["source"];
         ViewPointSource *source = NULL;
-        auto sourceType = config["frontend"]["source"]["type"].as<std::string>();
+        auto sourceType = fs["type"].as<std::string>();
         if(sourceType == "FOLDER") {
-            source = new ViewPointSourceFs(config["frontend"]["source"]["path"].as<std::string>(), config["frontend"]["source"]["scale"].as<double>());
+            std::string firstFile =  fs["first"].IsDefined() ? fs["first"].as<std::string>() : "";
+            std::string lastFile = fs["last"].IsDefined() ? fs["last"].as<std::string>() : "";
+            source = new ViewPointSourceFs(fs["path"].as<std::string>(), fs["scale"].as<double>(), firstFile, lastFile);
         }
-        auto mask = cv::imread(config["frontend"]["source"]["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
-        if(config["frontend"]["source"]["scale"].IsDefined()){
-            auto scale = config["frontend"]["source"]["scale"].as<double>();
+        auto mask = cv::imread(fs["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
+        if(fs["scale"].IsDefined()){
+            auto scale = fs["scale"].as<double>();
             cv::resize(mask, mask, cv::Size(), scale, scale, cv::INTER_AREA );
         }
         frontend = new FrontendPicture(source, mask, &threadpool, &database);
@@ -100,6 +103,7 @@ int main(int argc, char *argv[]){
         // wait bootstrap image count
         if(database.getBootstrap()){
             // avoid optimisation
+            exitRelease();
             continue;
         }
 
@@ -147,7 +151,7 @@ int main(int argc, char *argv[]){
                 std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopError << std::endl;
 
                 // optimisation loop management
-                if(fabs( loopError - pushError ) < database.getConfigError()) {
+                if(fabs( loopError - pushError ) < database.getConfigError() || isnan(loopError)) {
                     loopFlag = false;
                 } else {
                     pushError=loopError;
@@ -187,6 +191,7 @@ int main(int argc, char *argv[]){
         // update major iterator
         loopMajor ++;
 
+        exitRelease();
     }
 
     // system message
