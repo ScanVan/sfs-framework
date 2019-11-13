@@ -7,7 +7,9 @@ FLOW_EXE=$4
 NPROC=$5
 TASKS=$WORK_PATH/tasks
 
-rm $TASKS
+rm -rf $WORK_PATH
+mkdir $WORK_PATH
+
 for f in $(cd $TESTS_PATH; find . -name '*.yaml'); do 
     echo "./single.bash $TESTS_PATH/$f $BASE_YAML $WORK_PATH/$f $FLOW_EXE" >> $TASKS
 done
