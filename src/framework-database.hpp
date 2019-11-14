@@ -44,6 +44,11 @@ public:
 	std::vector<std::shared_ptr<Viewpoint>> viewpoints;
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Structure>> structures;
+
+    std::vector<Structure*> structures_s; /* experimental - not used yet */
+    int structs_seg_a; /* experimental - not used yet */
+    int structs_seg_b; /* experimental - not used yet */
+
     double configError;
     double configDisparity;
     double configRadius;
@@ -60,13 +65,15 @@ public:
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
+    void prepareStructure(); /* experimental - not used yet */
     void computeModels();
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);
     void computePoses(int loopState);
     void computeFrames();
-    void computeOptimals(long loopState, int loopIteration);
-    void computeRadii(long loopState, int loopIteration);
+    void computeOptimals(long loopState);
+    void computeRadii(long loopState);
+    void computeDisparityStatistics(long loopState);
 //    void deleteAndUnlinkStructure(int id); /* need decision */
     void computeFiltersRadialClamp(int loopState);
     void computeFiltersRadialStatistics(int loopState);

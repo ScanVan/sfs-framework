@@ -37,7 +37,7 @@ double Database::getConfigError(){
 
 /* encapsulation fault - adding disparity in addition to position */
 double Database::getError(){
-    return (viewpoints.back()->position - viewpoints.front()->position).norm() + maxValue;
+    return (viewpoints.back()->position - viewpoints.front()->position).norm() + meanValue;
 }
 
 double Database::getTranslationMeanValue(){
@@ -151,6 +151,38 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 
 }
 
+/* experimental - not used yet */
+void Database::prepareStructure(){
+    int index(0);
+    int last(structures.size()-1);
+
+    structures_s.resize( structures.size() );
+
+    for(unsigned int i(0); i<structures.size(); i++){
+        if(structures[i]->features.size()==2){
+            structures_s[index++] = structures[i].get();
+            structs_seg_a++;
+        }
+    }
+
+    for(unsigned int i(0); i<structures.size(); i++){
+        if(structures[i]->features.size()>2){
+            if(structures[i]->getHasLastViewpoint(last)==true){
+                structures_s[index++] = structures[i].get();
+                structs_seg_b++;
+            }
+        }
+    }
+
+    for(unsigned int i(0); i<structures.size(); i++){
+        if(structures[i]->features.size()>2){
+            if(structures[i]->getHasLastViewpoint(last)==false){
+                structures_s[index++] = structures[i].get();
+            }
+        }
+    }
+}
+
 void Database::computeModels(){
     for(auto & structure: structures){
         structure->computeModel();
@@ -217,12 +249,12 @@ void Database::computeFrames(){
     }
 }
 
-void Database::computeOptimals(long loopState, int loopIteration){
+void Database::computeOptimals(long loopState){
     if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){
         for(auto & element: structures){
             element->computeOptimalPosition();
         }
-    }else if((loopState==DB_LOOP_MODE_LAST)&&(loopIteration>1)){
+    }else if(loopState==DB_LOOP_MODE_LAST){
         for(auto & element: structures){
             if(element->getBootstrap(viewpoints.size()-1)==true){
                 element->computeOptimalPosition();
@@ -231,7 +263,7 @@ void Database::computeOptimals(long loopState, int loopIteration){
     }
 }
 
-void Database::computeRadii(long loopState, int loopIteration){
+void Database::computeRadii(long loopState){
     int mode(0);
     if(loopState==DB_LOOP_MODE_LAST){
         mode=viewpoints.size()-1;
@@ -240,11 +272,20 @@ void Database::computeRadii(long loopState, int loopIteration){
         if(element->getBootstrap(viewpoints.size()-1)==false){
             element->computeRadius(mode);
         }else{
-            if(loopIteration>1){
-                element->computeRadius(mode-1);
-            }
+            element->computeRadius(mode-1);
         }
     }
+}
+
+void Database::computeDisparityStatistics(long loopState) {
+    int indexRange(0);
+
+    if(loopState==DB_LOOP_MODE_LAST){
+        indexRange=viewpoints.size()-1;
+    }
+
+    computeFiltersStatistics(&Feature::getDisparity,indexRange);
+
 }
 
 //Issue index of following elements will be modifed, can't be use in computeFilter as this
@@ -261,7 +302,7 @@ void Database::computeFiltersRadialClamp(int loopState){
     int indexRange(0);
 
     if(loopState==DB_LOOP_MODE_LAST){
-        indexRange=viewpoints.size()-1;
+        indexRange=viewpoints.size()-2;
     }
 
     while (i < j){
@@ -304,10 +345,6 @@ void Database::computeFiltersDisparityStatistics(int loopState){
 
     computeFiltersStatistics(&Feature::getDisparity,indexRange);
 
-    if(loopState!=DB_LOOP_MODE_LAST){
-        return;
-    }
-
     while (i < j){
         if(structures[i]->getBootstrap(viewpoints.size()-1)==false){
         if (structures[i]->filterDisparityStatistics(stdValue*configDisparity, indexRange)==false){
@@ -320,7 +357,7 @@ void Database::computeFiltersDisparityStatistics(int loopState){
     structures.resize(j);
 }
 
-/* this member should to be private */
+/* this member should be private */
 void Database::computeFiltersStatistics(double(Feature::*getValue)(), int indexRange){
     unsigned long countValue(0);
     double componentValue(0.);

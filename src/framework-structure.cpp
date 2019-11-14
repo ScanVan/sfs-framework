@@ -40,6 +40,15 @@ bool Structure::getBootstrap(int lastViewpointIndex){
     return false;
 }
 
+bool Structure::getHasLastViewpoint(int lastViewpointIndex){
+    for(auto & feature: features){
+        if(feature->getViewpoint()->getIndex()==lastViewpointIndex){
+            return true;
+        }
+    }
+    return false;
+}
+
 void Structure::setFeaturesState(){
     for(auto & element: features){
         element->setStructurePtr(NULL);

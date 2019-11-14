@@ -131,11 +131,13 @@ int main(int argc, char *argv[]){
                 database.computeCorrelations(loopState);
                 database.computePoses(loopState);
                 database.computeFrames();
-                database.computeOptimals(loopState,loopMinor);
-                database.computeRadii(loopState,loopMinor);
+                database.computeOptimals(loopState);
+                database.computeRadii(loopState);
+
                 database.computeFiltersRadialClamp(loopState);
-                //database.computeFiltersRadialStatistics(loopState);
+                database.computeFiltersRadialStatistics(loopState);
                 database.computeFiltersDisparityStatistics(loopState);
+                database.computeDisparityStatistics(loopState);
 
                 // development feature - begin
                 //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
@@ -151,7 +153,7 @@ int main(int argc, char *argv[]){
                 std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopError << std::endl;
 
                 // optimisation loop management
-                if(fabs( loopError - pushError ) < database.getConfigError() || std::isnan(loopError)) {
+                if((fabs(loopError - pushError) < database.getConfigError()) || std::isnan(loopError)) {
                     loopFlag = false;
                 } else {
                     pushError=loopError;
