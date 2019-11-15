@@ -203,7 +203,24 @@ void Database::prepareStructure(){
 
 }
 
+void Database::removeStructure(unsigned int structureIndex){
+
+    // Remove structure
+    for(unsigned int i(structureIndex+1); i<structures.size();i++){
+        structures[i-1]=structures[i];
+    }
+
+    // Resize array
+    structures.pop_back();
+
+}
+
 void Database::computeModels(){
+
+    // Compute model for all features of all structures
+    //
+    // Translation are renormalised taking into account the last estimated one
+    // leading to a re-computation of all optimal intersection and radius.
     for(auto & structure: structures){
         structure->computeModel();
     }

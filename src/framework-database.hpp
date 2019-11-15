@@ -45,8 +45,8 @@ public:
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Structure>> structures;
 
-    int sortStructTypeA; /* experimental - not used yet */
-    int sortStructTypeB; /* experimental - not used yet */
+    int sortStructTypeA;
+    int sortStructTypeB;
 
     double configError;
     double configDisparity;
@@ -64,7 +64,8 @@ public:
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
-    void prepareStructure(); /* experimental - not used yet */
+    void prepareStructure();
+    void removeStructure(unsigned int structureIndex);
     void computeModels();
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);
