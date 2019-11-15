@@ -377,7 +377,16 @@ void Database::computePoses(int loopState){
 }
 
 void Database::computeFrames(){
+
+    // Compute absolute frame for the viewpoints
+    //
+    // Need to be done for all viewpoint as the translations are re-normalised
+    // at each iteration
+
+    // Assign identity and zero position to first viewpoint
     viewpoints[0]->resetFrame();
+
+    // Compute viewpoint absolute orientation and position
     for(unsigned int i(0); i<transforms.size(); i++){
         transforms[i]->computeFrame(viewpoints[i].get(),viewpoints[i+1].get());
     }
