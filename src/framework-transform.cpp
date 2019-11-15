@@ -58,8 +58,8 @@ void Transform::computeCentroid(){
     centerSecond/=double(centerCount);
 }
 
-void Transform::computePose(Viewpoint * first, Viewpoint * second){
-    Eigen::JacobiSVD<Eigen::Matrix3d> svd( correlation, Eigen::ComputeFullU | Eigen::ComputeFullV );
+void Transform::computePose(){
+    Eigen::JacobiSVD<Eigen::Matrix3d> svd(correlation, Eigen::ComputeFullU | Eigen::ComputeFullV);
     rotation=svd.matrixV()*svd.matrixU().transpose();
     if (rotation.determinant()<0){
         std::cerr << "SVD fault" << std::endl;

@@ -43,7 +43,7 @@ public:
     void resetCorrelation();
     void resetCentroid();
     void computeCentroid();
-    void computePose(Viewpoint * first, Viewpoint * second);
+    void computePose();
     void computeFrame(Viewpoint * first, Viewpoint * second);
 };
 

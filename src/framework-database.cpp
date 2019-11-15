@@ -333,19 +333,47 @@ void Database::computeCorrelations(int loopState){
 }
 
 void Database::computePoses(int loopState){
+
+    // Active transformation start index
+    unsigned int transformationStart(0);
+
+    // Transformation translation mean value
     double normalValue(0.);
-    int mode(0);
-    if (loopState==DB_LOOP_MODE_LAST){
-        mode=transforms.size()-1;
+
+    // Check pipeline state
+    if(loopState==DB_LOOP_MODE_LAST){
+
+        // Update active transformation
+        transformationStart=transforms.size()-1;
+
     }
-    for(unsigned int i(mode); i<transforms.size(); i++){
-        transforms[i]->computePose(viewpoints[i].get(),viewpoints[i+1].get());
+
+    // Compute transformation (pose)
+    for(unsigned int i(transformationStart); i<transforms.size(); i++){
+        transforms[i]->computePose();
     }
-    normalValue=getTranslationMeanValue(); /* could be source of instabilities : not sure */
+
+    // Compute translation mean value
+    normalValue=getTranslationMeanValue();
+
+    // Renormalise transformations translation
+    for(unsigned int i(0); i<transforms.size(); i++){
+        transforms[i]->setTranslationScale(normalValue);
+    }
+
+    //double normalValue(0.);
+    //int mode(0);
+    //if (loopState==DB_LOOP_MODE_LAST){
+    //    mode=transforms.size()-1;
+    //}
+    //for(unsigned int i(mode); i<transforms.size(); i++){
+    //    transforms[i]->computePose(viewpoints[i].get(),viewpoints[i+1].get());
+    //}
+    //normalValue=getTranslationMeanValue(); /* could be source of instabilities : not sure */
     //normalValue=transforms[0]->translation.norm(); /* proposed correction */
-    for(auto & element: transforms){
-        element->setTranslationScale(normalValue);
-    }
+    //for(auto & element: transforms){
+    //    element->setTranslationScale(normalValue);
+    //}
 }
 
 void Database::computeFrames(){
