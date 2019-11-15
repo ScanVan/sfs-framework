@@ -45,8 +45,8 @@ public:
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Structure>> structures;
 
-    int sortStructTypeA;
-    int sortStructTypeB;
+    unsigned int sortStructTypeA;
+    unsigned int sortStructTypeB;
 
     double configError;
     double configDisparity;

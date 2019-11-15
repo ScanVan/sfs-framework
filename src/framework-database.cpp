@@ -227,40 +227,109 @@ void Database::computeModels(){
 }
 
 void Database::computeCentroids(int loopState){
-    for(auto & element: transforms){
-        element->resetCentroid();
-    }
+
+    // Active transformation start index
+    unsigned int transformationStart(0);
+
+    // Active structure range lower bound
+    unsigned int structureStart(0);
+
+    // Active structure range upper bound
+    unsigned int structureRange(structures.size());
+
+    // Check pipeline state
     if(loopState==DB_LOOP_MODE_LAST){
-        for(auto & element: structures){
-            if(element->getBootstrap(viewpoints.size()-1)==false){
-                element->computeCentroid(transforms);
-            }
-        }
-    }else{
-        for(auto & element: structures){
-            element->computeCentroid(transforms);
-        }
+
+        // Update active transformation
+        transformationStart=transforms.size()-1;
+
+        // Update structure range
+        structureStart=sortStructTypeA;
+        structureRange=sortStructTypeA+sortStructTypeB;
+
     }
-    for(auto & element: transforms){
-        element->computeCentroid();
+
+    // Reset active transformations centroid
+    for(unsigned int i(transformationStart); i<transforms.size(); i++){
+        transforms[i]->resetCentroid();
     }
+
+    // Compute centroid contribution for active structures
+    for(unsigned int i(structureStart); i<structureRange; i++) {
+        structures[i]->computeCentroid(transforms);
+    }
+
+    // Compute active transformation centroid
+    for(unsigned int i(transformationStart); i<transforms.size(); i++){
+        transforms[i]->computeCentroid();
+    }
+
+    //for(auto & element: transforms){
+    //    element->resetCentroid();
+    //}
+    //if(loopState==DB_LOOP_MODE_LAST){
+    //    for(auto & element: structures){
+    //        if(element->getBootstrap(viewpoints.size()-1)==false){
+    //            element->computeCentroid(transforms);
+    //        }
+    //    }
+    //}else{
+    //    for(auto & element: structures){
+    //        element->computeCentroid(transforms);
+    //    }
+    //}
+    //for(auto & element: transforms){
+    //    element->computeCentroid();
+    //}
 }
 
 void Database::computeCorrelations(int loopState){
-    for(auto & element: transforms){
-        element->resetCorrelation();
-    }
+
+    // Active transformation start index
+    unsigned int transformationStart(0);
+
+    // Active structure range lower bound
+    unsigned int structureStart(0);
+
+    // Active structure range upper bound
+    unsigned int structureRange(structures.size());
+
+    // Check pipeline state
     if(loopState==DB_LOOP_MODE_LAST){
-        for(auto & element: structures){
-            if(element->getBootstrap(viewpoints.size()-1)==false){
-                element->computeCorrelation(transforms);
-            }
-        }
-    }else{
-        for(auto & element: structures){
-            element->computeCorrelation(transforms);
-        }
+
+        // Update active transformation
+        transformationStart=transforms.size()-1;
+
+        // Update structure range
+        structureStart=sortStructTypeA;
+        structureRange=sortStructTypeA+sortStructTypeB;
+
     }
+
+    // Reset active transformation correlation matrix
+    for(unsigned int i(transformationStart); i<transforms.size(); i++){
+        transforms[i]->resetCorrelation();
+    }
+
+    // Compute correlation matrix correlation for active structures
+    for(unsigned int i(structureStart); i<structureRange; i++){
+        structures[i]->computeCorrelation(transforms);
+    }
+
+    //for(auto & element: transforms){
+    //    element->resetCorrelation();
+    //}
+    //if(loopState==DB_LOOP_MODE_LAST){
+    //    for(auto & element: structures){
+    //        if(element->getBootstrap(viewpoints.size()-1)==false){
+    //            element->computeCorrelation(transforms);
+    //        }
+    //    }
+    //}else{
+    //    for(auto & element: structures){
+    //        element->computeCorrelation(transforms);
+    //    }
+    //}
 }
 
 void Database::computePoses(int loopState){
