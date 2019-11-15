@@ -107,6 +107,9 @@ int main(int argc, char *argv[]){
             continue;
         }
 
+        // prepare structure vector - type-based segment sort
+        database.prepareStructure();
+
         // reset algorithm loop
         loopFlag=true;
         loopMinor=0;

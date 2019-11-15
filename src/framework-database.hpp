@@ -45,9 +45,8 @@ public:
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Structure>> structures;
 
-    std::vector<Structure*> structures_s; /* experimental - not used yet */
-    int structs_seg_a; /* experimental - not used yet */
-    int structs_seg_b; /* experimental - not used yet */
+    int sortStructTypeA; /* experimental - not used yet */
+    int sortStructTypeB; /* experimental - not used yet */
 
     double configError;
     double configDisparity;

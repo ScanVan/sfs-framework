@@ -153,34 +153,54 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 
 /* experimental - not used yet */
 void Database::prepareStructure(){
-    int index(0);
-    int last(structures.size()-1);
 
-    structures_s.resize( structures.size() );
+    // Last viewpoint index
+    unsigned int lastViewpoint(viewpoints.size()-1);
 
-    for(unsigned int i(0); i<structures.size(); i++){
-        if(structures[i]->features.size()==2){
-            structures_s[index++] = structures[i].get();
-            structs_seg_a++;
-        }
-    }
+    // Continuous indexation
+    unsigned int index(0);
 
-    for(unsigned int i(0); i<structures.size(); i++){
-        if(structures[i]->features.size()>2){
-            if(structures[i]->getHasLastViewpoint(last)==true){
-                structures_s[index++] = structures[i].get();
-                structs_seg_b++;
+    // Copy structure vector
+    std::vector<std::shared_ptr<Structure>> unsorted(structures);
+
+    sortStructTypeA=0;
+    sortStructTypeB=0;
+
+    // Type-based detection - Type A
+    for(auto & structure: unsorted){
+        if(structure->getFeaturesCount()==2){
+            if(structure->getHasLastViewpoint(lastViewpoint)==true){
+                structures[index++]=structure;
+                sortStructTypeA++;
             }
         }
     }
 
-    for(unsigned int i(0); i<structures.size(); i++){
-        if(structures[i]->features.size()>2){
-            if(structures[i]->getHasLastViewpoint(last)==false){
-                structures_s[index++] = structures[i].get();
+    // Type-based detection - Type B
+    for(auto & structure: unsorted){
+        if(structure->getFeaturesCount()>2){
+            if(structure->getHasLastViewpoint(lastViewpoint)==true){
+                structures[index++]=structure;
+                sortStructTypeB++;
             }
         }
     }
+
+    // Type-based detection - Type C
+    for(auto & structure: unsorted){
+        if(structure->getHasLastViewpoint(lastViewpoint)==false){
+            structures[index++]=structure;
+        }
+    }
+
+    // development feature - begin
+    if(index!=structures.size()){
+        std::cerr << "Fault : " << index << " vs " << structures.size() << std::endl;
+    } else {
+        std::cerr << "Valid" << std::endl;
+    }
+    // development feature - end
+
 }
 
 void Database::computeModels(){
