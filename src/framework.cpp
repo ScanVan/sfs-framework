@@ -138,9 +138,15 @@ int main(int argc, char *argv[]){
                 database.computeRadii(loopState);
 
                 database.computeFiltersRadialClamp(loopState);
+                database.computeStatistics(loopState,&Feature::getRadius);
                 database.computeFiltersRadialStatistics(loopState);
+                database.computeStatistics(loopState,&Feature::getDisparity);
                 database.computeFiltersDisparityStatistics(loopState);
-                database.computeDisparityStatistics(loopState);
+                database.computeStatistics(loopState,&Feature::getDisparity);
+
+                // development feature - begin
+                //database._sanityCheckStructure();
+                // development feature - end
 
                 // development feature - begin
                 //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);

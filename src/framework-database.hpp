@@ -73,12 +73,11 @@ public:
     void computeFrames();
     void computeOptimals(long loopState);
     void computeRadii(long loopState);
-    void computeDisparityStatistics(long loopState);
+    void computeStatistics(long loopState, double(Feature::*getValue)());
 //    void deleteAndUnlinkStructure(int id); /* need decision */
     void computeFiltersRadialClamp(int loopState);
     void computeFiltersRadialStatistics(int loopState);
     void computeFiltersDisparityStatistics(int loopState);
-    void computeFiltersStatistics(double(Feature::*getValue)(), int indexRange);
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);
     Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();} /* need deletion */
@@ -86,6 +85,7 @@ public:
 public:
     void _displayViewpointStructures(Viewpoint *viewpoint, unsigned int structSizeMin);
     void _sanityCheck(bool inliner);
+    void _sanityCheckStructure();
     void _exportState(std::string path,int major, int iter); /* need deletion */
     void _exportMatchDistribution(std::string path, unsigned int major, std::string type); /* need deletion */
 

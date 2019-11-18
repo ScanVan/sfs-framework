@@ -44,8 +44,8 @@ public:
     void computeModel();
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
-    void computeOptimalPosition();
-    void computeRadius(long indexLimit);
+    void computeOptimalPosition(unsigned int ignoreViewpoint);
+    void computeRadius();
     bool filterRadiusClamp(double clampValue, int indexRange);
     bool filterRadiusStatistics(double meanValue, double stdValue, int indexRange);
     bool filterDisparityStatistics(double stdValue, int indexRange);
