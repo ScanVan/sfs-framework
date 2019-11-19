@@ -445,15 +445,6 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
 
 }
 
-//Issue index of following elements will be modifed, can't be use in computeFilter as this
-//void Database::deleteAndUnlinkStructure(int i){
-//    for(auto f : *structures[i]->getFeatures()){
-//        f->structure = NULL;
-//    }
-//    std::swap(structures[i],structures[structures.size()-1]);
-//  structures.resize(structures.size()-1);
-//}
-
 void Database::computeFiltersRadialClamp(int loopState){
 
     // Continuous indexation
