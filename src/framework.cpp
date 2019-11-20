@@ -138,10 +138,10 @@ int main(int argc, char *argv[]){
                 database.computeRadii(loopState);
 
                 database.computeFiltersRadialClamp(loopState);
-                database.computeStatistics(loopState,&Feature::getRadius);
-                database.computeFiltersRadialStatistics(loopState);
-                database.computeStatistics(loopState,&Feature::getDisparity);
-                database.computeFiltersDisparityStatistics(loopState);
+                //database.computeStatistics(loopState,&Feature::getRadius);
+                //database.computeFiltersRadialStatistics(loopState);
+                //database.computeStatistics(loopState,&Feature::getDisparity);
+                //database.computeFiltersDisparityStatistics(loopState);
                 database.computeStatistics(loopState,&Feature::getDisparity);
 
                 // development feature - begin

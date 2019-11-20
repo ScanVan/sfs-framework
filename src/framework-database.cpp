@@ -511,7 +511,9 @@ void Database::computeFiltersRadialStatistics(int loopState){
 
     // Apply filter condition
     for(unsigned int i(0); i<unfiltered.size(); i++){
-        if((i>=structureRange)||(unfiltered[i]->filterRadiusStatistics(meanValue, stdValue*configRadius,0)==true)){
+        //if((i>=structureRange)||(unfiltered[i]->filterRadiusStatistics(meanValue, stdValue*configRadius,0)==true)){
+        if((i>structureRange)||(unfiltered[i]->filterTriangulation(0.017453,2.0944)==true)){
+
             structures[index++]=unfiltered[i];
         }else{
             unfiltered[i]->setFeaturesState();

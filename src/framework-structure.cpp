@@ -154,3 +154,22 @@ bool Structure::filterDisparityStatistics(double stdValue, int indexRange){
     return true;
 }
 
+bool Structure::filterTriangulation(double const minAngle, double const maxAngle){
+    Eigen::Vector3d iVector;
+    Eigen::Vector3d jVector;
+    double angleValue(0.);
+    for(unsigned int i(0); i<features.size(); i++){
+        iVector=(*features[i]->getViewpoint()->getPosition())-position;
+        iVector/=iVector.norm();
+        for(unsigned int j(i+1); j<features.size(); j++){
+            jVector=(*features[j]->getViewpoint()->getPosition())-position;
+            jVector/=jVector.norm();
+            angleValue=acos(iVector.dot(jVector));
+            if((angleValue<minAngle)||(angleValue>maxAngle)){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
