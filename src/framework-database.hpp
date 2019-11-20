@@ -79,7 +79,7 @@ public:
     void computeFiltersDisparityStatistics(int loopState);
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);
-    Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();} /* need deletion */
+    Structure *newStructure(Viewpoint *originalViewpoint){ auto s = std::make_shared<Structure>(originalViewpoint); structures.push_back(s); return s.get();} /* need deletion */
 
 public:
     void _displayViewpointStructures(Viewpoint *viewpoint, unsigned int structSizeMin);

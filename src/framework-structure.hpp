@@ -32,9 +32,10 @@ class Structure {
 public:
     Eigen::Vector3d position;
     std::vector<Feature*> features;
+    Viewpoint *originalViewpoint;
 
 public:
-    //Structure() : flag(false) {}
+    Structure(Viewpoint *originalViewpoint) : originalViewpoint(originalViewpoint) {}
     Eigen::Vector3d * getPosition();
     int getFeaturesCount();
     bool getBootstrap(int lastViewpointIndex);
@@ -50,6 +51,7 @@ public:
     bool filterRadiusStatistics(double meanValue, double stdValue, int indexRange);
     bool filterDisparityStatistics(double stdValue, int indexRange);
     bool filterTriangulation(double const minAngle, double const maxAngle);
+    Viewpoint *getOriginalViewpoint() { return originalViewpoint; }
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */
 
 };

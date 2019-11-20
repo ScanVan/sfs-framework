@@ -106,7 +106,7 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
         switch(structuresCount){
             case 0: {
                 // no more needed - direct access to structure
-                structure = this->newStructure();
+                structure = this->newStructure(newViewpoint);
                 structureNewCount++;
             }break;
             case 1: {
