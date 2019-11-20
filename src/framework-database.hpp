@@ -65,7 +65,6 @@ public:
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
     void prepareStructure();
-    void removeStructure(unsigned int structureIndex);
     void computeModels();
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);

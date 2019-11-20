@@ -168,17 +168,15 @@ void Database::prepareStructure(){
 
     // Type-based detection - Type A
     for(auto & structure: unsorted){
-        if(structure->getFeaturesCount()==2){
-            if(structure->getHasLastViewpoint(lastViewpoint)==true){
-                structures[index++]=structure;
-                sortStructTypeA++;
-            }
+        if(structure->getLastViewpointCreated(lastViewpoint)==true){
+            structures[index++]=structure;
+            sortStructTypeA++;
         }
     }
 
     // Type-based detection - Type B
     for(auto & structure: unsorted){
-        if(structure->getFeaturesCount()>2){
+        if(structure->getLastViewpointCreated(lastViewpoint)==false){
             if(structure->getHasLastViewpoint(lastViewpoint)==true){
                 structures[index++]=structure;
                 sortStructTypeB++;
@@ -198,18 +196,6 @@ void Database::prepareStructure(){
         std::cerr << "Fault : " << index << " vs " << structures.size() << std::endl;
     }
     // development feature - end
-
-}
-
-void Database::removeStructure(unsigned int structureIndex){
-
-    // Remove structure
-    for(unsigned int i(structureIndex+1); i<structures.size();i++){
-        structures[i-1]=structures[i];
-    }
-
-    // Resize array
-    structures.pop_back();
 
 }
 
