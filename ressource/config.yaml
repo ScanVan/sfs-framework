@@ -28,6 +28,7 @@ export:
   path: /media/user/Documents/model
 
 debug:
+  structureImageDump:
   lastViewPointGui:
     structureSizeMin: 5
 

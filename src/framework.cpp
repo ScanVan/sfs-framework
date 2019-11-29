@@ -20,6 +20,9 @@
  */
 
 #include "framework.hpp"
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
 
 int main(int argc, char *argv[]){
     //profile("boot");
@@ -186,14 +189,29 @@ int main(int argc, char *argv[]){
         database._sanityCheck(inlinerEnabled);
         // development feature - end
 
+        bool allowDeallocateImages = true;
+
         if(config["debug"].IsDefined()){
             auto lastViewPointGui = config["debug"]["lastViewPointGui"];
             if(lastViewPointGui.IsDefined() && database.viewpoints.back()->getImage()->cols != 0){
                 database._displayViewpointStructures(database.viewpoints.back().get(), lastViewPointGui["structureSizeMin"].as<int>());
                 cv::waitKey(100); //Wait 100 ms give opencv the time to display the GUI
             }
+
+
+            if(config["debug"]["structureImageDump"].IsDefined()){
+                allowDeallocateImages = false;
+                for(auto viewpoint : database.viewpoints){
+                    auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
+                    auto folder = config["export"]["path"].as<std::string>() + "/viewpointStructuresImages";
+                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + ".png";
+                    fs::create_directories(folder);
+                    cv::imwrite(path, image);
+                }
+            }
         }
-        database.viewpoints.back()->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
+
+        if(allowDeallocateImages) database.viewpoints.back()->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
 
         // major iteration exportation : model and odometry
         database.exportModel   (config["export"]["path"].as<std::string>(),loopMajor);
