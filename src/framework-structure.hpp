@@ -48,9 +48,15 @@ public:
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition(unsigned int ignoreViewpoint);
     void computeRadius();
+
+    bool filterRadiusClamp2(double clampValue);
     bool filterRadiusClamp(double clampValue, int indexRange);
+
     bool filterRadiusStatistics(double meanValue, double stdValue, int indexRange);
+
     bool filterDisparityStatistics(double stdValue, int indexRange);
+    bool filterDisparityStatistics2(double stdValue, int indexRange);
+
     bool filterTriangulation(double const minAngle, double const maxAngle);
     Viewpoint *getOriginalViewpoint() { return originalViewpoint; }
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */

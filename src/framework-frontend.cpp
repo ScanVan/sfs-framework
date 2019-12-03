@@ -143,7 +143,6 @@ bool FrontendCloudpoint::next(){
 	auto o = odometry[viewpointIndex++];
     if(viewpointIndex == odometry.size()) exitRelease();
 
-//	auto origin = odometry[0];
     Eigen::Matrix3d randRot(
         Eigen::AngleAxisd((2.0*rand()*M_PI)/RAND_MAX, Eigen::Vector3d::UnitX()) *
         Eigen::AngleAxisd((2.0*rand()*M_PI)/RAND_MAX, Eigen::Vector3d::UnitY()) *
@@ -157,17 +156,14 @@ bool FrontendCloudpoint::next(){
 			auto noiseFactor = baseNoise + (1.0*rand()/RAND_MAX < badMatchRate ? badMatchNoise : 0);
 			auto noise = Eigen::Vector3d(distanceMax*noiseFactor*rand()/RAND_MAX,distanceMax*noiseFactor*rand()/RAND_MAX,distanceMax*noiseFactor*rand()/RAND_MAX);
 	        f.setDirection((randRot*(position + noise)).normalized());
-//	        f.setRadius(position.norm()+0.1, 0.);
 	        f.setRadius(1., 0.);
 	        f.setViewpointPtr(newViewpoint.get());
 	        f.setStructurePtr(NULL);
-            //f.setState(false);
 	        f.inliner = mid;
 			newViewpoint->addFeature(f);
 		}
 	}
 
-//	newViewpoint->setPose(Eigen::Matrix3d::Identity(), o-origin);
     newViewpoint->resetFrame();
 
 	std::vector<std::shared_ptr<Viewpoint>> localViewpoints;
@@ -179,16 +175,33 @@ bool FrontendCloudpoint::next(){
 	//Match local viewpoints to the new image
 	uint32_t *correlations = new uint32_t[newViewpointFeaturesCount*localViewpointsCount]; //-1 => empty
 	memset(correlations, -1, newViewpointFeaturesCount*localViewpointsCount*sizeof(uint32_t));
+
+    // loop on local viewpoint
 	for(uint32_t localViewpointIdx = 0; localViewpointIdx < localViewpointsCount; localViewpointIdx++){
+
+        // extract current local viewpoint
 		auto localViewpoint = localViewpoints[localViewpointIdx];
+
+        // loop on current local viewpoint features
 		for(uint32_t localFeatureIndex = 0;localFeatureIndex < localViewpoint->features.size();localFeatureIndex++){
+
+            // extract "current current" local viewpoint feature
 			auto localFeatureInliner = localViewpoint->features[localFeatureIndex].inliner;
+
+            // loop on new viewpoint features
 			for(uint32_t newFeatureIndex = 0;newFeatureIndex < newViewpoint->features.size();newFeatureIndex++){
+
+                // extract new viewpoint current feature
 				auto newFeatureInliner = newViewpoint->features[newFeatureIndex].inliner;
+
+                // compare feature point index in the source point cloud (synthetic model)
 				if(localFeatureInliner == newFeatureInliner){
+
+                    // update the feature correlation matrix
 					correlations[localViewpointIdx + newFeatureIndex*localViewpointsCount] = localFeatureIndex;
 				}
 			}
+
 		}
 	}
 

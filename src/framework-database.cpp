@@ -40,12 +40,16 @@ double Database::getError(){
     return (viewpoints.back()->position - viewpoints.front()->position).norm() + maxValue;
 }
 
-double Database::getTranslationMeanValue(){
-    double meanValue(0.);
-    for(auto & element: transforms){
-        meanValue+=element->getTranslation()->norm();
+void Database::getTranslationMeanValue(int loopState){
+    unsigned int structureRange(transforms.size());
+    if(loopState==DB_LOOP_MODE_LAST){
+        structureRange--;
     }
-    return meanValue/double(transforms.size());
+    transformMean=0.;
+    for(unsigned int i(0); i<structureRange; i++){
+        transformMean+=transforms[i]->getTranslation()->norm();
+    }
+    transformMean/=double(structureRange);
 }
 
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
@@ -70,6 +74,8 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
     uint32_t *viewpointsUsage = new uint32_t[viewpoints.size() + 1];
     memset(viewpointsUsage, -1, (viewpoints.size() + 1)*sizeof(uint32_t));
     newViewpoint->setIndex(viewpoints.size());
+
+    // loop on new viewpoint feature
     for(uint32_t queryIdx = 0;queryIdx < newViewpoint->features.size(); queryIdx++){
         uint32_t *correlationsPtr = correlations + queryIdx*localViewpointsCount; //Used to iterate over the given lines
 
@@ -102,6 +108,7 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 
         //Figure out which structure will be used to integrate the newViewpoint feature
         if(matchCount == 0) continue; //No match => no integration
+        //if(matchCount < 2) continue;
         Structure *structure = NULL;
         switch(structuresCount){
             case 0: {
@@ -290,9 +297,6 @@ void Database::computePoses(int loopState){
     // Active transformation start index
     unsigned int transformationStart(0);
 
-    // Transformation translation mean value
-    double normalValue(0.);
-
     // Check pipeline state
     if(loopState==DB_LOOP_MODE_LAST){
 
@@ -307,11 +311,11 @@ void Database::computePoses(int loopState){
     }
 
     // Compute translation mean value
-    normalValue=getTranslationMeanValue();
+    getTranslationMeanValue(loopState);
 
     // Renormalise transformations translation
     for(unsigned int i(0); i<transforms.size(); i++){
-        transforms[i]->setTranslationScale(normalValue);
+        transforms[i]->setTranslationScale(transformMean);
     }
 
 }
@@ -330,6 +334,7 @@ void Database::computeFrames(){
     for(unsigned int i(0); i<transforms.size(); i++){
         transforms[i]->computeFrame(viewpoints[i].get(),viewpoints[i+1].get());
     }
+
 }
 
 void Database::computeOptimals(long loopState){
@@ -445,7 +450,8 @@ void Database::computeFiltersRadialClamp(int loopState){
 
     // Apply filter condition on structures
     for(unsigned int i(0); i<unfiltered.size(); i++){
-        if(unfiltered[i]->filterRadiusClamp(0.,0)==true){
+        //if(unfiltered[i]->filterRadiusClamp(0.,0)==true){
+        if(unfiltered[i]->filterRadiusClamp2(0.)==true){
             structures[index++]=unfiltered[i];
         }else{
             unfiltered[i]->setFeaturesState();
@@ -551,7 +557,9 @@ void Database::computeFiltersDisparityStatistics(int loopState){
 
     // Apply filter condition
     for(unsigned int i(0); i<unfiltered.size(); i++){
-        if((i>=structureRange)||(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true)){
+        //if((i>=structureRange)||(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true)){
+        //if((i>=structureRange)||(unfiltered[i]->filterDisparityStatistics2(stdValue*configDisparity,0)==true)){
+        if(unfiltered[i]->filterDisparityStatistics2(stdValue*configDisparity,0)==true){
             structures[index++]=unfiltered[i];
         }else{
             unfiltered[i]->setFeaturesState();

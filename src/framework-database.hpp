@@ -48,6 +48,8 @@ public:
     unsigned int sortStructTypeA;
     unsigned int sortStructTypeB;
 
+    double transformMean;
+
     double configError;
     double configDisparity;
     double configRadius;
@@ -60,7 +62,7 @@ public:
     bool getBootstrap();
     double getConfigError();
     double getError();
-    double getTranslationMeanValue();
+    void getTranslationMeanValue(int loopState);
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);

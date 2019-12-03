@@ -163,7 +163,13 @@ int main(int argc, char *argv[]){
 
                 // optimisation loop management
                 if((fabs(loopError - pushError) < database.getConfigError()) || std::isnan(loopError)) {
-                    loopFlag = false;
+                    unsigned int pushCount(database.structures.size());
+                    database.computeFiltersDisparityStatistics(loopState);
+                    if(database.structures.size()==pushCount){
+                        loopFlag = false;
+                    }else{
+                        pushError=1.;
+                    }
                 } else {
                     pushError=loopError;
                 }
