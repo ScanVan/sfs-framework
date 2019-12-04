@@ -81,6 +81,8 @@ std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
 	assert(strptime(dateString.c_str(), "%Y-%m-%d-%H-%M-%S", &tm));
 	viewpoint->time = mktime(&tm);
 
+	viewpoint->uid = fileName.string();
+
 	fileIndex++;
 	return viewpoint;
 }
@@ -117,7 +119,7 @@ ViewPointSourceWithOdometry::ViewPointSourceWithOdometry(std::string viewpointsP
     }
 
     if(firstFile == "") fileIndex = 0;
-    if(lastFile == "") fileLastIndex = list.size();
+    if(lastFile == "") fileLastIndex = list.size()-1;
 
     if(fileIndex < 0) throw std::runtime_error("can't fine first file");
     if(fileLastIndex < 0) throw std::runtime_error("can't fine last file");
