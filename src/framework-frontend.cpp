@@ -152,14 +152,14 @@ bool FrontendCloudpoint::next(){
 		auto m = model[mid];
 		auto position = (m-o);
 		if((m-o).norm() < distanceMax){
-			Feature f;
+			auto f = new Feature();
 			auto noiseFactor = baseNoise + (1.0*rand()/RAND_MAX < badMatchRate ? badMatchNoise : 0);
 			auto noise = Eigen::Vector3d(distanceMax*noiseFactor*rand()/RAND_MAX,distanceMax*noiseFactor*rand()/RAND_MAX,distanceMax*noiseFactor*rand()/RAND_MAX);
-	        f.setDirection((randRot*(position + noise)).normalized());
-	        f.setRadius(1., 0.);
-	        f.setViewpointPtr(newViewpoint.get());
-	        f.setStructurePtr(NULL);
-	        f.inliner = mid;
+	        f->setDirection((randRot*(position + noise)).normalized());
+	        f->setRadius(1., 0.);
+	        f->setViewpointPtr(newViewpoint.get());
+	        f->setStructurePtr(NULL);
+	        f->inliner = mid;
 			newViewpoint->addFeature(f);
 		}
 	}
@@ -186,13 +186,13 @@ bool FrontendCloudpoint::next(){
 		for(uint32_t localFeatureIndex = 0;localFeatureIndex < localViewpoint->features.size();localFeatureIndex++){
 
             // extract "current current" local viewpoint feature
-			auto localFeatureInliner = localViewpoint->features[localFeatureIndex].inliner;
+			auto localFeatureInliner = localViewpoint->features[localFeatureIndex]->inliner;
 
             // loop on new viewpoint features
 			for(uint32_t newFeatureIndex = 0;newFeatureIndex < newViewpoint->features.size();newFeatureIndex++){
 
                 // extract new viewpoint current feature
-				auto newFeatureInliner = newViewpoint->features[newFeatureIndex].inliner;
+				auto newFeatureInliner = newViewpoint->features[newFeatureIndex]->inliner;
 
                 // compare feature point index in the source point cloud (synthetic model)
 				if(localFeatureInliner == newFeatureInliner){
@@ -248,23 +248,24 @@ bool FrontendDense::next() {
         cv::Mat stencil = cv::Mat::zeros(lastViewpoint->image.rows, lastViewpoint->image.cols, CV_8UC1);
 
         //Extend existing structures with lastViewpoint matches
-        for(auto &lastFeature: lastViewpoint->features) if(lastFeature.structure) {
+        for(auto lastFeature: lastViewpoint->features) if(lastFeature->structure) {
             //TODO use bilinear_sample
-            auto newPosition = lastFeature.position + Eigen::Vector2f(
-                u.at<double>(lastFeature.position.y(), lastFeature.position.x()),
-                v.at<double>(lastFeature.position.y(), lastFeature.position.x())
+            auto newPosition = lastFeature->position + Eigen::Vector2f(
+                u.at<double>(lastFeature->position.y(), lastFeature->position.x()),
+                v.at<double>(lastFeature->position.y(), lastFeature->position.x())
             );
             if(newPosition.x() < margin || newPosition.y() < margin || newPosition.x() >= newViewpoint->image.cols -margin || newPosition.y() >= newViewpoint->image.rows -margin) continue;
             if(!mask.at<uint8_t>(newPosition.y(), newPosition.x())) continue;
 
-            Feature newFeature;
-            newFeature.setFeature(newPosition.x(), newPosition.y(), newViewpoint->image.cols, newViewpoint->image.rows);
-            newFeature.setViewpointPtr(newViewpoint.get());
+            auto newFeature = new Feature();
+            newFeature->setFeature(newPosition.x(), newPosition.y(), newViewpoint->image.cols, newViewpoint->image.rows);
+            newFeature->setViewpointPtr(newViewpoint.get());
             auto color = newViewpoint->image.empty() ? cv::Vec3b(255,255,255) : newViewpoint->image.at<cv::Vec3b>(newPosition.y(), newPosition.x());
-            newFeature.setColor(color);
-            lastFeature.structure->addFeature(newViewpoint->addFeature(newFeature));
+            newFeature->setColor(color);
+            newViewpoint->addFeature(newFeature);
+            lastFeature->structure->addFeature(newFeature);
 
-            cv::circle(stencil, cv::Point(lastFeature.position.x(), lastFeature.position.y()), 2, cv::Scalar(255,255,255),1,cv::FILLED,0);
+            cv::circle(stencil, cv::Point(lastFeature->position.x(), lastFeature->position.y()), 2, cv::Scalar(255,255,255),1,cv::FILLED,0);
         }
 
         //Create new structure for empty area
@@ -282,22 +283,25 @@ bool FrontendDense::next() {
 
                     auto newStructure = database->newStructure(lastViewpoint.get());
 
-                    Feature lastFeature;
-                    lastFeature.setFeature(x, y, lastViewpoint->image.cols, lastViewpoint->image.rows);
-                    lastFeature.setViewpointPtr(lastViewpoint.get());
-                    lastFeature.setColor(lastViewpoint->image.empty() ? cv::Vec3b(255,255,255) : lastViewpoint->image.at<cv::Vec3b>(y, x));
-                    newStructure->addFeature(lastViewpoint->addFeature(lastFeature));
+                    auto lastFeature = new Feature();
+                    lastFeature->setFeature(x, y, lastViewpoint->image.cols, lastViewpoint->image.rows);
+                    lastFeature->setViewpointPtr(lastViewpoint.get());
+                    lastFeature->setColor(lastViewpoint->image.empty() ? cv::Vec3b(255,255,255) : lastViewpoint->image.at<cv::Vec3b>(y, x));
+                    lastViewpoint->addFeature(lastFeature);
+                    newStructure->addFeature(lastFeature);
 
-                    Feature newFeature;
-                    newFeature.setFeature(newPosition.y(), newPosition.x(), newViewpoint->image.cols, newViewpoint->image.rows);
-                    newFeature.setViewpointPtr(newViewpoint.get());
-                    newFeature.setColor(newViewpoint->image.empty() ? cv::Vec3b(255,255,255) : newViewpoint->image.at<cv::Vec3b>(newPosition.y(), newPosition.x()));
-                    newStructure->addFeature(newViewpoint->addFeature(newFeature));
+                    auto newFeature = new Feature();
+                    newFeature->setFeature(newPosition.x(), newPosition.y(), newViewpoint->image.cols, newViewpoint->image.rows);
+                    newFeature->setViewpointPtr(newViewpoint.get());
+                    newFeature->setColor(newViewpoint->image.empty() ? cv::Vec3b(255,255,255) : newViewpoint->image.at<cv::Vec3b>(newPosition.y(), newPosition.x()));
+                    newViewpoint->addFeature(newFeature);
+                    newStructure->addFeature(newFeature);
                 }
             }
         }
     }
 
+    newViewpoint->setIndex(database->viewpoints.size());
     database->addViewpoint(newViewpoint);
     exitRetain();
     if(!source->hasNext()) exitRelease();
