@@ -40,12 +40,16 @@ double Database::getError(){
     return (viewpoints.back()->position - viewpoints.front()->position).norm() + maxValue;
 }
 
-double Database::getTranslationMeanValue(){
-    double meanValue(0.);
-    for(auto & element: transforms){
-        meanValue+=element->getTranslation()->norm();
+void Database::getTranslationMeanValue(int loopState){
+    unsigned int structureRange(transforms.size());
+    if(loopState==DB_LOOP_MODE_LAST){
+        structureRange--;
     }
-    return meanValue/double(transforms.size());
+    transformMean=0.;
+    for(unsigned int i(0); i<structureRange; i++){
+        transformMean+=transforms[i]->getTranslation()->norm();
+    }
+    transformMean/=double(structureRange);
 }
 
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
@@ -70,6 +74,8 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
     uint32_t *viewpointsUsage = new uint32_t[viewpoints.size() + 1];
     memset(viewpointsUsage, -1, (viewpoints.size() + 1)*sizeof(uint32_t));
     newViewpoint->setIndex(viewpoints.size());
+
+    // loop on new viewpoint feature
     for(uint32_t queryIdx = 0;queryIdx < newViewpoint->features.size(); queryIdx++){
         uint32_t *correlationsPtr = correlations + queryIdx*localViewpointsCount; //Used to iterate over the given lines
 
@@ -102,6 +108,7 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 
         //Figure out which structure will be used to integrate the newViewpoint feature
         if(matchCount == 0) continue; //No match => no integration
+        //if(matchCount < 2) continue;
         Structure *structure = NULL;
         switch(structuresCount){
             case 0: {
@@ -199,15 +206,36 @@ void Database::prepareStructure(){
 
 }
 
-void Database::computeModels(){
+void Database::computeModels(int loopState){
 
     // Compute model for all features of all structures
     //
     // Translation are renormalised taking into account the last estimated one
     // leading to a re-computation of all optimal intersection and radius.
-    for(auto & structure: structures){
-        structure->computeModel();
+    //for(auto & structure: structures){
+    //    structure->computeModel();
+    //}
+
+    // DevNote : for type B structure, only the radius of the feature associated
+    // to last viewpoint has to be computed -> possible improvement
+
+    // Active structure upper bound
+    unsigned int structureRange(structures.size());
+
+    // check pipeline state
+    if(loopState==DB_LOOP_MODE_LAST){
+
+        // Update structure range
+        structureRange=sortStructTypeA+sortStructTypeB;
+
     }
+
+    // Updtae feature model position
+    # pragma omp parallel for
+    for(unsigned int i=0; i<structureRange; i++){
+        structures[i]->computeModel();
+    }
+
 }
 
 void Database::computeCentroids(int loopState){
@@ -234,7 +262,8 @@ void Database::computeCentroids(int loopState){
     }
 
     // Reset active transformations centroid
-    for(unsigned int i(transformationStart); i<transforms.size(); i++){
+    # pragma omp parallel for
+    for(unsigned int i=transformationStart; i<transforms.size(); i++){
         transforms[i]->resetCentroid();
     }
 
@@ -244,7 +273,8 @@ void Database::computeCentroids(int loopState){
     }
 
     // Compute active transformation centroid
-    for(unsigned int i(transformationStart); i<transforms.size(); i++){
+    # pragma omp parallel for
+    for(unsigned int i=transformationStart; i<transforms.size(); i++){
         transforms[i]->computeCentroid();
     }
 
@@ -274,7 +304,8 @@ void Database::computeCorrelations(int loopState){
     }
 
     // Reset active transformation correlation matrix
-    for(unsigned int i(transformationStart); i<transforms.size(); i++){
+    # pragma omp parallel for
+    for(unsigned int i=transformationStart; i<transforms.size(); i++){
         transforms[i]->resetCorrelation();
     }
 
@@ -290,9 +321,6 @@ void Database::computePoses(int loopState){
     // Active transformation start index
     unsigned int transformationStart(0);
 
-    // Transformation translation mean value
-    double normalValue(0.);
-
     // Check pipeline state
     if(loopState==DB_LOOP_MODE_LAST){
 
@@ -302,16 +330,17 @@ void Database::computePoses(int loopState){
     }
 
     // Compute transformation (pose)
-    for(unsigned int i(transformationStart); i<transforms.size(); i++){
+    # pragma omp parallel for
+    for(unsigned int i=transformationStart; i<transforms.size(); i++){
         transforms[i]->computePose();
     }
 
     // Compute translation mean value
-    normalValue=getTranslationMeanValue();
+    getTranslationMeanValue(loopState);
 
     // Renormalise transformations translation
     for(unsigned int i(0); i<transforms.size(); i++){
-        transforms[i]->setTranslationScale(normalValue);
+        transforms[i]->setTranslationScale(transformMean);
     }
 
 }
@@ -330,6 +359,7 @@ void Database::computeFrames(){
     for(unsigned int i(0); i<transforms.size(); i++){
         transforms[i]->computeFrame(viewpoints[i].get(),viewpoints[i+1].get());
     }
+
 }
 
 void Database::computeOptimals(long loopState){
@@ -342,8 +372,12 @@ void Database::computeOptimals(long loopState){
     // Active viewpoints stop index
     unsigned int viewpointLast(viewpoints.size()-1);
 
+    // Active structure range
+    unsigned int structureRange(structures.size());
+
     // Compute optimal structures position for type A
-    for(unsigned int i(0); i<sortStructTypeA; i++){
+    # pragma omp parallel for
+    for(unsigned int i=0; i<sortStructTypeA; i++){
         structures[i]->computeOptimalPosition(viewpointLast);
     }
 
@@ -353,10 +387,14 @@ void Database::computeOptimals(long loopState){
         // Update active viewpoints
         viewpointLast=viewpoints.size()-2;
 
+        // Update structure range //
+        structureRange=sortStructTypeA+sortStructTypeB;
+
     }
 
     // Compute optimal structures position for type B and C
-    for(unsigned int i(sortStructTypeA); i<structures.size(); i++){
+    # pragma omp parallel for
+    for(unsigned int i=sortStructTypeA; i<structureRange; i++){
         structures[i]->computeOptimalPosition(viewpointLast);
     }
 
@@ -369,8 +407,27 @@ void Database::computeRadii(long loopState){
     // Need to be done after structures optimal position computation. As the
     // optimal position is recomputed at each iteration, the radius correction
     // has to be made for each feature of each structure
+    //for(unsigned int i(0); i<structures.size(); i++){
+    //    structures[i]->computeRadius();
+    //}
 
-    for(unsigned int i(0); i<structures.size(); i++){
+    // DevNote : for type B structure, only the radius of the feature associated
+    // to last viewpoint has to be computed -> possible improvement
+
+    // Active structure upper bound
+    unsigned int structureRange(structures.size());
+
+    // check pipeline state
+    if(loopState==DB_LOOP_MODE_LAST){
+
+        // Update structure range
+        structureRange=sortStructTypeA+sortStructTypeB;
+
+    }
+
+    // Updtae feature model position
+    # pragma omp parallel for
+    for(unsigned int i=0; i<structureRange; i++){
         structures[i]->computeRadius();
     }
 
@@ -397,7 +454,7 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
         ignoreViewpoint=viewpoints.size()-1;
 
         // Update structures range
-        structureRange=sortStructTypeA;
+        structureRange=sortStructTypeA+sortStructTypeB;
 
     }
 
@@ -445,7 +502,8 @@ void Database::computeFiltersRadialClamp(int loopState){
 
     // Apply filter condition on structures
     for(unsigned int i(0); i<unfiltered.size(); i++){
-        if(unfiltered[i]->filterRadiusClamp(0.,0)==true){
+        //if(unfiltered[i]->filterRadiusClamp(0.,0)==true){
+        if(unfiltered[i]->filterRadiusClamp2(0.)==true){
             structures[index++]=unfiltered[i];
         }else{
             unfiltered[i]->setFeaturesState();
@@ -467,7 +525,7 @@ void Database::computeFiltersRadialClamp(int loopState){
     sortStructTypeB=trackB;
 
     // development feature - begin
-    std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
+    std::cerr << "R:R : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
     // development feature - end
 
 }
@@ -551,7 +609,9 @@ void Database::computeFiltersDisparityStatistics(int loopState){
 
     // Apply filter condition
     for(unsigned int i(0); i<unfiltered.size(); i++){
-        if((i>=structureRange)||(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true)){
+        //if((i>=structureRange)||(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true)){
+        //if((i>=structureRange)||(unfiltered[i]->filterDisparityStatistics2(stdValue*configDisparity,0)==true)){
+        if(unfiltered[i]->filterDisparityStatistics2(stdValue*configDisparity,0)==true){
             structures[index++]=unfiltered[i];
         }else{
             unfiltered[i]->setFeaturesState();
@@ -573,7 +633,7 @@ void Database::computeFiltersDisparityStatistics(int loopState){
     sortStructTypeB=trackB;
 
     // development feature - begin
-    std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
+    std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ") - (" << stdValue << ")" << std::endl;
     // development feature - end
 
 }
@@ -587,7 +647,11 @@ void Database::exportModel(std::string path, unsigned int major){
     }
     for(auto & element: structures){
         Eigen::Vector3d * position(element->getPosition());
+        if(element->features.size()==2){
+        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 255 0" << std::endl;
+        }else{
         exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 0 0" << std::endl;
+        }
     }
     exportStream.close();
 }
@@ -602,6 +666,24 @@ void Database::exportOdometry(std::string path, unsigned int major){
     for(auto & element: viewpoints){
         Eigen::Vector3d * position(element->getPosition());
         exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 255 255" << std::endl;
+    }
+    exportStream.close();
+}
+
+void Database::exportTransformation(std::string path, unsigned int major){
+    std::fstream exportStream;
+    exportStream.open(path+"/dev/"+std::to_string(major)+"_transformation.dat",std::ios::out);
+    if (exportStream.is_open() == false ){
+        std::cerr << "unable to create transformation file" << std::endl;
+    }
+    for(auto & viewpoint: viewpoints){
+        exportStream << viewpoint->uid << " ";
+        Eigen::Vector3d * position(viewpoint->getPosition());
+        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " ";
+        Eigen::Matrix3d orientation(viewpoint->orientation);
+        exportStream << orientation(0,0) << " " << orientation(0,1) << " " << orientation(0,2) << " ";
+        exportStream << orientation(1,0) << " " << orientation(1,1) << " " << orientation(1,2) << " ";
+        exportStream << orientation(2,0) << " " << orientation(2,1) << " " << orientation(2,2) << std::endl;
     }
     exportStream.close();
 }

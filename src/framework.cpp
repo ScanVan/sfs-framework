@@ -156,7 +156,7 @@ int main(int argc, char *argv[]){
             while ( loopFlag == true ) {
 
                 // algorithm core
-                database.computeModels();
+                database.computeModels(loopState);
                 database.computeCentroids(loopState);
                 database.computeCorrelations(loopState);
                 database.computePoses(loopState);
@@ -190,7 +190,17 @@ int main(int argc, char *argv[]){
 
                 // optimisation loop management
                 if((fabs(loopError - pushError) < database.getConfigError()) || std::isnan(loopError)) {
-                    loopFlag = false;
+                    if(loopState==DB_LOOP_MODE_FULL){
+                        loopFlag=false;
+                    }else{
+                        unsigned int pushCount(database.structures.size());
+                        database.computeFiltersDisparityStatistics(loopState);
+                        if(database.structures.size()==pushCount){
+                            loopFlag = false;
+                        }else{
+                            pushError=1.;
+                        }
+                    }
                 } else {
                     pushError=loopError;
                 }
@@ -238,8 +248,9 @@ int main(int argc, char *argv[]){
         if(allowDeallocateImages) database.viewpoints.back()->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
 
         // major iteration exportation : model and odometry
-        database.exportModel   (config["export"]["path"].as<std::string>(),loopMajor);
-        database.exportOdometry(config["export"]["path"].as<std::string>(),loopMajor);
+        database.exportModel         (config["export"]["path"].as<std::string>(),loopMajor);
+        database.exportOdometry      (config["export"]["path"].as<std::string>(),loopMajor);
+        database.exportTransformation(config["export"]["path"].as<std::string>(),loopMajor);
 
         // update major iterator
         loopMajor ++;
