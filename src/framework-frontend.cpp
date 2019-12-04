@@ -222,6 +222,7 @@ FrontendDense::FrontendDense(ViewPointSource * source, cv::Mat mask,Database *da
     database(database),
     ofCacheFolder(ofCacheFolder){
 
+    exitRetain();
 }
 
 
@@ -234,7 +235,16 @@ bool FrontendDense::next() {
     if(database->viewpoints.size() != 0){
         auto lastViewpoint = database->viewpoints.back();
         cv::Mat u,v;
-        ofCache(lastViewpoint->image, newViewpoint->image, u, v, ofCacheFolder); //TODO waning, last viewpoint may not have image
+
+        auto imageLast = cv::Mat();
+        lastViewpoint->image.convertTo( imageLast, CV_64FC3 );
+        imageLast /= 255.0;
+
+        auto imageNew = cv::Mat();
+        newViewpoint->image.convertTo( imageNew, CV_64FC3 );
+        imageNew /= 255.0;
+
+        ofCache(imageLast, imageNew, u, v, ofCacheFolder); //TODO waning, last viewpoint may not have image
         cv::Mat stencil = cv::Mat::zeros(lastViewpoint->image.rows, lastViewpoint->image.cols, CV_8UC1);
 
         //Extend existing structures with lastViewpoint matches
@@ -276,7 +286,7 @@ bool FrontendDense::next() {
                     lastFeature.setFeature(x, y, lastViewpoint->image.cols, lastViewpoint->image.rows);
                     lastFeature.setViewpointPtr(lastViewpoint.get());
                     lastFeature.setColor(lastViewpoint->image.empty() ? cv::Vec3b(255,255,255) : lastViewpoint->image.at<cv::Vec3b>(y, x));
-                    newStructure->addFeature(newViewpoint->addFeature(lastFeature));
+                    newStructure->addFeature(lastViewpoint->addFeature(lastFeature));
 
                     Feature newFeature;
                     newFeature.setFeature(newPosition.y(), newPosition.x(), newViewpoint->image.cols, newViewpoint->image.rows);
@@ -289,5 +299,7 @@ bool FrontendDense::next() {
     }
 
     database->addViewpoint(newViewpoint);
+    exitRetain();
+    if(!source->hasNext()) exitRelease();
     return true;
 }
