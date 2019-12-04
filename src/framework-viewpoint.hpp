@@ -63,7 +63,7 @@ public:
     void setImageDimension(int newWidth, int newHeight);
     void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
     void allocateFeaturesFromCvFeatures();
-    void addFeature(Feature f){ features.push_back(f); }
+    Feature* addFeature(Feature f){ features.push_back(f); return &features.back(); }
     double getSecondFrom(Viewpoint *ref);
     Feature *getFeatureFromCvIndex(uint32_t i){ return &features[i]; }
 };

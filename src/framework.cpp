@@ -58,6 +58,30 @@ int main(int argc, char *argv[]){
         frontend = new FrontendPicture(source, mask, &threadpool, &database);
     }
 
+    if(frontendType == "DENSE"){
+        auto fs = config["frontend"]["source"];
+        ViewPointSource *source = NULL;
+        auto sourceType = fs["type"].as<std::string>();
+        if(sourceType == "ODOMETRY") {
+            std::string firstFile =  fs["first"].IsDefined() ? fs["first"].as<std::string>() : "";
+            std::string lastFile = fs["last"].IsDefined() ? fs["last"].as<std::string>() : "";
+            source = new ViewPointSourceWithOdometry(
+                fs["odometryFile"].as<std::string>(),
+                fs["pictureFolder"].as<std::string>(),
+                fs["scale"].as<double>(),
+                firstFile,
+                lastFile
+            );
+        }
+        auto mask = cv::imread(fs["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
+        if(fs["scale"].IsDefined()){
+            auto scale = fs["scale"].as<double>();
+            cv::resize(mask, mask, cv::Size(), scale, scale, cv::INTER_AREA );
+        }
+        frontend = new FrontendDense(source, mask, &database, config["frontend"]["ofCacheFolder"].as<std::string>());
+    }
+
+
     if(frontendType == "CLOUDPOINT"){
         auto fn = config["frontend"];
         frontend = new FrontendCloudpoint(

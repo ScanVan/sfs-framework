@@ -198,3 +198,83 @@ bool FrontendCloudpoint::next(){
 	database->addViewpoint(newViewpoint);
 	return true;
 }
+
+
+
+
+
+FrontendDense::FrontendDense(ViewPointSource * source, cv::Mat mask,Database *database, std::string ofCacheFolder) :
+    source(source),
+    mask(mask),
+    database(database),
+    ofCacheFolder(ofCacheFolder){
+
+}
+
+
+#include "../lib/libflow/src/Cache.h"
+bool FrontendDense::next() {
+    if(!source->hasNext()) return false;
+    auto newViewpoint = source->next();
+    const int margin = 4;
+
+    if(database->viewpoints.size() != 0){
+        auto lastViewpoint = database->viewpoints.back();
+        cv::Mat u,v;
+        ofCache(lastViewpoint->image, newViewpoint->image, u, v, ofCacheFolder); //TODO waning, last viewpoint may not have image
+        cv::Mat stencil = cv::Mat::zeros(lastViewpoint->image.rows, lastViewpoint->image.cols, CV_8UC1);
+
+        //Extend existing structures with lastViewpoint matches
+        for(auto &lastFeature: lastViewpoint->features) if(lastFeature.structure) {
+            //TODO use bilinear_sample
+            auto newPosition = lastFeature.position + Eigen::Vector2f(
+                u.at<double>(lastFeature.position.y(), lastFeature.position.x()),
+                v.at<double>(lastFeature.position.y(), lastFeature.position.x())
+            );
+            if(newPosition.x() < margin || newPosition.y() < margin || newPosition.x() >= newViewpoint->image.cols -margin || newPosition.y() >= newViewpoint->image.rows -margin) continue;
+            if(!mask.at<uint8_t>(newPosition.y(), newPosition.x())) continue;
+
+            Feature newFeature;
+            newFeature.setFeature(newPosition.x(), newPosition.y(), newViewpoint->image.cols, newViewpoint->image.rows);
+            newFeature.setViewpointPtr(newViewpoint.get());
+            auto color = newViewpoint->image.empty() ? cv::Vec3b(255,255,255) : newViewpoint->image.at<cv::Vec3b>(newPosition.y(), newPosition.x());
+            newFeature.setColor(color);
+            lastFeature.structure->addFeature(newViewpoint->addFeature(newFeature));
+
+            cv::circle(stencil, cv::Point(lastFeature.position.x(), lastFeature.position.y()), 2, cv::Scalar(255,255,255),1,cv::FILLED,0);
+        }
+
+        //Create new structure for empty area
+        for(int y = margin;y < stencil.rows-margin;y++){
+            for(int x = margin;x < stencil.cols-margin;x++){
+                if(!stencil.at<uint8_t>(y,x)){
+                    auto newPosition = Eigen::Vector2f(
+                        x + u.at<double>(y, x),
+                        y + v.at<double>(y, x)
+                    );
+
+                    if(newPosition.x() < margin || newPosition.y() < margin || newPosition.x() >= newViewpoint->image.cols -margin || newPosition.y() >= newViewpoint->image.rows -margin) continue;
+                    if(!mask.at<uint8_t>(y, x)) continue;
+                    if(!mask.at<uint8_t>(newPosition.y(), newPosition.x())) continue;
+
+                    auto newStructure = database->newStructure(lastViewpoint.get());
+
+                    Feature lastFeature;
+                    lastFeature.setFeature(x, y, lastViewpoint->image.cols, lastViewpoint->image.rows);
+                    lastFeature.setViewpointPtr(lastViewpoint.get());
+                    lastFeature.setColor(lastViewpoint->image.empty() ? cv::Vec3b(255,255,255) : lastViewpoint->image.at<cv::Vec3b>(y, x));
+                    newStructure->addFeature(newViewpoint->addFeature(lastFeature));
+
+                    Feature newFeature;
+                    newFeature.setFeature(newPosition.y(), newPosition.x(), newViewpoint->image.cols, newViewpoint->image.rows);
+                    newFeature.setViewpointPtr(newViewpoint.get());
+                    newFeature.setColor(newViewpoint->image.empty() ? cv::Vec3b(255,255,255) : newViewpoint->image.at<cv::Vec3b>(newPosition.y(), newPosition.x()));
+                    newStructure->addFeature(newViewpoint->addFeature(newFeature));
+                }
+            }
+        }
+    }
+
+    database->addViewpoint(newViewpoint);
+    return true;
+}

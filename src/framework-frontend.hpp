@@ -46,3 +46,19 @@ public:
 
 	virtual bool next();
 };
+
+class FrontendDense : public Frontend{
+private:
+    ViewPointSource * source;
+    cv::Mat mask;
+    Database *database;
+    std::string ofCacheFolder;
+
+public:
+    FrontendDense(ViewPointSource * source, cv::Mat mask, Database *database, std::string ofCacheFolder);
+    virtual ~FrontendDense(){}
+    virtual bool next();
+};
+
+
+
