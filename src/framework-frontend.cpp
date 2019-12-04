@@ -260,8 +260,7 @@ bool FrontendDense::next() {
             auto newFeature = new Feature();
             newFeature->setFeature(newPosition.x(), newPosition.y(), newViewpoint->image.cols, newViewpoint->image.rows);
             newFeature->setViewpointPtr(newViewpoint.get());
-            auto color = newViewpoint->image.empty() ? cv::Vec3b(255,255,255) : newViewpoint->image.at<cv::Vec3b>(newPosition.y(), newPosition.x());
-            newFeature->setColor(color);
+            newFeature->setColor(newViewpoint->image.empty() ? cv::Vec3b(255,255,255) : newViewpoint->image.at<cv::Vec3b>(newPosition.y(), newPosition.x()));
             newViewpoint->addFeature(newFeature);
             lastFeature->structure->addFeature(newFeature);
 
