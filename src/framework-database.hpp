@@ -26,6 +26,7 @@
 #include <vector>
 #include <cmath>
 #include <opencv4/opencv2/core.hpp>
+#include <omp.h>
 #include "framework-viewpoint.hpp"
 #include "framework-transform.hpp"
 #include "framework-structure.hpp"
@@ -67,7 +68,7 @@ public:
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
     void prepareStructure();
-    void computeModels();
+    void computeModels(int loopState);
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);
     void computePoses(int loopState);
@@ -80,6 +81,7 @@ public:
     void computeFiltersDisparityStatistics(int loopState);
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);
+    void exportTransformation(std::string path, unsigned int major);
     Structure *newStructure(Viewpoint *originalViewpoint){ auto s = std::make_shared<Structure>(originalViewpoint); structures.push_back(s); return s.get();} /* need deletion */
 
 public:
