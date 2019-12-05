@@ -269,8 +269,13 @@ bool FrontendDense::next() {
             newViewpoint->addFeature(newFeature);
             lastFeature->structure->addFeature(newFeature);
 
-            cv::circle(stencil, cv::Point(lastFeature->position.x(), lastFeature->position.y()), 2, cv::Scalar(255,255,255),1,cv::FILLED,0);
+            stencil.at<uint8_t>(lastFeature->position.y(), lastFeature->position.x()) = 255;
+//            cv::circle(stencil, cv::Point(lastFeature->position.x(), lastFeature->position.y()), 2, cv::Scalar(255,255,255),1,cv::FILLED,0);
         }
+
+//        cv::namedWindow( "stencil", cv::WINDOW_KEEPRATIO );
+//        imshow( "stencil", stencil);
+//        cv::waitKey(0);
 
         //Create new structure for empty area
         for(int y = margin;y < stencil.rows-margin;y++){
