@@ -77,8 +77,11 @@ public:
     void computeRadii(long loopState);
     void computeStatistics(long loopState, double(Feature::*getValue)());
     void computeFiltersRadialClamp(int loopState);
-    void computeFiltersRadialStatistics(int loopState);
     void computeFiltersDisparityStatistics(int loopState);
+
+    /* not used yet */
+    void computeFiltersRadialStatistics(int loopState);
+
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);
     void exportTransformation(std::string path, unsigned int major);

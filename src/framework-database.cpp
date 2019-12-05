@@ -436,13 +436,13 @@ void Database::computeRadii(long loopState){
 void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
 
     // Count increment
-    unsigned int countValue(0);
+    int countValue(0);
 
     // Standard deviation component
     double componentValue(0.);
 
     // Active viewpoint start index
-    unsigned int ignoreViewpoint(0);
+    int ignoreViewpoint(0);
 
     // Active structure range
     unsigned int structureRange(structures.size());
@@ -502,8 +502,7 @@ void Database::computeFiltersRadialClamp(int loopState){
 
     // Apply filter condition on structures
     for(unsigned int i(0); i<unfiltered.size(); i++){
-        //if(unfiltered[i]->filterRadiusClamp(0.,0)==true){
-        if(unfiltered[i]->filterRadiusClamp2(0.)==true){
+        if(unfiltered[i]->filterRadiusClamp(0.)==true){
             structures[index++]=unfiltered[i];
         }else{
             unfiltered[i]->setFeaturesState();
@@ -530,6 +529,59 @@ void Database::computeFiltersRadialClamp(int loopState){
 
 }
 
+void Database::computeFiltersDisparityStatistics(int loopState){
+
+    // Continuous indexation
+    unsigned int index(0);
+
+    // Copy structures vector
+    std::vector<std::shared_ptr<Structure>> unfiltered(structures);
+
+    // Type-range tracking
+    unsigned int trackA(sortStructTypeA);
+    unsigned int trackB(sortStructTypeB);
+
+    // Active structures range
+    //unsigned int structureRange(unfiltered.size());
+
+    // Check pipeline state
+    //if(loopState==DB_LOOP_MODE_LAST){
+
+        // Update active structure
+    //    structureRange=sortStructTypeA;
+
+    //}
+
+    // Apply filter condition
+    for(unsigned int i(0); i<unfiltered.size(); i++){
+        if(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true){
+            structures[index++]=unfiltered[i];
+        }else{
+            unfiltered[i]->setFeaturesState();
+            if(i<(sortStructTypeA+sortStructTypeB)){
+                if(i<sortStructTypeA){
+                    trackA --;
+                }else{
+                    trackB --;
+                }
+            }
+        }
+    }
+
+    // Resize structures vector
+    structures.resize(index);
+
+    // Update type-range
+    sortStructTypeA=trackA;
+    sortStructTypeB=trackB;
+
+    // development feature - begin
+    std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ") - (" << stdValue << ")" << std::endl;
+    // development feature - end
+
+}
+
+/* not used yet */
 void Database::computeFiltersRadialStatistics(int loopState){
 
     // Continuous indexation
@@ -580,60 +632,6 @@ void Database::computeFiltersRadialStatistics(int loopState){
 
     // development feature - begin
     std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
-    // development feature - end
-
-}
-
-void Database::computeFiltersDisparityStatistics(int loopState){
-
-    // Continuous indexation
-    unsigned int index(0);
-
-    // Copy structures vector
-    std::vector<std::shared_ptr<Structure>> unfiltered(structures);
-
-    // Type-range tracking
-    unsigned int trackA(sortStructTypeA);
-    unsigned int trackB(sortStructTypeB);
-
-    // Active structures range
-    unsigned int structureRange(unfiltered.size());
-
-    // Check pipeline state
-    if(loopState==DB_LOOP_MODE_LAST){
-
-        // Update active structure
-        structureRange=sortStructTypeA;
-
-    }
-
-    // Apply filter condition
-    for(unsigned int i(0); i<unfiltered.size(); i++){
-        //if((i>=structureRange)||(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true)){
-        //if((i>=structureRange)||(unfiltered[i]->filterDisparityStatistics2(stdValue*configDisparity,0)==true)){
-        if(unfiltered[i]->filterDisparityStatistics2(stdValue*configDisparity,0)==true){
-            structures[index++]=unfiltered[i];
-        }else{
-            unfiltered[i]->setFeaturesState();
-            if(i<(sortStructTypeA+sortStructTypeB)){
-                if(i<sortStructTypeA){
-                    trackA --;
-                }else{
-                    trackB --;
-                }
-            }
-        }
-    }
-
-    // Resize structures vector
-    structures.resize(index);
-
-    // Update type-range
-    sortStructTypeA=trackA;
-    sortStructTypeB=trackB;
-
-    // development feature - begin
-    std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ") - (" << stdValue << ")" << std::endl;
     // development feature - end
 
 }
