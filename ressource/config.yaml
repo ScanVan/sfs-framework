@@ -18,6 +18,17 @@ frontend:
 #  badMatchNoise: 0.2
 #  badMatchRate: 0.1
 
+#To use the dense pipeline on a preprocessed odometry
+#frontend:
+#  type: DENSE
+#  ofCacheFolder: /home/dolu/pro/scanvan/export/ofCache
+#  source:
+#    type: ODOMETRY
+#    odometryFile: /home/dolu/pro/scanvan/export/transformation.dat
+#    pictureFolder: /media/dolu/SCANVAN10TB/record/camera_40008603-40009302/20190920-172211_SionCar11
+#    mask: /home/dolu/pro/scanvan/dataset/mask.png
+#    scale: 0.25
+
 algorithm:
   error: 1e-4
   disparity: 5
