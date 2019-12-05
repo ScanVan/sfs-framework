@@ -252,8 +252,8 @@ bool FrontendDense::next() {
         for(auto lastFeature: lastViewpoint->features) if(lastFeature->structure) {
             //TODO use bilinear_sample
             auto newPosition = lastFeature->position + Eigen::Vector2f(
-                u.at<double>(lastFeature->position.y(), lastFeature->position.x()),
-                v.at<double>(lastFeature->position.y(), lastFeature->position.x())
+                u.at<float>(lastFeature->position.y(), lastFeature->position.x()),
+                v.at<float>(lastFeature->position.y(), lastFeature->position.x())
             );
 //            auto newPosition = lastFeature->position + Eigen::Vector2f(
 //                bilinear_sample((double*)u.data, lastFeature->position.x(), lastFeature->position.y(), lastViewpoint->image.cols),
@@ -277,8 +277,8 @@ bool FrontendDense::next() {
             for(int x = margin;x < stencil.cols-margin;x++){
                 if(!stencil.at<uint8_t>(y, x)){
                     auto newPosition = Eigen::Vector2f(
-                        x + u.at<double>(y, x),
-                        y + v.at<double>(y, x)
+                        x + u.at<float>(y, x),
+                        y + v.at<float>(y, x)
                     );
 
                     if(newPosition.x() < margin || newPosition.y() < margin || newPosition.x() >= newViewpoint->image.cols -margin || newPosition.y() >= newViewpoint->image.rows -margin) continue;
