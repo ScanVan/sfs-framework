@@ -40,7 +40,7 @@ bool Structure::getBootstrap(int lastViewpointIndex){
     return false;
 }
 
-bool Structure::getLastViewpointCreated(unsigned int lastViewpointIndex){
+bool Structure::getLastViewpointCreated(int lastViewpointIndex){
     if(originalViewpoint->getIndex()==lastViewpointIndex){
         return true;
     }
@@ -100,7 +100,7 @@ void Structure::computeCorrelation(std::vector<std::shared_ptr<Transform>> & tra
     }
 }
 
-void Structure::computeOptimalPosition(unsigned int ignoreViewpoint){
+void Structure::computeOptimalPosition(int ignoreViewpoint){
     Eigen::Matrix3d wacc(Eigen::Matrix3d::Zero());
     Eigen::Vector3d vacc(Eigen::Vector3d::Zero());
     Eigen::Matrix3d weight;
@@ -128,21 +128,9 @@ void Structure::computeRadius(){
     }
 }
 
-bool Structure::filterRadiusClamp(double clampValue, int indexRange){
-    for(auto & feature: features){
-        if(feature->getViewpoint()->getIndex()>=indexRange){
-            if(feature->getRadius()<clampValue){
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-bool Structure::filterRadiusClamp2(double clampValue){
+bool Structure::filterRadiusClamp(double clampValue){
     std::vector<Feature*> unfiltered(features);
     unsigned int index(0);
-
     for(unsigned int i(0); i<unfiltered.size(); i++){
         if(unfiltered[i]->getRadius()>clampValue){
             features[index++]=unfiltered[i];
@@ -150,9 +138,7 @@ bool Structure::filterRadiusClamp2(double clampValue){
             unfiltered[i]->setStructurePtr(NULL);
         }
     }
-
     features.resize(index);
-
     if(index>=2){
         return true;
     }else{
@@ -160,32 +146,28 @@ bool Structure::filterRadiusClamp2(double clampValue){
     }
 }
 
-bool Structure::filterRadiusStatistics(double meanValue, double stdValue, int indexRange){
-    for(auto & feature: features){
-        if(feature->getViewpoint()->getIndex()>=indexRange){
-            if(fabs(feature->getRadius()-meanValue)>stdValue){
-                return false;
-            }
+bool Structure::filterRadiusLimit(double limitValue){
+    std::vector<Feature*> unfiltered(features);
+    unsigned int index(0);
+    for(unsigned int i(0); i<unfiltered.size(); i++){
+        if(unfiltered[i]->getRadius()<limitValue){
+            features[index++]=unfiltered[i];
+        }else{
+            unfiltered[i]->setStructurePtr(NULL);
         }
+
     }
-    return true;
+    features.resize(index);
+    if(index>=2){
+        return true;
+    }else{
+        return false;
+    }
 }
 
 bool Structure::filterDisparityStatistics(double stdValue, int indexRange){
-    for(auto & feature: features){
-        if(feature->getViewpoint()->getIndex()>=indexRange){
-            if(feature->getDisparity()>stdValue){
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-bool Structure::filterDisparityStatistics2(double stdValue, int indexRange){
     std::vector<Feature*> unfiltered(features);
     unsigned int index(0);
-
     for(unsigned int i(0); i<unfiltered.size(); i++){
         if(features[i]->getViewpoint()->getIndex()>=indexRange){
             if(features[i]->getDisparity()<=stdValue){
@@ -197,9 +179,7 @@ bool Structure::filterDisparityStatistics2(double stdValue, int indexRange){
             features[index++]=unfiltered[i];
         }
     }
-
     features.resize(index);
-
     if(index>=2){
         return true;
     }else{
@@ -207,6 +187,19 @@ bool Structure::filterDisparityStatistics2(double stdValue, int indexRange){
     }
 }
 
+/* not used yet */
+bool Structure::filterRadiusStatistics(double meanValue, double stdValue, int indexRange){
+    for(auto & feature: features){
+        if(feature->getViewpoint()->getIndex()>=indexRange){
+            if(fabs(feature->getRadius()-meanValue)>stdValue){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+/* not used yet */
 bool Structure::filterTriangulation(double const minAngle, double const maxAngle){
     Eigen::Vector3d iVector;
     Eigen::Vector3d jVector;
