@@ -275,7 +275,7 @@ bool FrontendDense::next() {
         //Create new structure for empty area
         for(int y = margin;y < stencil.rows-margin;y++){
             for(int x = margin;x < stencil.cols-margin;x++){
-                if(!stencil.at<uint8_t>(y,x)){
+                if(!stencil.at<uint8_t>(y, x)){
                     auto newPosition = Eigen::Vector2f(
                         x + u.at<double>(y, x),
                         y + v.at<double>(y, x)
