@@ -2,6 +2,7 @@
 
 #include "framework-stillcompute.hpp"
 #include "framework-sparsefeature.hpp"
+#include "framework-utiles.hpp"
 
 FrontendPicture::FrontendPicture(ViewPointSource * source, cv::Mat mask, ThreadPool *threadpool, Database *database) :
 	source(source),
@@ -254,6 +255,10 @@ bool FrontendDense::next() {
                 u.at<double>(lastFeature->position.y(), lastFeature->position.x()),
                 v.at<double>(lastFeature->position.y(), lastFeature->position.x())
             );
+//            auto newPosition = lastFeature->position + Eigen::Vector2f(
+//                bilinear_sample((double*)u.data, lastFeature->position.x(), lastFeature->position.y(), lastViewpoint->image.cols),
+//                bilinear_sample((double*)v.data, lastFeature->position.x(), lastFeature->position.y(), lastViewpoint->image.cols)
+//            );
             if(newPosition.x() < margin || newPosition.y() < margin || newPosition.x() >= newViewpoint->image.cols -margin || newPosition.y() >= newViewpoint->image.rows -margin) continue;
             if(!mask.at<uint8_t>(newPosition.y(), newPosition.x())) continue;
 
