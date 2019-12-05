@@ -115,3 +115,4 @@ void exitRelease();
 
 
 double bilinear_sample(double *p, double x, double y, int width);
+double bilinear_sample(float *p, double x, double y, int width);
