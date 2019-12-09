@@ -170,33 +170,30 @@ int main(int argc, char *argv[]){
                 // optimisation loop management
                 if((fabs(loopError - pushError) < database.getConfigError()) || std::isnan(loopError)) {
 
+                    // Push amount of structures
+                    unsigned int pushCount(database.structures.size());
+
+                    // Filtering process
+                    database.computeFiltersRadialLimit();
+
                     // check loop state
-                    if(loopState==DB_LOOP_MODE_FULL){
-
-                        // interrupt optimisation loop
-                        loopFlag=false;
-
-                    }else{
-
-                        // Push amount of structures
-                        unsigned int pushCount(database.structures.size());
+                    if(loopState!=DB_LOOP_MODE_FULL){
 
                         // Filtering processes
                         database.computeFiltersDisparityStatistics(loopState);
-                        database.computeFiltersRadialLimit();
 
-                        // Check filtering results
-                        if(database.structures.size()==pushCount){
+                    }
 
-                            // interrupt optimisation loop
-                            loopFlag = false;
+                    // Check filtering results
+                    if(database.structures.size()==pushCount){
 
-                        }else{
+                        // interrupt optimisation loop
+                        loopFlag = false;
 
-                            // reset pushed error
-                            pushError=1.;
+                    }else{
 
-                        }
+                        // reset pushed error
+                        pushError=1.;
 
                     }
 
