@@ -73,7 +73,7 @@ public:
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);
     void computePoses(int loopState);
-    void computeFrames();
+    void computeFrames(int loopState);
     void computeOptimals(long loopState);
     void computeRadii(long loopState);
     void computeStatistics(long loopState, double(Feature::*getValue)());

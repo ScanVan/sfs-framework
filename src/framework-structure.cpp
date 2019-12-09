@@ -112,18 +112,16 @@ void Structure::computeCorrelation(std::vector<std::shared_ptr<Transform>> & tra
     }
 }
 
-void Structure::computeOptimalPosition(int ignoreViewpoint){
+void Structure::computeOptimalPosition(){
     Eigen::Matrix3d wacc(Eigen::Matrix3d::Zero());
     Eigen::Vector3d vacc(Eigen::Vector3d::Zero());
     Eigen::Matrix3d weight;
     Eigen::Vector3d vector;
     for(auto & element: features){
-        if(element->getViewpoint()->getIndex()<=ignoreViewpoint){
-            vector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
-            weight=Eigen::Matrix3d::Identity()-vector*vector.transpose();
-            vacc+=weight*(*element->getViewpoint()->getPosition());
-            wacc+=weight;
-        }
+        vector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
+        weight=Eigen::Matrix3d::Identity()-vector*vector.transpose();
+        vacc+=weight*(*element->getViewpoint()->getPosition());
+        wacc+=weight;
     }
     position=wacc.inverse()*vacc;
 }

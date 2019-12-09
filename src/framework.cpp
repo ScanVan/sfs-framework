@@ -140,15 +140,14 @@ int main(int argc, char *argv[]){
                 database.computeCentroids(loopState);
                 database.computeCorrelations(loopState);
                 database.computePoses(loopState);
-                database.computeFrames();
+                database.computeFrames(loopState);
                 database.computeOptimals(loopState);
                 database.computeRadii(loopState);
 
+                // stability filtering (radial clamp)
                 database.computeFiltersRadialClamp(loopState);
-                //database.computeStatistics(loopState,&Feature::getRadius);
-                //database.computeFiltersRadialStatistics(loopState);
-                //database.computeStatistics(loopState,&Feature::getDisparity);
-                //database.computeFiltersDisparityStatistics(loopState);
+
+                // statistics computation on disparity
                 database.computeStatistics(loopState,&Feature::getDisparity);
 
                 // development feature - begin
@@ -170,20 +169,42 @@ int main(int argc, char *argv[]){
 
                 // optimisation loop management
                 if((fabs(loopError - pushError) < database.getConfigError()) || std::isnan(loopError)) {
+
+                    // check loop state
                     if(loopState==DB_LOOP_MODE_FULL){
+
+                        // interrupt optimisation loop
                         loopFlag=false;
+
                     }else{
+
+                        // Push amount of structures
                         unsigned int pushCount(database.structures.size());
+
+                        // Filtering processes
                         database.computeFiltersDisparityStatistics(loopState);
                         database.computeFiltersRadialLimit();
+
+                        // Check filtering results
                         if(database.structures.size()==pushCount){
+
+                            // interrupt optimisation loop
                             loopFlag = false;
+
                         }else{
+
+                            // reset pushed error
                             pushError=1.;
+
                         }
+
                     }
+
                 } else {
+
+                    // push current error
                     pushError=loopError;
+
                 }
 
             }

@@ -61,7 +61,6 @@ cv::Vec3b Feature::getColor(){
 
 void Feature::setRadius(double newRadius, double newDisparity){
     radius=newRadius;
-    //disparity=abs(newDisparity/newRadius);
     disparity=newDisparity/newRadius;
 }
 
