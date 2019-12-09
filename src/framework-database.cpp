@@ -158,7 +158,6 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 
 }
 
-/* experimental - not used yet */
 void Database::prepareStructure(){
 
     // Last viewpoint index
@@ -203,6 +202,15 @@ void Database::prepareStructure(){
         std::cerr << "Fault : " << index << " vs " << structures.size() << std::endl;
     }
     // development feature - end
+
+}
+
+void Database::prepareFeature(){
+
+    // parsing structures for features sorting based on relative viewpoint index //
+    for(auto & structure: structures){
+        structure->sortFeatures();
+    }
 
 }
 
@@ -529,6 +537,47 @@ void Database::computeFiltersRadialClamp(int loopState){
 
 }
 
+void Database::computeFiltersRadialLimit(){
+
+    // Continuous indexation
+    unsigned int index(0);
+
+    // Copy structures vector
+    std::vector<std::shared_ptr<Structure>> unfiltered(structures);
+
+    // Type-range tracking
+    unsigned int trackA(sortStructTypeA);
+    unsigned int trackB(sortStructTypeB);
+
+    // Apply filter condition on structures
+    for(unsigned int i(0); i<unfiltered.size(); i++){
+        if(unfiltered[i]->filterRadiusLimit(transformMean*100.)==true){
+            structures[index++]=unfiltered[i];
+        }else{
+            unfiltered[i]->setFeaturesState();
+            if(i<(sortStructTypeA+sortStructTypeB)){
+                if(i<sortStructTypeA){
+                    trackA --;
+                }else{
+                    trackB --;
+                }
+            }
+        }
+    }
+
+    // resize structure vector
+    structures.resize(index);
+
+    // Update type-range
+    sortStructTypeA=trackA;
+    sortStructTypeB=trackB;
+
+    // development feature - begin
+    std::cerr << "R:L : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
+    // development feature - end
+
+}
+
 void Database::computeFiltersDisparityStatistics(int loopState){
 
     // Continuous indexation
@@ -787,9 +836,7 @@ void Database::_sanityCheck(bool inliner){
 }
 
 void Database::_sanityCheckStructure(){
-
     unsigned int lastViewpoint(viewpoints.size()-1);
-
     for(unsigned int i(0); i<structures.size(); i++){
         if(structures[i]->getFeaturesCount()==2){
             if(structures[i]->getHasLastViewpoint(lastViewpoint)==true){
@@ -799,7 +846,6 @@ void Database::_sanityCheckStructure(){
             }
         }
     }
-
     for(unsigned int i(0); i<structures.size(); i++){
         if(structures[i]->getFeaturesCount()>2){
             if(structures[i]->getHasLastViewpoint(lastViewpoint)==true){
@@ -809,7 +855,6 @@ void Database::_sanityCheckStructure(){
             }
         }
     }
-
     for(unsigned int i(0); i<structures.size(); i++){
         if(structures[i]->getHasLastViewpoint(lastViewpoint)==false){
             if(i<sortStructTypeA+sortStructTypeB){
@@ -817,7 +862,17 @@ void Database::_sanityCheckStructure(){
             }
         }
     }
+}
 
+void Database::_sanityCheckFeatureOrder(){
+    for(auto & structure: structures){
+        for(unsigned int i(1); i<structure->features.size(); i++){
+            if(structure->features[i]->getViewpoint()->getIndex()<=structure->features[i-1]->getViewpoint()->getIndex()){
+                std::cerr << "Sanity check on feature order" << std::endl;
+            }
+        }
+
+    }
 }
 
 // Note : this function does not respect encapsulation (development function) - need to be removed

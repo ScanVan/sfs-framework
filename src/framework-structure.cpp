@@ -68,6 +68,24 @@ void Structure::addFeature(Feature * feature){
     features.push_back(feature);
 }
 
+void Structure::sortFeatures(){
+    int detectSmallest(0), pushIndex(0);
+    std::vector<Feature*> unsorted(features);
+    for(unsigned int i(0); i<features.size(); i++){
+        detectSmallest=INT_MAX;
+        for(unsigned int j(0); j<unsorted.size(); j++){
+            if(unsorted[j]!=NULL){
+                if(unsorted[j]->getViewpoint()->getIndex()<detectSmallest){
+                    detectSmallest=unsorted[j]->getViewpoint()->getIndex();
+                    pushIndex=j;
+                }
+            }
+        }
+        features[i]=unsorted[pushIndex];
+        unsorted[pushIndex]=NULL;
+    }
+}
+
 void Structure::computeModel(){
     for(auto & element: features){
         element->computeModel();
@@ -75,27 +93,21 @@ void Structure::computeModel(){
 }
 
 void Structure::computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms){
-    int i_index(0), j_index(0);
-    for(unsigned int i(0); i<features.size(); i++){
-        i_index=features[i]->getViewpoint()->getIndex();
-        for(unsigned int j(0); j<features.size(); j++){
-            j_index=features[j]->getViewpoint()->getIndex();
-            if (i_index-j_index==1){
-                transforms[j_index]->pushCentroid(features[j]->getModel(),features[i]->getModel());
-            }
+    int previousIndex(0);
+    for(unsigned int i(1); i<features.size(); i++){
+        previousIndex=features[i-1]->getViewpoint()->getIndex();
+        if((features[i]->getViewpoint()->getIndex()-previousIndex)==1){
+            transforms[previousIndex]->pushCentroid(features[i-1]->getModel(),features[i]->getModel());
         }
     }
 }
 
 void Structure::computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms){
-    int i_index(0), j_index(0);
-    for(unsigned int i(0); i<features.size(); i++){
-        i_index=features[i]->getViewpoint()->getIndex();
-        for(unsigned int j(0); j<features.size(); j++){
-            j_index=features[j]->getViewpoint()->getIndex();
-            if (i_index-j_index==1){
-                transforms[j_index]->pushCorrelation(features[j]->getModel(), features[i]->getModel());
-            }
+    int previousIndex(0);
+    for(unsigned int i(1); i<features.size(); i++){
+        previousIndex=features[i-1]->getViewpoint()->getIndex();
+        if((features[i]->getViewpoint()->getIndex()-previousIndex)==1){
+            transforms[previousIndex]->pushCorrelation(features[i-1]->getModel(), features[i]->getModel());
         }
     }
 }

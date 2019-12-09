@@ -43,6 +43,7 @@ public:
     bool getHasLastViewpoint(int lastViewpointIndex);
     void setFeaturesState();
     void addFeature(Feature * feature);
+    void sortFeatures();
     void computeModel();
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);

@@ -110,6 +110,13 @@ int main(int argc, char *argv[]){
         // prepare structure vector - type-based segment sort
         database.prepareStructure();
 
+        // perpare structure features - sort by viewpoint index order
+        database.prepareFeature();
+
+        // development feature - begin
+        database._sanityCheckFeatureOrder();
+        // development feature - end
+
         // reset algorithm loop
         loopFlag=true;
         loopMinor=0;
@@ -168,6 +175,7 @@ int main(int argc, char *argv[]){
                     }else{
                         unsigned int pushCount(database.structures.size());
                         database.computeFiltersDisparityStatistics(loopState);
+                        database.computeFiltersRadialLimit();
                         if(database.structures.size()==pushCount){
                             loopFlag = false;
                         }else{
