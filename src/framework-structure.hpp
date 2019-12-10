@@ -52,7 +52,7 @@ public:
     bool filterRadiusClamp(double clampValue);
     bool filterRadiusLimit(double limitValue);
     bool filterDisparityStatistics(double stdValue, int indexRange);
-
+    bool filterTriangulation(double minRatio);
     /* not used yet */
     bool filterRadiusStatistics(double meanValue, double stdValue, int indexRange);
     bool filterTriangulation(double const minAngle, double const maxAngle);

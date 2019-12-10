@@ -197,6 +197,28 @@ bool Structure::filterDisparityStatistics(double stdValue, int indexRange){
     }
 }
 
+bool Structure::filterTriangulation(double minRatio){
+    std::vector<Feature*> unfiltered(features);
+    unsigned int index(0);
+    double baseLine(0.);
+    for(unsigned int i(0); i<unfiltered.size()-1; i++){
+        for(unsigned int j(i+1); j<unfiltered.size(); j++){
+            baseLine=((*features[i]->getViewpoint()->getPosition())-(*features[j]->getViewpoint()->getPosition())).norm();
+            if((baseLine/features[i]->getRadius())>minRatio){
+                features[index++]=unfiltered[i];
+            }else{
+                unfiltered[i]->setStructurePtr(NULL);
+            }
+        }
+    }
+    features.resize(index);
+    if(index>=2){
+        return true;
+    }else{
+        return false;
+    }
+}
+
 /* not used yet */
 bool Structure::filterRadiusStatistics(double meanValue, double stdValue, int indexRange){
     for(auto & feature: features){
