@@ -43,15 +43,16 @@ public:
     bool getHasLastViewpoint(int lastViewpointIndex);
     void setFeaturesState();
     void addFeature(Feature * feature);
+    void sortFeatures();
     void computeModel();
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
-    void computeOptimalPosition(int ignoreViewpoint);
+    void computeOptimalPosition();
     void computeRadius();
     bool filterRadiusClamp(double clampValue);
     bool filterRadiusLimit(double limitValue);
     bool filterDisparityStatistics(double stdValue, int indexRange);
-
+    bool filterTriangulation(double minRatio);
     /* not used yet */
     bool filterRadiusStatistics(double meanValue, double stdValue, int indexRange);
     bool filterTriangulation(double const minAngle, double const maxAngle);

@@ -68,15 +68,17 @@ public:
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
     void prepareStructure();
+    void prepareFeature();
     void computeModels(int loopState);
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);
     void computePoses(int loopState);
-    void computeFrames();
+    void computeFrames(int loopState);
     void computeOptimals(long loopState);
     void computeRadii(long loopState);
     void computeStatistics(long loopState, double(Feature::*getValue)());
     void computeFiltersRadialClamp(int loopState);
+    void computeFiltersRadialLimit();
     void computeFiltersDisparityStatistics(int loopState);
 
     /* not used yet */
@@ -92,6 +94,7 @@ public:
     cv::Mat viewpointStructuralImage(Viewpoint *viewpoint, unsigned int structSizeMin);
     void _sanityCheck(bool inliner);
     void _sanityCheckStructure();
+    void _sanityCheckFeatureOrder();
     void _exportState(std::string path,int major, int iter); /* need deletion */
     void _exportMatchDistribution(std::string path, unsigned int major, std::string type); /* need deletion */
 

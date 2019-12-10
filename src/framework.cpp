@@ -137,6 +137,13 @@ int main(int argc, char *argv[]){
         // prepare structure vector - type-based segment sort
         database.prepareStructure();
 
+        // perpare structure features - sort by viewpoint index order
+        database.prepareFeature();
+
+        // development feature - begin
+        database._sanityCheckFeatureOrder();
+        // development feature - end
+
         // reset algorithm loop
         loopFlag=true;
         loopMinor=0;
@@ -160,15 +167,14 @@ int main(int argc, char *argv[]){
                 database.computeCentroids(loopState);
                 database.computeCorrelations(loopState);
                 database.computePoses(loopState);
-                database.computeFrames();
+                database.computeFrames(loopState);
                 database.computeOptimals(loopState);
                 database.computeRadii(loopState);
 
+                // stability filtering (radial clamp)
                 database.computeFiltersRadialClamp(loopState);
-                //database.computeStatistics(loopState,&Feature::getRadius);
-                //database.computeFiltersRadialStatistics(loopState);
-                //database.computeStatistics(loopState,&Feature::getDisparity);
-                //database.computeFiltersDisparityStatistics(loopState);
+
+                // statistics computation on disparity
                 database.computeStatistics(loopState,&Feature::getDisparity);
 
                 // development feature - begin
@@ -190,19 +196,39 @@ int main(int argc, char *argv[]){
 
                 // optimisation loop management
                 if((fabs(loopError - pushError) < database.getConfigError()) || std::isnan(loopError)) {
-                    if(loopState==DB_LOOP_MODE_FULL){
-                        loopFlag=false;
-                    }else{
-                        unsigned int pushCount(database.structures.size());
+
+                    // Push amount of structures
+                    unsigned int pushCount(database.structures.size());
+
+                    // Filtering process
+                    database.computeFiltersRadialLimit();
+
+                    // check loop state
+                    if(loopState!=DB_LOOP_MODE_FULL){
+
+                        // Filtering processes
                         database.computeFiltersDisparityStatistics(loopState);
-                        if(database.structures.size()==pushCount){
-                            loopFlag = false;
-                        }else{
-                            pushError=1.;
-                        }
+
                     }
+
+                    // Check filtering results
+                    if(database.structures.size()==pushCount){
+
+                        // interrupt optimisation loop
+                        loopFlag = false;
+
+                    }else{
+
+                        // reset pushed error
+                        pushError=1.;
+
+                    }
+
                 } else {
+
+                    // push current error
                     pushError=loopError;
+
                 }
 
             }

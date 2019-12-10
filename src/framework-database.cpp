@@ -158,7 +158,6 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 
 }
 
-/* experimental - not used yet */
 void Database::prepareStructure(){
 
     // Last viewpoint index
@@ -206,18 +205,16 @@ void Database::prepareStructure(){
 
 }
 
+void Database::prepareFeature(){
+
+    // parsing structures for features sorting based on relative viewpoint index //
+    for(auto & structure: structures){
+        structure->sortFeatures();
+    }
+
+}
+
 void Database::computeModels(int loopState){
-
-    // Compute model for all features of all structures
-    //
-    // Translation are renormalised taking into account the last estimated one
-    // leading to a re-computation of all optimal intersection and radius.
-    //for(auto & structure: structures){
-    //    structure->computeModel();
-    //}
-
-    // DevNote : for type B structure, only the radius of the feature associated
-    // to last viewpoint has to be computed -> possible improvement
 
     // Active structure upper bound
     unsigned int structureRange(structures.size());
@@ -329,7 +326,7 @@ void Database::computePoses(int loopState){
 
     }
 
-    // Compute transformation (pose)
+    // Compute transformation (orientation and translation)
     # pragma omp parallel for
     for(unsigned int i=transformationStart; i<transforms.size(); i++){
         transforms[i]->computePose();
@@ -339,24 +336,31 @@ void Database::computePoses(int loopState){
     getTranslationMeanValue(loopState);
 
     // Renormalise transformations translation
-    for(unsigned int i(0); i<transforms.size(); i++){
+    # pragma omp parallel for
+    for(unsigned int i=0; i<transforms.size(); i++){
         transforms[i]->setTranslationScale(transformMean);
     }
 
 }
 
-void Database::computeFrames(){
+void Database::computeFrames(int loopState){
 
-    // Compute absolute frame for the viewpoints
-    //
-    // Need to be done for all viewpoints as the translations are re-normalised
-    // at each iteration
+    // Active transformation index
+    unsigned int transformationStart(0);
+
+    // check pipeline state
+    if(loopState==DB_LOOP_MODE_LAST){
+
+        // Update active transformation
+        transformationStart=transforms.size()-1;
+
+    }
 
     // Assign identity and zero position to first viewpoint
     viewpoints[0]->resetFrame();
 
     // Compute viewpoint absolute orientation and position
-    for(unsigned int i(0); i<transforms.size(); i++){
+    for(unsigned int i(transformationStart); i<transforms.size(); i++){
         transforms[i]->computeFrame(viewpoints[i].get(),viewpoints[i+1].get());
     }
 
@@ -364,55 +368,26 @@ void Database::computeFrames(){
 
 void Database::computeOptimals(long loopState){
 
-    // Compute optimal intersection of structure
-    //
-    // Need to be done for all structures as the translation are re-normalised
-    // at each iteration
-
-    // Active viewpoints stop index
-    unsigned int viewpointLast(viewpoints.size()-1);
-
     // Active structure range
     unsigned int structureRange(structures.size());
 
-    // Compute optimal structures position for type A
-    # pragma omp parallel for
-    for(unsigned int i=0; i<sortStructTypeA; i++){
-        structures[i]->computeOptimalPosition(viewpointLast);
-    }
-
-    // Check pipeline state
+    // check pipeline state
     if(loopState==DB_LOOP_MODE_LAST){
 
-        // Update active viewpoints
-        viewpointLast=viewpoints.size()-2;
-
-        // Update structure range //
-        structureRange=sortStructTypeA+sortStructTypeB;
+        // Update active structure
+        structureRange=sortStructTypeA;
 
     }
 
-    // Compute optimal structures position for type B and C
+    // Compute optimal structure position
     # pragma omp parallel for
-    for(unsigned int i=sortStructTypeA; i<structureRange; i++){
-        structures[i]->computeOptimalPosition(viewpointLast);
+    for(unsigned int i=0; i<structureRange; i++){
+        structures[i]->computeOptimalPosition();
     }
 
 }
 
 void Database::computeRadii(long loopState){
-
-    // Compute feature radius correction
-    //
-    // Need to be done after structures optimal position computation. As the
-    // optimal position is recomputed at each iteration, the radius correction
-    // has to be made for each feature of each structure
-    //for(unsigned int i(0); i<structures.size(); i++){
-    //    structures[i]->computeRadius();
-    //}
-
-    // DevNote : for type B structure, only the radius of the feature associated
-    // to last viewpoint has to be computed -> possible improvement
 
     // Active structure upper bound
     unsigned int structureRange(structures.size());
@@ -525,6 +500,47 @@ void Database::computeFiltersRadialClamp(int loopState){
 
     // development feature - begin
     std::cerr << "R:R : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
+    // development feature - end
+
+}
+
+void Database::computeFiltersRadialLimit(){
+
+    // Continuous indexation
+    unsigned int index(0);
+
+    // Copy structures vector
+    std::vector<std::shared_ptr<Structure>> unfiltered(structures);
+
+    // Type-range tracking
+    unsigned int trackA(sortStructTypeA);
+    unsigned int trackB(sortStructTypeB);
+
+    // Apply filter condition on structures
+    for(unsigned int i(0); i<unfiltered.size(); i++){
+        if(unfiltered[i]->filterRadiusLimit(transformMean*100.)==true){
+            structures[index++]=unfiltered[i];
+        }else{
+            unfiltered[i]->setFeaturesState();
+            if(i<(sortStructTypeA+sortStructTypeB)){
+                if(i<sortStructTypeA){
+                    trackA --;
+                }else{
+                    trackB --;
+                }
+            }
+        }
+    }
+
+    // resize structure vector
+    structures.resize(index);
+
+    // Update type-range
+    sortStructTypeA=trackA;
+    sortStructTypeB=trackB;
+
+    // development feature - begin
+    std::cerr << "R:L : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
     // development feature - end
 
 }
@@ -791,9 +807,7 @@ void Database::_sanityCheck(bool inliner){
 }
 
 void Database::_sanityCheckStructure(){
-
     unsigned int lastViewpoint(viewpoints.size()-1);
-
     for(unsigned int i(0); i<structures.size(); i++){
         if(structures[i]->getFeaturesCount()==2){
             if(structures[i]->getHasLastViewpoint(lastViewpoint)==true){
@@ -803,7 +817,6 @@ void Database::_sanityCheckStructure(){
             }
         }
     }
-
     for(unsigned int i(0); i<structures.size(); i++){
         if(structures[i]->getFeaturesCount()>2){
             if(structures[i]->getHasLastViewpoint(lastViewpoint)==true){
@@ -813,7 +826,6 @@ void Database::_sanityCheckStructure(){
             }
         }
     }
-
     for(unsigned int i(0); i<structures.size(); i++){
         if(structures[i]->getHasLastViewpoint(lastViewpoint)==false){
             if(i<sortStructTypeA+sortStructTypeB){
@@ -821,7 +833,17 @@ void Database::_sanityCheckStructure(){
             }
         }
     }
+}
 
+void Database::_sanityCheckFeatureOrder(){
+    for(auto & structure: structures){
+        for(unsigned int i(1); i<structure->features.size(); i++){
+            if(structure->features[i]->getViewpoint()->getIndex()<=structure->features[i-1]->getViewpoint()->getIndex()){
+                std::cerr << "Sanity check on feature order" << std::endl;
+            }
+        }
+
+    }
 }
 
 // Note : this function does not respect encapsulation (development function) - need to be removed
