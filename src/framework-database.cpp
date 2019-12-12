@@ -241,7 +241,8 @@ void Database::computeCentroids(int loopState){
     unsigned int transformationStart(0);
 
     // Active structure range lower bound
-    unsigned int structureStart(0);
+    //unsigned int structureStart(0);
+    unsigned int structureStart(sortStructTypeA);
 
     // Active structure range upper bound
     unsigned int structureRange(structures.size());
@@ -253,7 +254,7 @@ void Database::computeCentroids(int loopState){
         transformationStart=transforms.size()-1;
 
         // Update structure range
-        structureStart=sortStructTypeA;
+        //structureStart=sortStructTypeA;
         structureRange=sortStructTypeA+sortStructTypeB;
 
     }
@@ -283,7 +284,8 @@ void Database::computeCorrelations(int loopState){
     unsigned int transformationStart(0);
 
     // Active structure range lower bound
-    unsigned int structureStart(0);
+    //unsigned int structureStart(0);
+    unsigned int structureStart(sortStructTypeA);
 
     // Active structure range upper bound
     unsigned int structureRange(structures.size());
@@ -295,7 +297,7 @@ void Database::computeCorrelations(int loopState){
         transformationStart=transforms.size()-1;
 
         // Update structure range
-        structureStart=sortStructTypeA;
+        //structureStart=sortStructTypeA;
         structureRange=sortStructTypeA+sortStructTypeB;
 
     }
@@ -423,24 +425,24 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
     unsigned int structureRange(structures.size());
 
     // Check pipeline state
-    if(loopState==DB_LOOP_MODE_LAST){
+    //if(loopState==DB_LOOP_MODE_LAST){
 
         // Update active viewpoints
-        ignoreViewpoint=viewpoints.size()-1;
+    //    ignoreViewpoint=viewpoints.size()-1;
 
         // Update structures range
-        structureRange=sortStructTypeA+sortStructTypeB;
+    //    structureRange=sortStructTypeA+sortStructTypeB;
 
-    }
+    //}
 
     // Compute mean value
     meanValue=0.;
     for(unsigned int i(0); i<structureRange; i++){
         for(auto & feature: structures[i]->features){ /* encapsulation fault */
-            if(feature->getViewpoint()->getIndex()>=ignoreViewpoint){ /* encapsulation fault */
+            //if(feature->getViewpoint()->getIndex()>=ignoreViewpoint){ /* encapsulation fault */
                 meanValue+=(feature->*getValue)(); /* encapsulation fault */
                 countValue++;
-            }
+            //}
         }
     }
     meanValue/=double(countValue);
@@ -450,13 +452,13 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
     maxValue=0.;
     for(unsigned int i(0); i<structureRange; i++){
         for(auto & feature: structures[i]->features){ /* encapsulation fault */
-            if(feature->getViewpoint()->getIndex()>=ignoreViewpoint){ /* encapsulation fault */
+            //if(feature->getViewpoint()->getIndex()>=ignoreViewpoint){ /* encapsulation fault */
                 componentValue=(feature->*getValue)()-meanValue; /* encapsulation fault */
                 stdValue+=componentValue*componentValue;
                 if(maxValue<(feature->*getValue)()){ /* encapsulation fault */
                     maxValue=(feature->*getValue)(); /* encapsulation fault */
                 }
-            }
+            //}
         }
     }
     stdValue=std::sqrt(stdValue/(countValue-1));
@@ -558,19 +560,70 @@ void Database::computeFiltersDisparityStatistics(int loopState){
     unsigned int trackB(sortStructTypeB);
 
     // Active structures range
-    //unsigned int structureRange(unfiltered.size());
+    unsigned int structureRange(unfiltered.size());
+
+    // Active viewpoint range
+    unsigned int viewpointRange(0);
 
     // Check pipeline state
     //if(loopState==DB_LOOP_MODE_LAST){
 
         // Update active structure
-    //    structureRange=sortStructTypeA;
+    //    structureRange=sortStructTypeA+sortStructTypeB;
+
+        // Update active viewpoint
+    //    viewpointRange=viewpoints.size()-1;
 
     //}
 
     // Apply filter condition
     for(unsigned int i(0); i<unfiltered.size(); i++){
-        if(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true){
+        //if(i<structureRange){
+            if(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true){
+                structures[index++]=unfiltered[i];
+            }else{
+                unfiltered[i]->setFeaturesState();
+                if(i<(sortStructTypeA+sortStructTypeB)){
+                    if(i<sortStructTypeA){
+                        trackA --;
+                    }else{
+                        trackB --;
+                    }
+                }
+            }
+        //}else{
+        //    structures[index++]=unfiltered[i];
+        //}
+    }
+
+    // Resize structures vector
+    structures.resize(index);
+
+    // Update type-range
+    sortStructTypeA=trackA;
+    sortStructTypeB=trackB;
+
+    // development feature - begin
+    std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ") - (" << stdValue << ")" << std::endl;
+    // development feature - end
+
+}
+
+void Database::computeFiltersTriangulation(){
+
+    // Continuous indexation
+    unsigned int index(0);
+
+    // Copy structures vector
+    std::vector<std::shared_ptr<Structure>> unfiltered(structures);
+
+    // Type-range tracking
+    unsigned int trackA(sortStructTypeA);
+    unsigned int trackB(sortStructTypeB);
+
+    // Apply filter condition
+    for(unsigned int i(0); i<unfiltered.size(); i++){
+        if(unfiltered[i]->filterTriangulation(1./100.)==true){
             structures[index++]=unfiltered[i];
         }else{
             unfiltered[i]->setFeaturesState();

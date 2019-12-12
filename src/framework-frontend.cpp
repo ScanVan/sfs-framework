@@ -51,7 +51,8 @@ bool FrontendPicture::next() {
 			lastViewpoint->getImage()->size()
 		);
 //			std::cout << score << std::endl;
-		if(score < 0.0005){
+//		if(score < 0.0005){
+        if(score < 0.002){
 		    exitRelease();
 			return false;
 		}

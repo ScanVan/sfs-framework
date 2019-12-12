@@ -80,6 +80,7 @@ public:
     void computeFiltersRadialClamp(int loopState);
     void computeFiltersRadialLimit();
     void computeFiltersDisparityStatistics(int loopState);
+    void computeFiltersTriangulation();
 
     /* not used yet */
     void computeFiltersRadialStatistics(int loopState);

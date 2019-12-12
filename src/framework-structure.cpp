@@ -202,13 +202,18 @@ bool Structure::filterTriangulation(double minRatio){
     unsigned int index(0);
     double baseLine(0.);
     for(unsigned int i(0); i<unfiltered.size()-1; i++){
+        if(unfiltered[i]->getStructure()==NULL)continue;
         for(unsigned int j(i+1); j<unfiltered.size(); j++){
+            if(unfiltered[j]->getStructure()==NULL)continue;
             baseLine=((*features[i]->getViewpoint()->getPosition())-(*features[j]->getViewpoint()->getPosition())).norm();
-            if((baseLine/features[i]->getRadius())>minRatio){
-                features[index++]=unfiltered[i];
-            }else{
-                unfiltered[i]->setStructurePtr(NULL);
+            if((baseLine/features[j]->getRadius())<minRatio){
+                unfiltered[j]->setStructurePtr(NULL);
             }
+        }
+    }
+    for(unsigned int i(0); i<unfiltered.size(); i++){
+        if(unfiltered[i]->getStructure()!=NULL){
+            features[index++]=unfiltered[i];
         }
     }
     features.resize(index);
@@ -218,6 +223,30 @@ bool Structure::filterTriangulation(double minRatio){
         return false;
     }
 }
+
+//bool Structure::filterTriangulation(double minRatio){
+//    std::vector<Feature*> unfiltered(features);
+//    unsigned int index(0);
+//    double baseLine(0.);
+//    for(unsigned int i(0); i<unfiltered.size()-1; i++){
+//        if(unfiltered[i]->getStructure()==NULL)continue;
+//        for(unsigned int j(i+1); j<unfiltered.size(); j++){
+//            if(unfiltered[j]->getStructure()==NULL)continue;
+//            baseLine=((*features[i]->getViewpoint()->getPosition())-(*features[j]->getViewpoint()->getPosition())).norm();
+//            if((baseLine/features[j]->getRadius())>minRatio){
+//                features[index++]=unfiltered[i];
+//            }else{
+//                unfiltered[i]->setStructurePtr(NULL);
+//            }
+//        }
+//    }
+//    features.resize(index);
+//    if(index>=2){
+//        return true;
+//    }else{
+//        return false;
+//    }
+//}
 
 /* not used yet */
 bool Structure::filterRadiusStatistics(double meanValue, double stdValue, int indexRange){
