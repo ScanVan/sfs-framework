@@ -78,6 +78,8 @@ int main(int argc, char *argv[]){
     // algorithm error
     double loopError(1.);
     double pushError(0.);
+    double loopError2(1.);
+    double pushError2(0.);
 
     // pipeline loop
     while(true){
@@ -130,7 +132,8 @@ int main(int argc, char *argv[]){
 
             // reset algorithm
             loopError=0.;
-            pushError=1.;
+            pushError=-1.;
+            pushError2=-1.;
 
             // algorithm optimisation loop
             while ( loopFlag == true ) {
@@ -160,15 +163,17 @@ int main(int argc, char *argv[]){
 
                 // get error value
                 loopError = database.getError();
+                loopError2 = database.getError2();
 
                 // update minor iterator
                 loopMinor ++;
 
                 // display information
-                std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopError << std::endl;
+                std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopError << " + " << loopError2 << std::endl;
 
                 // optimisation loop management
-                if((fabs(loopError - pushError) < database.getConfigError()) || std::isnan(loopError)) {
+                //if((fabs(loopError - pushError) < database.getConfigError()) || std::isnan(loopError)) {
+                if((fabs(loopError-pushError)<database.getConfigError())&&(fabs(loopError2-pushError2)<database.getConfigError())||(loopState==DB_LOOP_MODE_FULL)){
 
                     // Push amount of structures
                     unsigned int pushCount(database.structures.size());
@@ -177,12 +182,12 @@ int main(int argc, char *argv[]){
                     database.computeFiltersRadialLimit();
 
                     // check loop state
-                    if(loopState!=DB_LOOP_MODE_FULL){
+                    //if(loopState!=DB_LOOP_MODE_FULL){
 
                         // Filtering processes
                         database.computeFiltersDisparityStatistics(loopState);
 
-                    }
+                    //}
 
                     // Check filtering results
                     if(database.structures.size()==pushCount){
@@ -193,7 +198,8 @@ int main(int argc, char *argv[]){
                     }else{
 
                         // reset pushed error
-                        pushError=1.;
+                        pushError=-1.;
+                        pushError2=-1.;
 
                     }
 
@@ -201,6 +207,7 @@ int main(int argc, char *argv[]){
 
                     // push current error
                     pushError=loopError;
+                    pushError2=loopError2;
 
                 }
 

@@ -62,7 +62,10 @@ public:
     Database(double initialError, double initialDisparity, double initialRadius);
     bool getBootstrap();
     double getConfigError();
+
     double getError();
+    double getError2();
+
     void getTranslationMeanValue(int loopState);
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);

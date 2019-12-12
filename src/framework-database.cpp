@@ -37,7 +37,12 @@ double Database::getConfigError(){
 
 /* encapsulation fault - adding disparity in addition to position */
 double Database::getError(){
-    return (viewpoints.back()->position - viewpoints.front()->position).norm() + maxValue;
+    //return (viewpoints.back()->position - viewpoints.front()->position).norm() + maxValue;
+    return (*viewpoints.back()->getPosition()-*viewpoints.front()->getPosition()).norm();
+}
+
+double Database::getError2(){
+    return maxValue;
 }
 
 void Database::getTranslationMeanValue(int loopState){
