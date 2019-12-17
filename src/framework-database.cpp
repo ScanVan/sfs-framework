@@ -35,14 +35,20 @@ double Database::getConfigError(){
     return configError;
 }
 
-/* encapsulation fault - adding disparity in addition to position */
-double Database::getError(){
-    //return (viewpoints.back()->position - viewpoints.front()->position).norm() + maxValue;
+double Database::getPError(){
     return (*viewpoints.back()->getPosition()-*viewpoints.front()->getPosition()).norm();
 }
 
-double Database::getError2(){
+double Database::getDError(){
     return maxValue;
+}
+
+bool Database::getCheckError( double const currentError, double const lastError ) {
+    // Apply condition //
+    if(fabs(currentError-lastError)<configError){
+        return true;
+    }
+    return false;
 }
 
 void Database::getTranslationMeanValue(int loopState){
@@ -122,13 +128,24 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
                 structureNewCount++;
             }break;
             case 1: {
-                if(structuresOccurences[0] < 2) continue; //Not good enough
+                //if(structuresOccurences[0] < 2) continue; //Not good enough
+                if(structuresOccurences[0] < 1) continue; //Not good enough
                 structure = structures[0];
                 structureAggregationCount++;
             }break;
             default: {
+                // search for best structure //
+                uint32_t detectIdx = 0;
+                for ( uint32_t seachMax = 0, searchIdx = 0; searchIdx < structuresCount; searchIdx++ ) {
+                    if(structuresOccurences[searchIdx]>seachMax){
+                        seachMax=structuresOccurences[searchIdx];
+                        detectIdx=searchIdx;
+                    }
+                }
+                if(structuresOccurences[detectIdx] < 1) continue;
+                structure = structures[detectIdx];
                 structureFusionCount++;
-                continue;
+                //continue; // de-activate match fusion
             }break;
         }
 
@@ -387,7 +404,7 @@ void Database::computeOptimals(long loopState){
     }
 
     // Compute optimal structure position
-    # pragma omp parallel for
+    # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
         structures[i]->computeOptimalPosition();
     }
@@ -442,7 +459,7 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
 
     // Compute mean value
     meanValue=0.;
-    for(unsigned int i(0); i<structureRange; i++){
+    for(unsigned int i(sortStructTypeA); i<structureRange; i++){
         for(auto & feature: structures[i]->features){ /* encapsulation fault */
             //if(feature->getViewpoint()->getIndex()>=ignoreViewpoint){ /* encapsulation fault */
                 meanValue+=(feature->*getValue)(); /* encapsulation fault */
@@ -455,7 +472,7 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
     // Compute standard deviation
     stdValue=0.;
     maxValue=0.;
-    for(unsigned int i(0); i<structureRange; i++){
+    for(unsigned int i(sortStructTypeA); i<structureRange; i++){
         for(auto & feature: structures[i]->features){ /* encapsulation fault */
             //if(feature->getViewpoint()->getIndex()>=ignoreViewpoint){ /* encapsulation fault */
                 componentValue=(feature->*getValue)()-meanValue; /* encapsulation fault */
@@ -609,7 +626,7 @@ void Database::computeFiltersDisparityStatistics(int loopState){
     sortStructTypeB=trackB;
 
     // development feature - begin
-    std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ") - (" << stdValue << ")" << std::endl;
+    std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
     // development feature - end
 
 }
