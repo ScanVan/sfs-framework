@@ -39,19 +39,24 @@ public:
     Eigen::Vector3d * getPosition();
     int getFeaturesCount();
     bool getBootstrap(int lastViewpointIndex);
-    bool getLastViewpointCreated(unsigned int lastViewpointIndex);
+    bool getLastViewpointCreated(int lastViewpointIndex);
     bool getHasLastViewpoint(int lastViewpointIndex);
     void setFeaturesState();
     void addFeature(Feature * feature);
+    void sortFeatures();
     void computeModel();
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
-    void computeOptimalPosition(unsigned int ignoreViewpoint);
+    void computeOptimalPosition();
     void computeRadius();
-    bool filterRadiusClamp(double clampValue, int indexRange);
-    bool filterRadiusStatistics(double meanValue, double stdValue, int indexRange);
+    bool filterRadiusClamp(double clampValue);
+    bool filterRadiusLimit(double limitValue);
     bool filterDisparityStatistics(double stdValue, int indexRange);
+    bool filterTriangulation(double minRatio);
+    /* not used yet */
+    bool filterRadiusStatistics(double meanValue, double stdValue, int indexRange);
     bool filterTriangulation(double const minAngle, double const maxAngle);
+
     Viewpoint *getOriginalViewpoint() { return originalViewpoint; }
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */
 

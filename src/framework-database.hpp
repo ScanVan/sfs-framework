@@ -26,6 +26,7 @@
 #include <vector>
 #include <cmath>
 #include <opencv4/opencv2/core.hpp>
+#include <omp.h>
 #include "framework-viewpoint.hpp"
 #include "framework-transform.hpp"
 #include "framework-structure.hpp"
@@ -48,6 +49,8 @@ public:
     unsigned int sortStructTypeA;
     unsigned int sortStructTypeB;
 
+    double transformMean;
+
     double configError;
     double configDisparity;
     double configRadius;
@@ -59,25 +62,34 @@ public:
     Database(double initialError, double initialDisparity, double initialRadius);
     bool getBootstrap();
     double getConfigError();
-    double getError();
-    double getTranslationMeanValue();
+    double getPError();
+    double getDError();
+    bool getCheckError( double const currentError, double const lastError );
+    void getTranslationMeanValue(int loopState);
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
     void prepareStructure();
-    void computeModels();
+    void prepareFeature();
+    void computeModels(int loopState);
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);
     void computePoses(int loopState);
-    void computeFrames();
+    void computeFrames(int loopState);
     void computeOptimals(long loopState);
     void computeRadii(long loopState);
     void computeStatistics(long loopState, double(Feature::*getValue)());
     void computeFiltersRadialClamp(int loopState);
-    void computeFiltersRadialStatistics(int loopState);
+    void computeFiltersRadialLimit();
     void computeFiltersDisparityStatistics(int loopState);
+    void computeFiltersTriangulation();
+
+    /* not used yet */
+    void computeFiltersRadialStatistics(int loopState);
+
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);
+    void exportTransformation(std::string path, unsigned int major);
     Structure *newStructure(Viewpoint *originalViewpoint){ auto s = std::make_shared<Structure>(originalViewpoint); structures.push_back(s); return s.get();} /* need deletion */
 
 public:
@@ -85,6 +97,7 @@ public:
     cv::Mat viewpointStructuralImage(Viewpoint *viewpoint, unsigned int structSizeMin);
     void _sanityCheck(bool inliner);
     void _sanityCheckStructure();
+    void _sanityCheckFeatureOrder();
     void _exportState(std::string path,int major, int iter); /* need deletion */
     void _exportMatchDistribution(std::string path, unsigned int major, std::string type); /* need deletion */
 

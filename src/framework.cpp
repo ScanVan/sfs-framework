@@ -70,17 +70,23 @@ int main(int argc, char *argv[]){
         inlinerEnabled = true;
     }
 
-    // pipeline iterations
+    // Pipeline iterations
     int loopMajor(1);
     int loopMinor(0);
 
-    // algorithm loop
+    // Algorithm loop
     bool loopFlag(true);
+    bool loopTrig(true);
     long loopState=0;
 
-    // algorithm error
-    double loopError(1.);
-    double pushError(0.);
+    // Algorithm error
+    double loopPError(1.);
+    double pushPError(0.);
+    double loopDError(1.);
+    double pushDError(0.);
+
+    // Algorithm filtering
+    unsigned int pushFilter(0);
 
     // pipeline loop
     while(true){
@@ -89,7 +95,7 @@ int main(int argc, char *argv[]){
         // image stream front-end
         //
 
-        // query image from source
+        // Query image from source
         if(!frontend->next()){
             // drop the pushed image
             continue;
@@ -103,17 +109,24 @@ int main(int argc, char *argv[]){
         // geometry estimation solver
         //
 
-        // wait bootstrap image count
+        // Wait bootstrap image count
         if(database.getBootstrap()){
             // avoid optimisation
             exitRelease();
             continue;
         }
 
-        // prepare structure vector - type-based segment sort
+        // Prepare structure vector - type-based segment sort
         database.prepareStructure();
 
-        // reset algorithm loop
+        // Perpare structure features - sort by viewpoint index order
+        database.prepareFeature();
+
+        // development feature - begin
+        database._sanityCheckFeatureOrder();
+        // development feature - end
+
+        // Reset algorithm loop
         loopFlag=true;
         loopMinor=0;
 
@@ -121,30 +134,29 @@ int main(int argc, char *argv[]){
         //database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
         // development feature - end
 
-        // algorithm state loop
+        // Algorithm state loop
         while ( loopFlag == true ) {
 
             // reset algorithm
-            loopError=0.;
-            pushError=1.;
+            pushPError=-1.;
+            pushDError=-1.;
 
             // algorithm optimisation loop
             while ( loopFlag == true ) {
 
-                // algorithm core
-                database.computeModels();
+                // Algorithm core
+                database.computeModels(loopState);
                 database.computeCentroids(loopState);
                 database.computeCorrelations(loopState);
                 database.computePoses(loopState);
-                database.computeFrames();
+                database.computeFrames(loopState);
                 database.computeOptimals(loopState);
                 database.computeRadii(loopState);
 
+                // Stability filtering (radial clamp)
                 database.computeFiltersRadialClamp(loopState);
-                //database.computeStatistics(loopState,&Feature::getRadius);
-                //database.computeFiltersRadialStatistics(loopState);
-                //database.computeStatistics(loopState,&Feature::getDisparity);
-                //database.computeFiltersDisparityStatistics(loopState);
+
+                // Statistics computation on disparity
                 database.computeStatistics(loopState,&Feature::getDisparity);
 
                 // development feature - begin
@@ -155,32 +167,78 @@ int main(int argc, char *argv[]){
                 //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
                 // development feature - end
 
-                // get error value
-                loopError = database.getError();
+                // Get error values
+                loopPError = database.getPError();
+                loopDError = database.getDError();
 
-                // update minor iterator
+                // Update minor iterator
                 loopMinor ++;
 
-                // display information
-                std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopError << std::endl;
+                // Display information
+                std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopPError << " + " << loopDError << std::endl;
 
-                // optimisation loop management
-                if((fabs(loopError - pushError) < database.getConfigError()) || std::isnan(loopError)) {
-                    loopFlag = false;
+                // Check trigger (optimisation loop)
+                if((std::isnan(loopPError))||(std::isnan(loopDError))){
+                    loopTrig=true;
+                } else {                
+                    if ((database.getCheckError(loopPError, pushPError))&&(database.getCheckError(loopDError, pushDError))){
+                        loopTrig=true;
+                    }else{
+                        loopTrig=false;
+                    }
+                }
+
+                // Optimisation loop management
+                if((loopTrig)||(loopState==DB_LOOP_MODE_FULL)){
+
+                    // Push amount of structures
+                    pushFilter = database.structures.size();
+
+                    // Filtering process
+                    database.computeFiltersRadialLimit();
+
+                    // Filtering processes
+                    database.computeFiltersDisparityStatistics(loopState);
+
+                    // Check filtering results
+                    if(database.structures.size()==pushFilter){
+
+                        // Interrupt optimisation loop
+                        loopFlag = false;
+
+                    }else{
+
+                        // Reset pushed error
+                        pushPError=-1.;
+                        pushDError=-1.;
+
+                    }
+
                 } else {
-                    pushError=loopError;
+
+                    // Push current error
+                    pushPError=loopPError;
+                    pushDError=loopDError;
+
                 }
 
             }
 
-            // state loop management
-            if( (loopState==DB_LOOP_MODE_BOOT) ||
-                (loopState==DB_LOOP_MODE_FULL) ){
+            // State loop management
+            if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){
+
+                // Update loop mode
                 loopState=DB_LOOP_MODE_LAST;
+
             } else
             if (loopState==DB_LOOP_MODE_LAST){
+
+                // Update loop mode
                 loopState=DB_LOOP_MODE_FULL;
+
+                // Reset loop flag (continue optimisation)
                 loopFlag=true;
+
             }
 
         }
@@ -213,9 +271,10 @@ int main(int argc, char *argv[]){
 
         if(allowDeallocateImages) database.viewpoints.back()->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
 
-        // major iteration exportation : model and odometry
-        database.exportModel   (config["export"]["path"].as<std::string>(),loopMajor);
-        database.exportOdometry(config["export"]["path"].as<std::string>(),loopMajor);
+        // Major iteration exportation : model, odometry and transformation
+        database.exportModel         (config["export"]["path"].as<std::string>(),loopMajor);
+        database.exportOdometry      (config["export"]["path"].as<std::string>(),loopMajor);
+        database.exportTransformation(config["export"]["path"].as<std::string>(),loopMajor);
 
         // update major iterator
         loopMajor ++;
