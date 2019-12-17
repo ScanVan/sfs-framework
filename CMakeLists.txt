@@ -19,15 +19,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 file(GLOB sfs-framework_SRC
     "src/*.?pp"
-	#src/framework-viewpointsource.?pp
-    #src/framework-viewpoint.?pp
-    #src/framework-sparsefeature.?pp
-    #src/framework-database.?pp
-    #src/framework.?pp
+    "lib/libflow/src/*.?pp"
 )
 
 add_executable( sfs-framework ${sfs-framework_SRC} )
 target_link_libraries( sfs-framework yaml-cpp ${OpenCV_LIBS} ${YAML_CPP_LIBRARIES} stdc++fs omp)
 
 message(STATUS "OpenCV_INCLUDE_DIRS = ${OpenCV_INCLUDE_DIRS}")
-

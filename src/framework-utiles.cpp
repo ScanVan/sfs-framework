@@ -62,3 +62,35 @@ void exitRelease(){
     if(exitCounter <= 0) exit(0);
     exitMutex.unlock();
 }
+
+
+double bilinear_sample(double *p, double x, double y, int width){
+    int ix = x;
+    int iy = y;
+
+    int i00 = iy*width + ix;
+    int i01 = i00 + 1;
+    int i10 = i00 + width;
+    int i11 = i00 + width + 1;
+
+    double fx = x-ix;
+    double fy = y-iy;
+
+    return  (p[i00]*(1.0-fx) + p[i01]*fx)*(1.0-fy) + (p[i10]*(1.0-fx) + p[i11]*fx)*fy;
+}
+
+
+float bilinear_sample(float *p, float x, float y, int width){
+    int ix = x;
+    int iy = y;
+
+    int i00 = iy*width + ix;
+    int i01 = i00 + 1;
+    int i10 = i00 + width;
+    int i11 = i00 + width + 1;
+
+    float fx = x-ix;
+    float fy = y-iy;
+
+    return  (p[i00]*(1.0f-fx) + p[i01]*fx)*(1.0f-fy) + (p[i10]*(1.0f-fx) + p[i11]*fx)*fy;
+}

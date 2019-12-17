@@ -800,11 +800,11 @@ cv::Mat Database::viewpointStructuralImage(Viewpoint *viewpoint, unsigned int st
     res = *viewpoint->getImage();
     for(int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
         auto f = (*viewpoint->getFeatures())[featureId];
-        if(!f.structure) continue;
-        if(f.structure->features.size() < structSizeMin) continue;
+        if(!f->structure) continue;
+        if(f->structure->features.size() < structSizeMin) continue;
         cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
 
-        std::vector<Feature*> features = *(f.structure->getFeatures());
+        std::vector<Feature*> features = *(f->structure->getFeatures());
         std::sort(features.begin(), features.end(), featureSort());
         for(uint32_t idx = 1;idx < features.size();idx++){
             cv::line(res, _f2i((features)[idx-1]->position),  _f2i((features)[idx]->position), color, 2);
@@ -814,11 +814,11 @@ cv::Mat Database::viewpointStructuralImage(Viewpoint *viewpoint, unsigned int st
     rng = cv::RNG(12345);
     for(int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
         auto f = (*viewpoint->getFeatures())[featureId];
-        if(!f.structure) continue;
-        if(f.structure->features.size() < structSizeMin) continue;
+        if(!f->structure) continue;
+        if(f->structure->features.size() < structSizeMin) continue;
         cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
 
-        auto features = f.structure->getFeatures();
+        auto features = f->structure->getFeatures();
         cv::putText(
             res,
             std::to_string(featureId),
@@ -872,10 +872,10 @@ void Database::_sanityCheck(bool inliner){
     delete []structureSizes;
 
     for(auto v : viewpoints){
-        for(auto &f : v->features){
-            if(f.structure){
-                auto sf = &(f.structure->features);
-                if(std::find(sf->begin(), sf->end(), &f) == sf->end()) throw std::runtime_error("Feature having a structure without that feature");
+        for(auto f : v->features){
+            if(f->structure){
+                auto sf = &(f->structure->features);
+                if(std::find(sf->begin(), sf->end(), f) == sf->end()) throw std::runtime_error("Feature having a structure without that feature");
             }
         }
     }

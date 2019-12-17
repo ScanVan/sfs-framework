@@ -51,3 +51,25 @@ public:
 	virtual std::shared_ptr<Viewpoint> next();
 	virtual bool hasNext();
 };
+
+
+class ViewPointSourceWithOdometry : public ViewPointSource{
+private:
+    class ViewPointInfo{
+    public:
+        std::string fileName;
+        Eigen::Vector3d position;
+        Eigen::Matrix3d orientation;
+    };
+    std::vector<ViewPointInfo> list;
+    uint32_t fileIndex;
+    uint32_t fileLastIndex;
+    double scale = 1.0;
+    std::string pictureFolder;
+
+public:
+    ViewPointSourceWithOdometry(std::string viewpointsPath, std::string pictureFolder, double scale, std::string firstFile, std::string lastFile);
+    virtual ~ViewPointSourceWithOdometry() {}
+    virtual std::shared_ptr<Viewpoint> next();
+    virtual bool hasNext();
+};
