@@ -31,12 +31,12 @@
 #include "framework-transform.hpp"
 #include "framework-structure.hpp"
 
-#define DB_LOOP_BOOT_COUNT ( 3 ) /* amount of viewpoint to wait to trigger the initial boot optimisation */
+#define DB_LOOP_BOOT_COUNT ( 3 ) /* Amount of viewpoints to wait to trigger the initial boot optimisation */
 
-#define DB_LOOP_MODE_BOOT  ( 0 ) /* initial structure */
-#define DB_LOOP_MODE_LAST  ( 1 ) /* optimising last viewpoint */
-//#define DB_LOOP_MODE_HEAD  ( 2 ) /* optimising active head */
-#define DB_LOOP_MODE_FULL  ( 2 ) /* optimising all structure */
+#define DB_LOOP_MODE_BOOT  ( 0 ) /* Initial structure */
+#define DB_LOOP_MODE_LAST  ( 1 ) /* Optimising last viewpoint */
+//#define DB_LOOP_MODE_HEAD  ( 2 ) /* Optimising active head */
+#define DB_LOOP_MODE_FULL  ( 2 ) /* Optimising all structures */
 
 class Database {
 
@@ -48,9 +48,7 @@ public:
 
     unsigned int sortStructTypeA;
     unsigned int sortStructTypeB;
-
     double transformMean;
-
     double configError;
     double configDisparity;
     double configRadius;
@@ -61,7 +59,6 @@ public:
 public:
     Database(double initialError, double initialDisparity, double initialRadius);
     bool getBootstrap();
-    double getConfigError();
     double getPError();
     double getDError();
     bool getCheckError( double const currentError, double const lastError );

@@ -31,10 +31,6 @@ bool Database::getBootstrap(){
     return viewpoints.size()<DB_LOOP_BOOT_COUNT?true:false;
 }
 
-double Database::getConfigError(){
-    return configError;
-}
-
 double Database::getPError(){
     return (*viewpoints.back()->getPosition()-*viewpoints.front()->getPosition()).norm();
 }
@@ -44,7 +40,6 @@ double Database::getDError(){
 }
 
 bool Database::getCheckError( double const currentError, double const lastError ) {
-    // Apply condition //
     if(fabs(currentError-lastError)<configError){
         return true;
     }
@@ -263,7 +258,6 @@ void Database::computeCentroids(int loopState){
     unsigned int transformationStart(0);
 
     // Active structure range lower bound
-    //unsigned int structureStart(0);
     unsigned int structureStart(sortStructTypeA);
 
     // Active structure range upper bound
@@ -276,7 +270,6 @@ void Database::computeCentroids(int loopState){
         transformationStart=transforms.size()-1;
 
         // Update structure range
-        //structureStart=sortStructTypeA;
         structureRange=sortStructTypeA+sortStructTypeB;
 
     }
@@ -306,7 +299,6 @@ void Database::computeCorrelations(int loopState){
     unsigned int transformationStart(0);
 
     // Active structure range lower bound
-    //unsigned int structureStart(0);
     unsigned int structureStart(sortStructTypeA);
 
     // Active structure range upper bound
@@ -319,7 +311,6 @@ void Database::computeCorrelations(int loopState){
         transformationStart=transforms.size()-1;
 
         // Update structure range
-        //structureStart=sortStructTypeA;
         structureRange=sortStructTypeA+sortStructTypeB;
 
     }
@@ -432,39 +423,24 @@ void Database::computeRadii(long loopState){
 
 }
 
+/* encapsulation fault */
 void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
-
-    // Count increment
-    int countValue(0);
 
     // Standard deviation component
     double componentValue(0.);
 
-    // Active viewpoint start index
-    int ignoreViewpoint(0);
+    // Count increment
+    int countValue(0);
 
     // Active structure range
     unsigned int structureRange(structures.size());
-
-    // Check pipeline state
-    //if(loopState==DB_LOOP_MODE_LAST){
-
-        // Update active viewpoints
-    //    ignoreViewpoint=viewpoints.size()-1;
-
-        // Update structures range
-    //    structureRange=sortStructTypeA+sortStructTypeB;
-
-    //}
 
     // Compute mean value
     meanValue=0.;
     for(unsigned int i(sortStructTypeA); i<structureRange; i++){
         for(auto & feature: structures[i]->features){ /* encapsulation fault */
-            //if(feature->getViewpoint()->getIndex()>=ignoreViewpoint){ /* encapsulation fault */
-                meanValue+=(feature->*getValue)(); /* encapsulation fault */
-                countValue++;
-            //}
+            meanValue+=(feature->*getValue)(); /* encapsulation fault */
+            countValue++;
         }
     }
     meanValue/=double(countValue);
@@ -474,13 +450,11 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
     maxValue=0.;
     for(unsigned int i(sortStructTypeA); i<structureRange; i++){
         for(auto & feature: structures[i]->features){ /* encapsulation fault */
-            //if(feature->getViewpoint()->getIndex()>=ignoreViewpoint){ /* encapsulation fault */
-                componentValue=(feature->*getValue)()-meanValue; /* encapsulation fault */
-                stdValue+=componentValue*componentValue;
-                if(maxValue<(feature->*getValue)()){ /* encapsulation fault */
-                    maxValue=(feature->*getValue)(); /* encapsulation fault */
-                }
-            //}
+            componentValue=(feature->*getValue)()-meanValue; /* encapsulation fault */
+            stdValue+=componentValue*componentValue;
+            if(maxValue<(feature->*getValue)()){ /* encapsulation fault */
+                maxValue=(feature->*getValue)(); /* encapsulation fault */
+            }
         }
     }
     stdValue=std::sqrt(stdValue/(countValue-1));
@@ -581,26 +555,11 @@ void Database::computeFiltersDisparityStatistics(int loopState){
     unsigned int trackA(sortStructTypeA);
     unsigned int trackB(sortStructTypeB);
 
-    // Active structures range
-    unsigned int structureRange(unfiltered.size());
-
-    // Active viewpoint range
-    unsigned int viewpointRange(0);
-
-    // Check pipeline state
-    //if(loopState==DB_LOOP_MODE_LAST){
-
-        // Update active structure
-    //    structureRange=sortStructTypeA+sortStructTypeB;
-
-        // Update active viewpoint
-    //    viewpointRange=viewpoints.size()-1;
-
-    //}
-
     // Apply filter condition
     for(unsigned int i(0); i<unfiltered.size(); i++){
-        //if(i<structureRange){
+        if(i<sortStructTypeA){
+            structures[index++]=unfiltered[i];
+        }else{
             if(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true){
                 structures[index++]=unfiltered[i];
             }else{
@@ -613,9 +572,7 @@ void Database::computeFiltersDisparityStatistics(int loopState){
                     }
                 }
             }
-        //}else{
-        //    structures[index++]=unfiltered[i];
-        //}
+        }
     }
 
     // Resize structures vector
@@ -799,7 +756,7 @@ void Database::_displayViewpointStructures(Viewpoint *viewpoint, unsigned int st
     cv::Rect myROI(0, 0, viewpoint->getImage()->cols, viewpoint->getImage()->rows);
     cv::Mat res(myROI.width,myROI.height, CV_8UC3, cv::Scalar(0,0,0));
     res = *viewpoint->getImage();
-    for(int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
+    for(unsigned int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
         auto f = (*viewpoint->getFeatures())[featureId];
         if(!f.structure) continue;
         if(f.structure->features.size() < structSizeMin) continue;
@@ -813,7 +770,7 @@ void Database::_displayViewpointStructures(Viewpoint *viewpoint, unsigned int st
     }
 
     rng = cv::RNG(12345);
-    for(int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
+    for(unsigned int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
         auto f = (*viewpoint->getFeatures())[featureId];
         if(!f.structure) continue;
         if(f.structure->features.size() < structSizeMin) continue;
