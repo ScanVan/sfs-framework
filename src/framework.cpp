@@ -140,6 +140,19 @@ int main(int argc, char *argv[]){
             continue;
         }
 
+
+        if(config["debug"].IsDefined()){
+            if(config["debug"]["structureImageDump"].IsDefined()){
+                for(auto viewpoint : database.viewpoints){
+                    auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
+                    auto folder = config["export"]["path"].as<std::string>() + "/viewpointStructuresImages";
+                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "a.png";
+                    fs::create_directories(folder);
+                    cv::imwrite(path, image);
+                }
+            }
+        }
+
         // Prepare structure vector - type-based segment sort
         database.prepareStructure();
 
@@ -277,7 +290,7 @@ int main(int argc, char *argv[]){
             auto lastViewPointGui = config["debug"]["lastViewPointGui"];
             if(lastViewPointGui.IsDefined() && database.viewpoints.back()->getImage()->cols != 0){
                 database._displayViewpointStructures(database.viewpoints.back().get(), lastViewPointGui["structureSizeMin"].as<int>());
-                cv::waitKey(100); //Wait 100 ms give opencv the time to display the GUI
+                cv::waitKey(0); //Wait 100 ms give opencv the time to display the GUI
             }
 
 
@@ -286,7 +299,7 @@ int main(int argc, char *argv[]){
                 for(auto viewpoint : database.viewpoints){
                     auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
                     auto folder = config["export"]["path"].as<std::string>() + "/viewpointStructuresImages";
-                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + ".png";
+                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "b.png";
                     fs::create_directories(folder);
                     cv::imwrite(path, image);
                 }
