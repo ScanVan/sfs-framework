@@ -53,14 +53,15 @@ void Viewpoint::setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosit
 }
 
 void Viewpoint::allocateFeaturesFromCvFeatures(){
-	features.resize(cvFeatures.size());
 	for(uint32_t i = 0;i < cvFeatures.size();i++){
-        features[i].setFeature(cvFeatures[i].pt.x, cvFeatures[i].pt.y, width, height);
-        features[i].setRadius(1., 0.);
-        features[i].setViewpointPtr(this);
-        features[i].setStructurePtr(NULL);
+	    auto feature = new Feature();
+        feature->setFeature(cvFeatures[i].pt.x, cvFeatures[i].pt.y, width, height);
+        feature->setRadius(1., 0.);
+        feature->setViewpointPtr(this);
+        feature->setStructurePtr(NULL);
         auto color = image.empty() ? cv::Vec3b(255,255,255) : image.at<cv::Vec3b>(cvFeatures[i].pt.y, cvFeatures[i].pt.x);
-        features[i].setColor(color);
+        feature->setColor(color);
+        features.push_back(feature);
 	}
 }
 

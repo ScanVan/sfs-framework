@@ -20,6 +20,9 @@
  */
 
 #include "framework.hpp"
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
 
 int main(int argc, char *argv[]){
     //profile("boot");
@@ -54,6 +57,30 @@ int main(int argc, char *argv[]){
         }
         frontend = new FrontendPicture(source, mask, &threadpool, &database);
     }
+
+    if(frontendType == "DENSE"){
+        auto fs = config["frontend"]["source"];
+        ViewPointSource *source = NULL;
+        auto sourceType = fs["type"].as<std::string>();
+        if(sourceType == "ODOMETRY") {
+            std::string firstFile =  fs["first"].IsDefined() ? fs["first"].as<std::string>() : "";
+            std::string lastFile = fs["last"].IsDefined() ? fs["last"].as<std::string>() : "";
+            source = new ViewPointSourceWithOdometry(
+                fs["odometryFile"].as<std::string>(),
+                fs["pictureFolder"].as<std::string>(),
+                fs["scale"].as<double>(),
+                firstFile,
+                lastFile
+            );
+        }
+        auto mask = cv::imread(fs["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
+        if(fs["scale"].IsDefined()){
+            auto scale = fs["scale"].as<double>();
+            cv::resize(mask, mask, cv::Size(), scale, scale, cv::INTER_AREA );
+        }
+        frontend = new FrontendDense(source, mask, &database, config["frontend"]["ofCacheFolder"].as<std::string>());
+    }
+
 
     if(frontendType == "CLOUDPOINT"){
         auto fn = config["frontend"];
@@ -111,6 +138,19 @@ int main(int argc, char *argv[]){
             // avoid optimisation
             exitRelease();
             continue;
+        }
+
+
+        if(config["debug"].IsDefined()){
+            if(config["debug"]["structureImageDump"].IsDefined()){
+                for(auto viewpoint : database.viewpoints){
+                    auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
+                    auto folder = config["export"]["path"].as<std::string>() + "/viewpointStructuresImages";
+                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "a.png";
+                    fs::create_directories(folder);
+                    cv::imwrite(path, image);
+                }
+            }
         }
 
         // Prepare structure vector - type-based segment sort
@@ -244,14 +284,29 @@ int main(int argc, char *argv[]){
         database._sanityCheck(inlinerEnabled);
         // development feature - end
 
+        bool allowDeallocateImages = true;
+
         if(config["debug"].IsDefined()){
             auto lastViewPointGui = config["debug"]["lastViewPointGui"];
             if(lastViewPointGui.IsDefined() && database.viewpoints.back()->getImage()->cols != 0){
                 database._displayViewpointStructures(database.viewpoints.back().get(), lastViewPointGui["structureSizeMin"].as<int>());
-                cv::waitKey(100); //Wait 100 ms give opencv the time to display the GUI
+                cv::waitKey(0); //Wait 100 ms give opencv the time to display the GUI
+            }
+
+
+            if(config["debug"]["structureImageDump"].IsDefined()){
+                allowDeallocateImages = false;
+                for(auto viewpoint : database.viewpoints){
+                    auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
+                    auto folder = config["export"]["path"].as<std::string>() + "/viewpointStructuresImages";
+                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "b.png";
+                    fs::create_directories(folder);
+                    cv::imwrite(path, image);
+                }
             }
         }
-        database.viewpoints.back()->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
+
+        if(allowDeallocateImages && database.viewpoints.size() >= 4) database.viewpoints[database.viewpoints.size()-4]->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
 
         // Major iteration exportation : model, odometry and transformation
         database.exportModel         (config["export"]["path"].as<std::string>(),loopMajor);

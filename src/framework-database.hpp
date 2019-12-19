@@ -91,6 +91,7 @@ public:
 
 public:
     void _displayViewpointStructures(Viewpoint *viewpoint, unsigned int structSizeMin);
+    cv::Mat viewpointStructuralImage(Viewpoint *viewpoint, unsigned int structSizeMin);
     void _sanityCheck(bool inliner);
     void _sanityCheckStructure();
     void _sanityCheckFeatureOrder();

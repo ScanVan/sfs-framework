@@ -37,7 +37,7 @@ public:
 	cv::Mat image;
     int width; /* maybe to delete : only used in allocateFeaturesFromCvFeatures : passed as parameter ? */
     int height; /* maybe to delete : only used in allocateFeaturesFromCvFeatures : passed as parameter ? */
-	std::vector<Feature> features;
+	std::vector<Feature*> features;
 	std::vector<cv::KeyPoint> cvFeatures;
 	cv::Mat cvDescriptor;
     Eigen::Matrix3d orientation;
@@ -53,7 +53,7 @@ public:
 	void setCvDescriptor(cv::Mat &image){this->cvDescriptor = cvDescriptor;}
 	cv::Mat* getCvDescriptor(){return &this->cvDescriptor;}
 	void setPosition(Eigen::Vector3d position){this->position = position;}
-	std::vector<Feature> *getFeatures() { return &features; }
+	std::vector<Feature*> *getFeatures() { return &features; }
     int getIndex();
     Eigen::Matrix3d * getOrientation();
     Eigen::Vector3d * getPosition();
@@ -63,7 +63,7 @@ public:
     void setImageDimension(int newWidth, int newHeight);
     void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
     void allocateFeaturesFromCvFeatures();
-    void addFeature(Feature f){ features.push_back(f); }
+    void addFeature(Feature *f){ features.push_back(f);  }
     double getSecondFrom(Viewpoint *ref);
-    Feature *getFeatureFromCvIndex(uint32_t i){ return &features[i]; }
+    Feature *getFeatureFromCvIndex(uint32_t i){ return features[i]; }
 };
