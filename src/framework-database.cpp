@@ -209,8 +209,10 @@ void Database::prepareStructure(){
 
     // Type-based detection - Type C
     for(auto & structure: unsorted){
-        if(structure->getHasLastViewpoint(lastViewpoint)==false){
-            structures[index++]=structure;
+        if(structure->getLastViewpointCreated(lastViewpoint)==false){
+            if(structure->getHasLastViewpoint(lastViewpoint)==false){
+                structures[index++]=structure;
+            }
         }
     }
 
@@ -222,6 +224,7 @@ void Database::prepareStructure(){
 
 }
 
+/* version type A/B only : ok */
 void Database::prepareFeature(){
 
     // parsing structures for features sorting based on relative viewpoint index //
@@ -231,6 +234,7 @@ void Database::prepareFeature(){
 
 }
 
+/* version type A/B only : ok */
 void Database::computeModels(int loopState){
 
     // Active structure upper bound
@@ -252,13 +256,14 @@ void Database::computeModels(int loopState){
 
 }
 
+/* version type A/B only : ok */
 void Database::computeCentroids(int loopState){
 
     // Active transformation start index
     unsigned int transformationStart(0);
 
     // Active structure range lower bound
-    unsigned int structureStart(sortStructTypeA);
+    unsigned int structureStart(0);
 
     // Active structure range upper bound
     unsigned int structureRange(structures.size());
@@ -282,7 +287,9 @@ void Database::computeCentroids(int loopState){
 
     // Compute centroid contribution for active structures
     for(unsigned int i(structureStart); i<structureRange; i++) {
-        structures[i]->computeCentroid(transforms);
+        if(structures[i]->getFeaturesCount()>2){
+            structures[i]->computeCentroid(transforms);
+        }
     }
 
     // Compute active transformation centroid
@@ -293,13 +300,14 @@ void Database::computeCentroids(int loopState){
 
 }
 
+/* version type A/B only : ok */
 void Database::computeCorrelations(int loopState){
 
     // Active transformation start index
     unsigned int transformationStart(0);
 
     // Active structure range lower bound
-    unsigned int structureStart(sortStructTypeA);
+    unsigned int structureStart(0);
 
     // Active structure range upper bound
     unsigned int structureRange(structures.size());
@@ -323,11 +331,14 @@ void Database::computeCorrelations(int loopState){
 
     // Compute correlation matrix correlation for active structures
     for(unsigned int i(structureStart); i<structureRange; i++){
-        structures[i]->computeCorrelation(transforms);
+        if(structures[i]->getFeaturesCount()>2){
+            structures[i]->computeCorrelation(transforms);
+        }
     }
 
 }
 
+/* version type A/B only : ok */
 void Database::computePoses(int loopState){
 
     // Active transformation start index
@@ -358,6 +369,7 @@ void Database::computePoses(int loopState){
 
 }
 
+/* version type A/B only : ok */
 void Database::computeFrames(int loopState){
 
     // Active transformation index
@@ -381,6 +393,7 @@ void Database::computeFrames(int loopState){
 
 }
 
+/* version type A/B only : ok */
 void Database::computeOptimals(long loopState){
 
     // Active structure range
@@ -390,7 +403,7 @@ void Database::computeOptimals(long loopState){
     if(loopState==DB_LOOP_MODE_LAST){
 
         // Update active structure
-        structureRange=sortStructTypeA;
+        structureRange=sortStructTypeA+sortStructTypeB;
 
     }
 
@@ -402,6 +415,7 @@ void Database::computeOptimals(long loopState){
 
 }
 
+/* version type A/B only : ok */
 void Database::computeRadii(long loopState){
 
     // Active structure upper bound
@@ -424,6 +438,7 @@ void Database::computeRadii(long loopState){
 }
 
 /* encapsulation fault */
+/* version type A/B only : ok */
 void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
 
     // Standard deviation component
@@ -437,10 +452,12 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
 
     // Compute mean value
     meanValue=0.;
-    for(unsigned int i(sortStructTypeA); i<structureRange; i++){
+    for(unsigned int i(0); i<structureRange; i++){
+        if(structures[i]->getFeaturesCount()>2){
         for(auto & feature: structures[i]->features){ /* encapsulation fault */
             meanValue+=(feature->*getValue)(); /* encapsulation fault */
             countValue++;
+        }
         }
     }
     meanValue/=double(countValue);
@@ -448,13 +465,15 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
     // Compute standard deviation
     stdValue=0.;
     maxValue=0.;
-    for(unsigned int i(sortStructTypeA); i<structureRange; i++){
+    for(unsigned int i(0); i<structureRange; i++){
+        if(structures[i]->getFeaturesCount()>2){
         for(auto & feature: structures[i]->features){ /* encapsulation fault */
             componentValue=(feature->*getValue)()-meanValue; /* encapsulation fault */
             stdValue+=componentValue*componentValue;
             if(maxValue<(feature->*getValue)()){ /* encapsulation fault */
                 maxValue=(feature->*getValue)(); /* encapsulation fault */
             }
+        }
         }
     }
     stdValue=std::sqrt(stdValue/(countValue-1));
@@ -557,7 +576,8 @@ void Database::computeFiltersDisparityStatistics(int loopState){
 
     // Apply filter condition
     for(unsigned int i(0); i<unfiltered.size(); i++){
-        if(i<sortStructTypeA){
+        //if(i<sortStructTypeA){
+        if(structures[i]->getFeaturesCount()<=2){
             structures[index++]=unfiltered[i];
         }else{
             if(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true){
