@@ -59,7 +59,7 @@ void Database::getTranslationMeanValue(int loopState){
 }
 
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
-    int localCount = MIN(2, viewpoints.size());
+    int localCount = MIN(5, viewpoints.size());
     for(auto i = viewpoints.end()-localCount;i != viewpoints.end(); ++i){
         localViewpoints->push_back(*i);
     }
