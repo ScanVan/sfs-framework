@@ -26,6 +26,7 @@
 #include <opencv4/opencv2/imgcodecs.hpp>
 #include <opencv4/opencv2/highgui.hpp>
 #include <ctime>
+#include <fstream>
 
 namespace fs = std::experimental::filesystem;
 
@@ -77,19 +78,10 @@ std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
 	dateString.insert(6,"-");
 	dateString.insert(4,"-");
 
-//	sscanf(dateString.c_str(), "%d-%d-%d-%d-%d-%d-%d",
-//		&viewpoint->year,
-//		&viewpoint->month,
-//		&viewpoint->day,
-//		&viewpoint->hour,
-//		&viewpoint->minute,
-//		&viewpoint->second,
-//		&viewpoint->microseconde
-//	);
-
-
 	assert(strptime(dateString.c_str(), "%Y-%m-%d-%H-%M-%S", &tm));
 	viewpoint->time = mktime(&tm);
+
+	viewpoint->uid = fileName.string();
 
 	fileIndex++;
 	return viewpoint;
@@ -98,6 +90,64 @@ std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
 bool ViewPointSourceFs::hasNext(){
 	return fileIndex <= fileLastIndex;
 }
+
+
+
+
+
+
+
+
+ViewPointSourceWithOdometry::ViewPointSourceWithOdometry(std::string viewpointsPath, std::string pictureFolder, double scale, std::string firstFile, std::string lastFile) : scale(scale), pictureFolder(pictureFolder){
+    std::ifstream listFile(viewpointsPath);
+
+    ViewPointInfo info;
+
+    fileIndex = -1;
+    fileLastIndex = -1;
+
+    while (listFile >>
+            info.fileName >>
+            info.position[0] >> info.position[1] >> info.position[2] >>
+            info.orientation(0,0) >> info.orientation(0,1) >> info.orientation(0,2) >>
+            info.orientation(1,0) >> info.orientation(1,1) >> info.orientation(1,2) >>
+            info.orientation(2,0) >> info.orientation(2,1) >> info.orientation(2,2))
+    {
+        if(info.fileName == firstFile) fileIndex = list.size();
+        if(info.fileName == lastFile) fileLastIndex = list.size();
+        list.push_back(info);
+    }
+
+    if(firstFile == "") fileIndex = 0;
+    if(lastFile == "") fileLastIndex = list.size()-1;
+
+    if(fileIndex < 0) throw std::runtime_error("can't fine first file");
+    if(fileLastIndex < 0) throw std::runtime_error("can't fine last file");
+}
+
+std::shared_ptr<Viewpoint> ViewPointSourceWithOdometry::next(){
+    auto viewpoint = std::make_shared<Viewpoint>();
+    auto info = list[fileIndex];
+
+    auto image = cv::Mat();
+    auto path = pictureFolder + "/" + info.fileName;
+    cv::resize(cv::imread(path, cv::IMREAD_COLOR), image, cv::Size(), scale, scale, cv::INTER_AREA );
+
+    if (image.empty()) throw new std::runtime_error("imread path failure : " + path );
+    viewpoint->setImage(image);
+    viewpoint->setImageDimension(image.cols, image.rows);
+
+    viewpoint->position = info.position;
+    viewpoint->orientation = info.orientation;
+    fileIndex++;
+    return viewpoint;
+}
+
+bool ViewPointSourceWithOdometry::hasNext(){
+    return fileIndex <= fileLastIndex;
+}
+
+
 
 
 

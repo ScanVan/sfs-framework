@@ -112,3 +112,7 @@ template<typename T> std::pair<bool, int> findInVector(
 
 void exitRetain();
 void exitRelease();
+
+
+double bilinear_sample(double *p, double x, double y, int width);
+double bilinear_sample(float *p, double x, double y, int width);

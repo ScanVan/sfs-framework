@@ -771,43 +771,47 @@ struct featureSort
     }
 };
 
-//Do  cv::waitKey(0); if you want to stop after it.
-void Database::_displayViewpointStructures(Viewpoint *viewpoint, unsigned int structSizeMin){
+cv::Mat Database::viewpointStructuralImage(Viewpoint *viewpoint, unsigned int structSizeMin){
     cv::RNG rng(12345);
     cv::Rect myROI(0, 0, viewpoint->getImage()->cols, viewpoint->getImage()->rows);
     cv::Mat res(myROI.width,myROI.height, CV_8UC3, cv::Scalar(0,0,0));
     res = *viewpoint->getImage();
     for(unsigned int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
         auto f = (*viewpoint->getFeatures())[featureId];
-        if(!f.structure) continue;
-        if(f.structure->features.size() < structSizeMin) continue;
+        if(!f->structure) continue;
+        if(f->structure->features.size() < structSizeMin) continue;
         cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
 
-        std::vector<Feature*> features = *(f.structure->getFeatures());
+        std::vector<Feature*> features = *(f->structure->getFeatures());
         std::sort(features.begin(), features.end(), featureSort());
         for(uint32_t idx = 1;idx < features.size();idx++){
-            cv::line(res, _f2i((features)[idx-1]->position),  _f2i((features)[idx]->position), color, 2);
+            cv::line(res, _f2i((features)[idx-1]->position),  _f2i((features)[idx]->position), color, 1);
         }
     }
 
     rng = cv::RNG(12345);
     for(unsigned int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
         auto f = (*viewpoint->getFeatures())[featureId];
-        if(!f.structure) continue;
-        if(f.structure->features.size() < structSizeMin) continue;
+        if(!f->structure) continue;
+        if(f->structure->features.size() < structSizeMin) continue;
         cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
 
-        auto features = f.structure->getFeatures();
-        cv::putText(
-            res,
-            std::to_string(featureId),
-            _f2i((*features)[0]->position) + cv::Point(-5, -5),
-            cv::FONT_HERSHEY_SIMPLEX,
-            0.5,
-            color
-        );
+        auto features = f->structure->getFeatures();
+//        cv::putText(
+//            res,
+//            std::to_string(featureId),
+//            _f2i((*features)[0]->position) + cv::Point(-5, -5),
+//            cv::FONT_HERSHEY_SIMPLEX,
+//            0.5,
+//            color
+//        );
     }
+    return res;
+}
 
+//Do  cv::waitKey(0); if you want to stop after it.
+void Database::_displayViewpointStructures(Viewpoint *viewpoint, unsigned int structSizeMin){
+    auto res = viewpointStructuralImage(viewpoint, structSizeMin);
 
     cv::namedWindow( "miaou", cv::WINDOW_KEEPRATIO );
     imshow( "miaou", res);
@@ -846,10 +850,10 @@ void Database::_sanityCheck(bool inliner){
     delete []structureSizes;
 
     for(auto v : viewpoints){
-        for(auto &f : v->features){
-            if(f.structure){
-                auto sf = &(f.structure->features);
-                if(std::find(sf->begin(), sf->end(), &f) == sf->end()) throw std::runtime_error("Feature having a structure without that feature");
+        for(auto f : v->features){
+            if(f->structure){
+                auto sf = &(f->structure->features);
+                if(std::find(sf->begin(), sf->end(), f) == sf->end()) throw std::runtime_error("Feature having a structure without that feature");
             }
         }
     }

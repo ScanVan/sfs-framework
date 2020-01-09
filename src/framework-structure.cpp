@@ -156,6 +156,28 @@ bool Structure::filterRadiusClamp(double clampValue){
     }
 }
 
+//bool Structure::filterRadiusClamp(double clampValue){
+//    std::vector<Feature*> unfiltered(features);
+//    unsigned int index(0);
+//    for(unsigned int i(0); i<unfiltered.size(); i++){
+//        auto radius = unfiltered[i]->getRadius();
+//        if(radius > 0){
+//            features[index++]=unfiltered[i];
+//        } else if(-radius > clampValue/2.0){
+//            features[index++]=unfiltered[i];
+//            unfiltered[i]->radius = clampValue*0.95;
+//        } else {
+//            unfiltered[i]->setStructurePtr(NULL);
+//        }
+//    }
+//    features.resize(index);
+//    if(index>=2){
+//        return true;
+//    }else{
+//        return false;
+//    }
+//}
+
 bool Structure::filterRadiusLimit(double limitValue){
     std::vector<Feature*> unfiltered(features);
     unsigned int index(0);
