@@ -25,6 +25,14 @@ Eigen::Vector3d * Structure::getPosition(){
     return &position;
 }
 
+bool Structure::getOptimised(){
+    if (position.norm() < 1e-6){
+        return false;
+    }else{
+        return true;
+    }
+}
+
 int Structure::getFeaturesCount(){
     return features.size();
 }

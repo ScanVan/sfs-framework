@@ -35,8 +35,11 @@ public:
     Viewpoint *originalViewpoint;
 
 public:
-    Structure(Viewpoint *originalViewpoint) : originalViewpoint(originalViewpoint) {}
+    Structure(Viewpoint *originalViewpoint) : position(Eigen::Vector3d::Zero()), originalViewpoint(originalViewpoint) {}
     Eigen::Vector3d * getPosition();
+
+    bool getOptimised();
+
     int getFeaturesCount();
     bool getBootstrap(int lastViewpointIndex);
     bool getLastViewpointCreated(int lastViewpointIndex);
