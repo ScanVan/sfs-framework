@@ -21,10 +21,11 @@
 
 #include "framework-database.hpp"
 
-Database::Database(double initialError, double initialDisparity, double initialRadius){
+Database::Database(double initialError, double initialDisparity, double initialRadius, unsigned int initialMatchRange){
     configError=initialError;
     configDisparity=initialDisparity;
     configRadius=initialRadius;
+    configMatchRange=initialMatchRange;
 }
 
 bool Database::getBootstrap(){
@@ -59,7 +60,7 @@ void Database::getTranslationMeanValue(int loopState){
 }
 
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
-    int localCount = MIN(5, viewpoints.size());
+    int localCount = MIN(configMatchRange, viewpoints.size());
     for(auto i = viewpoints.end()-localCount;i != viewpoints.end(); ++i){
         localViewpoints->push_back(*i);
     }

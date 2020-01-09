@@ -52,12 +52,13 @@ public:
     double configError;
     double configDisparity;
     double configRadius;
+    unsigned int configMatchRange;
     double meanValue;
     double stdValue;
     double maxValue;
 
 public:
-    Database(double initialError, double initialDisparity, double initialRadius);
+    Database(double initialError, double initialDisparity, double initialRadius, unsigned int initialMatchRange);
     bool getBootstrap();
     double getPError();
     double getDError();

@@ -34,7 +34,8 @@ int main(int argc, char *argv[]){
     auto database = Database(
         config["algorithm"]["error"].as<double>(),
         config["algorithm"]["disparity"].as<double>(),
-        config["algorithm"]["radius"].as<double>()
+        config["algorithm"]["radius"].as<double>(),
+        config["matching"]["range"].as<unsigned int>()
     );
     ThreadPool threadpool(8);
 

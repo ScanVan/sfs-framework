@@ -29,6 +29,9 @@ frontend:
 #    mask: /home/dolu/pro/scanvan/dataset/mask.png
 #    scale: 0.25
 
+matching:
+  range: 5
+
 algorithm:
   error: 1e-4
   disparity: 5
