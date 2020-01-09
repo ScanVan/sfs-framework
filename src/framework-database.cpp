@@ -186,6 +186,7 @@ void Database::prepareStructure(){
     // Copy structures vector
     std::vector<std::shared_ptr<Structure>> unsorted(structures);
 
+    // reset counters
     sortStructTypeA=0;
     sortStructTypeB=0;
 
