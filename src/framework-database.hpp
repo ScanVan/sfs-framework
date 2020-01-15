@@ -76,6 +76,9 @@ public:
     void computeFrames(int loopState);
     void computeOptimals(long loopState);
     void computeRadii(long loopState);
+
+    void computeTrailing();
+
     void computeStatistics(long loopState, double(Feature::*getValue)());
     void computeFiltersRadialClamp(int loopState);
     void computeFiltersRadialLimit();

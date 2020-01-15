@@ -141,7 +141,7 @@ int main(int argc, char *argv[]){
             continue;
         }
 
-
+        // development feature - begin
         if(config["debug"].IsDefined()){
             if(config["debug"]["structureImageDump"].IsDefined()){
                 for(auto viewpoint : database.viewpoints){
@@ -153,6 +153,7 @@ int main(int argc, char *argv[]){
                 }
             }
         }
+        // development feature - end
 
         // Prepare structure vector - type-based segment sort
         database.prepareStructure();
@@ -227,7 +228,8 @@ int main(int argc, char *argv[]){
                 }
 
                 // Optimisation loop management
-                if((loopTrig)||(loopState==DB_LOOP_MODE_FULL)){
+                //if((loopTrig)||(loopState==DB_LOOP_MODE_FULL)){
+                if(loopTrig){
 
                     // Push amount of structures
                     pushFilter = database.structures.size();
@@ -261,6 +263,9 @@ int main(int argc, char *argv[]){
                 }
 
             }
+
+            // trailing structure management
+            database.computeTrailing();
 
             // State loop management
             if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){
