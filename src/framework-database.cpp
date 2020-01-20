@@ -219,10 +219,16 @@ void Database::prepareStructure(){
         }
     }
 
+    // Prepare type A
+    //for(unsigned int i=0; i<sortStructTypeA; i++ ){
+    //    structures[i]->computeRadius();
+    //}
+
     // development feature - begin
-    std::cerr << "F-Type distribution : " << sortStructTypeA << ", " << sortStructTypeB << ", " << structures.size() - sortStructTypeA - sortStructTypeB << std::endl;
     if(index!=structures.size()){
         std::cerr << "Fault : " << index << " vs " << structures.size() << std::endl;
+    } else {
+        std::cerr << "Structure distribution by types : " << sortStructTypeA << ", " << sortStructTypeB << ", " << structures.size() - sortStructTypeA - sortStructTypeB << std::endl;
     }
     // development feature - end
 
@@ -246,12 +252,12 @@ void Database::computeModels(int loopState){
     if(loopState==DB_LOOP_MODE_LAST){
 
         // Update structure range
-        structureRange=sortStructTypeA;
+        structureRange=sortStructTypeA+sortStructTypeB;
 
     }
 
     // Updtae feature model position
-    # pragma omp parallel for
+    # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
         structures[i]->computeModel();
     }
@@ -276,7 +282,7 @@ void Database::computeCentroids(int loopState){
         transformationStart=transforms.size()-1;
 
         // Update structure range
-        structureRange=sortStructTypeA;
+        structureRange=sortStructTypeA+sortStructTypeB;
 
     }
 
@@ -319,7 +325,7 @@ void Database::computeCorrelations(int loopState){
         transformationStart=transforms.size()-1;
 
         // Update structure range
-        structureRange=sortStructTypeA;
+        structureRange=sortStructTypeA+sortStructTypeB;
 
     }
 
@@ -352,7 +358,7 @@ void Database::computePoses(int loopState){
     }
 
     // Compute transformation (orientation and translation)
-    # pragma omp parallel for
+    # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=transformationStart; i<transforms.size(); i++){
         transforms[i]->computePose();
     }
@@ -361,7 +367,7 @@ void Database::computePoses(int loopState){
     getTranslationMeanValue(loopState);
 
     // Renormalise transformations translation
-    # pragma omp parallel for
+    # pragma omp parallel for 
     for(unsigned int i=0; i<transforms.size(); i++){
         transforms[i]->setTranslationScale(transformMean);
     }
@@ -402,16 +408,16 @@ void Database::computeOptimals(long loopState){
     if(loopState==DB_LOOP_MODE_LAST){
 
         // Update active structure
-        structureRange=sortStructTypeA;
+        structureRange=sortStructTypeA+sortStructTypeB;
 
     }
 
     // Compute optimal structure position
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
-        if(structures[i]->getFeaturesCount()>2){ // <<<<<<<<< avoid 2 struct <<<<<<<<<
+        //if(structures[i]->getFeaturesCount()>2){ // <<<<<<<<< avoid 2 struct <<<<<<<<<
             structures[i]->computeOptimalPosition();
-        }
+        //}
     }
 
 }
@@ -425,16 +431,16 @@ void Database::computeRadii(long loopState){
     if(loopState==DB_LOOP_MODE_LAST){
 
         // Update structure range
-        structureRange=sortStructTypeA;
+        structureRange=sortStructTypeA+sortStructTypeB;
 
     }
 
     // Updtae feature model position
-    # pragma omp parallel for
+    # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
-        if(structures[i]->getFeaturesCount()>2){ // <<<<<<<<< avoid 2 struct <<<<<<<<<
+        //if(structures[i]->getFeaturesCount()>2){ // <<<<<<<<< avoid 2 struct <<<<<<<<<
             structures[i]->computeRadius();
-        }
+        //}
     }
 
 }
@@ -468,19 +474,19 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
     if(loopState==DB_LOOP_MODE_LAST){
 
         // Update structure range
-        structureRange=sortStructTypeA;
+        structureRange=sortStructTypeA+sortStructTypeB;
 
     }
 
     // Compute mean value
     meanValue=0.;
     for(unsigned int i(0); i<structureRange; i++){
-        if(structures[i]->getFeaturesCount()>2){
+        //if(structures[i]->getFeaturesCount()>2){
             for(auto & feature: structures[i]->features){ /* encapsulation fault */
                 meanValue+=(feature->*getValue)(); /* encapsulation fault */
                 countValue++;
             }
-        }
+        //}
     }
     meanValue/=double(countValue);
 
@@ -488,7 +494,7 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
     stdValue=0.;
     maxValue=0.;
     for(unsigned int i(0); i<structureRange; i++){
-        if(structures[i]->getFeaturesCount()>2){
+        //if(structures[i]->getFeaturesCount()>2){
             for(auto & feature: structures[i]->features){ /* encapsulation fault */
                 componentValue=(feature->*getValue)()-meanValue; /* encapsulation fault */
                 stdValue+=componentValue*componentValue;
@@ -496,7 +502,7 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
                     maxValue=(feature->*getValue)(); /* encapsulation fault */
                 }
             }
-        }
+        //}
     }
     stdValue=std::sqrt(stdValue/(countValue-1));
 
@@ -597,7 +603,7 @@ void Database::computeFiltersDisparityStatistics(int loopState){
     unsigned int trackB(sortStructTypeB);
 
     // Active structure range
-    unsigned int structureRange(0);
+    unsigned int structureRange(structures.size());
 
     // check pipeline state
     if(loopState==DB_LOOP_MODE_LAST){
@@ -609,9 +615,9 @@ void Database::computeFiltersDisparityStatistics(int loopState){
 
     // Apply filter condition
     for(unsigned int i(0); i<unfiltered.size(); i++){
-        if((structures[i]->getFeaturesCount()<=2)||(i>=structureRange)){
-            structures[index++]=unfiltered[i];
-        }else{
+        //if(structures[i]->getFeaturesCount()<=2){
+        //    structures[index++]=unfiltered[i];
+        //}else{
             if(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true){
                 structures[index++]=unfiltered[i];
             }else{
@@ -624,7 +630,7 @@ void Database::computeFiltersDisparityStatistics(int loopState){
                     }
                 }
             }
-        }
+        //}
     }
 
     // Resize structures vector

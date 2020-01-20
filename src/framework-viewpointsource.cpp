@@ -35,7 +35,7 @@ ViewPointSourceFs::ViewPointSourceFs(std::vector<std::string> files){
 	this->fileIndex = 0;
 }
 
-ViewPointSourceFs::ViewPointSourceFs(std::string folder, double scale, std::string firstFile, std::string lastFile) : scale(scale){
+ViewPointSourceFs::ViewPointSourceFs(std::string folder, double scale, std::string firstFile, std::string lastFile, uint32_t increment) : scale(scale), increment(increment) {
 	// read the contents of the directory where the images are located
 	fs::path pt = fs::u8path(folder);
 	for (auto& p : fs::directory_iterator(pt)) {
@@ -83,7 +83,8 @@ std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
 
 	viewpoint->uid = fileName.string();
 
-	fileIndex++;
+	//fileIndex++;
+    fileIndex += increment;
 	return viewpoint;
 }
 

@@ -63,6 +63,7 @@ void Transform::computePose(){
     rotation=svd.matrixV()*svd.matrixU().transpose();
     if (rotation.determinant()<0){
         std::cerr << "SVD fault" << std::endl;
+        Eigen::Matrix3d reflection;
         Eigen::Matrix3d correctV(svd.matrixV());
         correctV(0,2)=-correctV(0,2);
         correctV(1,2)=-correctV(1,2);

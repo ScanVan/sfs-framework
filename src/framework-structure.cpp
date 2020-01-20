@@ -26,11 +26,7 @@ Eigen::Vector3d * Structure::getPosition(){
 }
 
 bool Structure::getOptimised(){
-    if (position.norm() < 1e-6){
-        return false;
-    }else{
-        return true;
-    }
+    return optimised;
 }
 
 int Structure::getFeaturesCount(){
@@ -132,6 +128,7 @@ void Structure::computeOptimalPosition(){
         wacc+=weight;
     }
     position=wacc.inverse()*vacc;
+    optimised=true;
 }
 
 void Structure::computeRadius(){
@@ -147,6 +144,14 @@ void Structure::computeRadius(){
 }
 
 bool Structure::filterRadiusClamp(double clampValue){
+    //for(unsigned int i(0); i<features.size(); i++){
+    //    if(features[i]->radius<0.){
+    //        features[i]->radius=-features[i]->radius;
+    //    }
+    //}    
+    //return true;
+
+
     std::vector<Feature*> unfiltered(features);
     unsigned int index(0);
     for(unsigned int i(0); i<unfiltered.size(); i++){

@@ -33,9 +33,11 @@ public:
     Eigen::Vector3d position;
     std::vector<Feature*> features;
     Viewpoint *originalViewpoint;
+    bool optimised;
 
 public:
-    Structure(Viewpoint *originalViewpoint) : position(Eigen::Vector3d::Zero()), originalViewpoint(originalViewpoint) {}
+    Structure() : position(Eigen::Vector3d::Zero()), originalViewpoint(NULL), optimised(false) {}
+    Structure(Viewpoint *originalViewpoint) : position(Eigen::Vector3d::Zero()), originalViewpoint(originalViewpoint), optimised(false) {}
     Eigen::Vector3d * getPosition();
 
     bool getOptimised();

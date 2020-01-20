@@ -43,10 +43,11 @@ private:
     uint32_t fileIndex;
     uint32_t fileLastIndex;
     double scale = 1.0;
+    uint32_t increment = 1;
 
 public:
 	ViewPointSourceFs(std::vector<std::string> files);
-	ViewPointSourceFs(std::string folder, double scale, std::string firstFile, std::string lastFile);
+	ViewPointSourceFs(std::string folder, double scale, std::string firstFile, std::string lastFile, uint32_t increment);
 	virtual ~ViewPointSourceFs() {}
 	virtual std::shared_ptr<Viewpoint> next();
 	virtual bool hasNext();

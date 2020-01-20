@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
         if(sourceType == "FOLDER") {
             std::string firstFile =  fs["first"].IsDefined() ? fs["first"].as<std::string>() : "";
             std::string lastFile = fs["last"].IsDefined() ? fs["last"].as<std::string>() : "";
-            source = new ViewPointSourceFs(fs["path"].as<std::string>(), fs["scale"].as<double>(), firstFile, lastFile);
+            source = new ViewPointSourceFs(fs["path"].as<std::string>(), fs["scale"].as<double>(), firstFile, lastFile, fs["inc"].as<uint32_t>());
         }
         auto mask = cv::imread(fs["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
         if(fs["scale"].IsDefined()){
@@ -173,6 +173,10 @@ int main(int argc, char *argv[]){
         //database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
         // development feature - end
 
+        // development feature - begin
+        std::cerr << "Distribution " << database.sortStructTypeA << " " << database.sortStructTypeB << std::endl;
+        // development feature - end
+
         // Algorithm state loop
         while ( loopFlag == true ) {
 
@@ -228,8 +232,8 @@ int main(int argc, char *argv[]){
                 }
 
                 // Optimisation loop management
-                //if((loopTrig)||(loopState==DB_LOOP_MODE_FULL)){
-                if(loopTrig){
+                if((loopTrig)||(loopState==DB_LOOP_MODE_FULL)){
+                //if(loopTrig){
 
                     // Push amount of structures
                     pushFilter = database.structures.size();
@@ -265,7 +269,13 @@ int main(int argc, char *argv[]){
             }
 
             // trailing structure management
-            database.computeTrailing();
+            //database.computeTrailing();
+
+            // Filtering process
+            //database.computeFiltersRadialClamp(loopState);
+
+            // Filtering process
+            //database.computeFiltersRadialLimit();
 
             // State loop management
             if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){
