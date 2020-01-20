@@ -67,8 +67,8 @@ public:
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
-    void prepareStructure();
     void prepareFeature();
+    void prepareStructure();
     void computeModels(int loopState);
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);
@@ -76,18 +76,10 @@ public:
     void computeFrames(int loopState);
     void computeOptimals(long loopState);
     void computeRadii(long loopState);
-
-    void computeTrailing();
-
-    void computeStatistics(long loopState, double(Feature::*getValue)());
-    void computeFiltersRadialClamp(int loopState);
-    void computeFiltersRadialLimit();
-    void computeFiltersDisparityStatistics(int loopState);
-    void computeFiltersTriangulation();
-
-    /* not used yet */
-    void computeFiltersRadialStatistics(int loopState);
-
+    void computeDisparityStatistics(long loopState);
+    void filterRadialPositivity(int loopState);
+    void filterRadialLimitation(int loopState);
+    void filterDisparity(int loopState);
     void exportModel(std::string path, unsigned int major);
     void exportOdometry(std::string path, unsigned int major);
     void exportTransformation(std::string path, unsigned int major);

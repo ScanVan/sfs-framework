@@ -34,22 +34,30 @@ void Transform::setTranslationScale(double scaleFactor){
 }
 
 void Transform::pushCorrelation(Eigen::Vector3d * firstComponent, Eigen::Vector3d * secondComponent){
+    # pragma omp critical
+    {
     correlation+=((*firstComponent)-centerFirst)*((*secondComponent)-centerSecond).transpose();
+    }
 }
 
 void Transform::pushCentroid(Eigen::Vector3d * pushFirst, Eigen::Vector3d * pushSecond){
+    # pragma omp critical
+    {
     centerFirst +=*pushFirst;
     centerSecond+=*pushSecond;
     centerCount++;
+    }
 }
 
 void Transform::resetCorrelation(){
-    correlation=Eigen::Matrix3d::Zero();
+    correlation(0,0)=correlation(0,1)=correlation(0,2)=0.;
+    correlation(1,0)=correlation(1,1)=correlation(1,2)=0.;
+    correlation(2,0)=correlation(2,1)=correlation(2,2)=0.;
 }
 
 void Transform::resetCentroid(){
-    centerFirst =Eigen::Vector3d::Zero();
-    centerSecond=Eigen::Vector3d::Zero();
+    centerFirst (0)=centerFirst (1)=centerFirst (2)=0.;
+    centerSecond(0)=centerSecond(1)=centerSecond(2)=0.;
     centerCount=0;
 }
 
@@ -63,7 +71,6 @@ void Transform::computePose(){
     rotation=svd.matrixV()*svd.matrixU().transpose();
     if (rotation.determinant()<0){
         std::cerr << "SVD fault" << std::endl;
-        Eigen::Matrix3d reflection;
         Eigen::Matrix3d correctV(svd.matrixV());
         correctV(0,2)=-correctV(0,2);
         correctV(1,2)=-correctV(1,2);

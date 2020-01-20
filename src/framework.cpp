@@ -155,11 +155,11 @@ int main(int argc, char *argv[]){
         }
         // development feature - end
 
-        // Prepare structure vector - type-based segment sort
-        database.prepareStructure();
-
         // Perpare structure features - sort by viewpoint index order
         database.prepareFeature();
+
+        // Prepare structure vector - type-based segment sort
+        database.prepareStructure();
 
         // development feature - begin
         database._sanityCheckFeatureOrder();
@@ -196,11 +196,11 @@ int main(int argc, char *argv[]){
                 database.computeOptimals(loopState);
                 database.computeRadii(loopState);
 
-                // Stability filtering (radial clamp)
-                database.computeFiltersRadialClamp(loopState);
+                // Stability filtering - radius positivity
+                database.filterRadialPositivity(loopState);
 
                 // Statistics computation on disparity
-                database.computeStatistics(loopState,&Feature::getDisparity);
+                database.computeDisparityStatistics(loopState);
 
                 // development feature - begin
                 //database._sanityCheckStructure();
@@ -239,10 +239,10 @@ int main(int argc, char *argv[]){
                     pushFilter = database.structures.size();
 
                     // Filtering process
-                    database.computeFiltersRadialLimit();
+                    database.filterRadialLimitation(loopState);
 
                     // Filtering processes
-                    database.computeFiltersDisparityStatistics(loopState);
+                    database.filterDisparity(loopState);
 
                     // Check filtering results
                     if(database.structures.size()==pushFilter){
@@ -267,15 +267,6 @@ int main(int argc, char *argv[]){
                 }
 
             }
-
-            // trailing structure management
-            //database.computeTrailing();
-
-            // Filtering process
-            //database.computeFiltersRadialClamp(loopState);
-
-            // Filtering process
-            //database.computeFiltersRadialLimit();
 
             // State loop management
             if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){

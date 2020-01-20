@@ -29,10 +29,15 @@ bool Structure::getOptimised(){
     return optimised;
 }
 
+bool Structure::getFiltered(){
+    return filtered;
+}
+
 int Structure::getFeaturesCount(){
     return features.size();
 }
 
+/* delete */
 bool Structure::getBootstrap(int lastViewpointIndex){
     if (features.size()==2){
         for(auto & feature: features){
@@ -44,6 +49,7 @@ bool Structure::getBootstrap(int lastViewpointIndex){
     return false;
 }
 
+/* delete */
 bool Structure::getLastViewpointCreated(int lastViewpointIndex){
     if(originalViewpoint->getIndex()==lastViewpointIndex){
         return true;
@@ -52,12 +58,15 @@ bool Structure::getLastViewpointCreated(int lastViewpointIndex){
 }
 
 bool Structure::getHasLastViewpoint(int lastViewpointIndex){
-    for(auto & feature: features){
-        if(feature->getViewpoint()->getIndex()==lastViewpointIndex){
-            return true;
-        }
+    if(features.back()->getViewpoint()->getIndex()==lastViewpointIndex){
+        return true;
+    }else{
+        return false;
     }
-    return false;
+}
+
+bool Structure::getHasScale(){
+    return (features.size()>2) ? true : false;
 }
 
 void Structure::setFeaturesState(){
@@ -73,14 +82,15 @@ void Structure::addFeature(Feature * feature){
 }
 
 void Structure::sortFeatures(){
-    int detectSmallest(0), pushIndex(0);
+    int detectSmallest(0), candidateSmallest(0), pushIndex(0);
     std::vector<Feature*> unsorted(features);
     for(unsigned int i(0); i<features.size(); i++){
         detectSmallest=INT_MAX;
         for(unsigned int j(0); j<unsorted.size(); j++){
             if(unsorted[j]!=NULL){
-                if(unsorted[j]->getViewpoint()->getIndex()<detectSmallest){
-                    detectSmallest=unsorted[j]->getViewpoint()->getIndex();
+                candidateSmallest=unsorted[j]->getViewpoint()->getIndex();
+                if(candidateSmallest<detectSmallest){
+                    detectSmallest=candidateSmallest;
                     pushIndex=j;
                 }
             }
@@ -143,30 +153,49 @@ void Structure::computeRadius(){
     }
 }
 
-bool Structure::filterRadiusClamp(double clampValue){
-    //for(unsigned int i(0); i<features.size(); i++){
-    //    if(features[i]->radius<0.){
-    //        features[i]->radius=-features[i]->radius;
-    //    }
-    //}    
-    //return true;
+unsigned int Structure::computeDisparityMean(double * const meanValue){
+    for(auto & feature: features){
+        (*meanValue)+=feature->getDisparity();
+    }
+    return features.size();
+}
 
+void Structure::computeDisparityStd(double * const stdValue, double const meanValue){
+    double component(0);
+    for(auto & feature: features){
+        component=feature->getDisparity()-meanValue;
+        (*stdValue)+=component*component;
+    }
+}
 
-    std::vector<Feature*> unfiltered(features);
-    unsigned int index(0);
-    for(unsigned int i(0); i<unfiltered.size(); i++){
-        if(unfiltered[i]->getRadius()>clampValue){
-            features[index++]=unfiltered[i];
-        }else{
-            unfiltered[i]->setStructurePtr(NULL);
+void Structure::computeDisparityMax(double * const maxValue){
+    for(auto & feature: features){
+        if(feature->getDisparity()>(*maxValue)){
+            (*maxValue)=feature->getDisparity();
         }
     }
-    features.resize(index);
-    if(index>=2){
-        return true;
-    }else{
-        return false;
+}
+
+void Structure::filterRadialPositivity(double clampValue){
+    unsigned int index(0);
+    for(unsigned int i(0); i<features.size(); i++){
+        if(features[i]->getRadius()<clampValue){
+            features[i]->setStructurePtr(NULL);
+        }else{
+            if(index!=i) features[index]=features[i];
+            index ++;
+        }
     }
+    if(index<features.size()){
+        features.resize(index);
+    }
+    if(index<2){
+        filtered=false;
+        setFeaturesState();
+    }else{
+        filtered=true;
+    }
+
 }
 
 //bool Structure::filterRadiusClamp(double clampValue){
@@ -191,127 +220,45 @@ bool Structure::filterRadiusClamp(double clampValue){
 //    }
 //}
 
-bool Structure::filterRadiusLimit(double limitValue){
-    std::vector<Feature*> unfiltered(features);
+void Structure::filterRadialLimitation(double limitValue){
     unsigned int index(0);
-    for(unsigned int i(0); i<unfiltered.size(); i++){
-        if(unfiltered[i]->getRadius()<limitValue){
-            features[index++]=unfiltered[i];
-        }else{
-            unfiltered[i]->setStructurePtr(NULL);
-        }
-
-    }
-    features.resize(index);
-    if(index>=2){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-bool Structure::filterDisparityStatistics(double stdValue, int indexRange){
-    std::vector<Feature*> unfiltered(features);
-    unsigned int index(0);
-    for(unsigned int i(0); i<unfiltered.size(); i++){
-        if(features[i]->getViewpoint()->getIndex()>=indexRange){
-            if(features[i]->getDisparity()<=stdValue){
-                features[index++]=unfiltered[i];
-            }else{
-                unfiltered[i]->setStructurePtr(NULL);
-            }
-        }else{
-            features[index++]=unfiltered[i];
-        }
-    }
-    features.resize(index);
-    if(index>=2){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-bool Structure::filterTriangulation(double minRatio){
-    std::vector<Feature*> unfiltered(features);
-    unsigned int index(0);
-    double baseLine(0.);
-    for(unsigned int i(0); i<unfiltered.size()-1; i++){
-        if(unfiltered[i]->getStructure()==NULL)continue;
-        for(unsigned int j(i+1); j<unfiltered.size(); j++){
-            if(unfiltered[j]->getStructure()==NULL)continue;
-            baseLine=((*features[i]->getViewpoint()->getPosition())-(*features[j]->getViewpoint()->getPosition())).norm();
-            if((baseLine/features[j]->getRadius())<minRatio){
-                unfiltered[j]->setStructurePtr(NULL);
-            }
-        }
-    }
-    for(unsigned int i(0); i<unfiltered.size(); i++){
-        if(unfiltered[i]->getStructure()!=NULL){
-            features[index++]=unfiltered[i];
-        }
-    }
-    features.resize(index);
-    if(index>=2){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-//bool Structure::filterTriangulation(double minRatio){
-//    std::vector<Feature*> unfiltered(features);
-//    unsigned int index(0);
-//    double baseLine(0.);
-//    for(unsigned int i(0); i<unfiltered.size()-1; i++){
-//        if(unfiltered[i]->getStructure()==NULL)continue;
-//        for(unsigned int j(i+1); j<unfiltered.size(); j++){
-//            if(unfiltered[j]->getStructure()==NULL)continue;
-//            baseLine=((*features[i]->getViewpoint()->getPosition())-(*features[j]->getViewpoint()->getPosition())).norm();
-//            if((baseLine/features[j]->getRadius())>minRatio){
-//                features[index++]=unfiltered[i];
-//            }else{
-//                unfiltered[i]->setStructurePtr(NULL);
-//            }
-//        }
-//    }
-//    features.resize(index);
-//    if(index>=2){
-//        return true;
-//    }else{
-//        return false;
-//    }
-//}
-
-/* not used yet */
-bool Structure::filterRadiusStatistics(double meanValue, double stdValue, int indexRange){
-    for(auto & feature: features){
-        if(feature->getViewpoint()->getIndex()>=indexRange){
-            if(fabs(feature->getRadius()-meanValue)>stdValue){
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-/* not used yet */
-bool Structure::filterTriangulation(double const minAngle, double const maxAngle){
-    Eigen::Vector3d iVector;
-    Eigen::Vector3d jVector;
-    double angleValue(0.);
     for(unsigned int i(0); i<features.size(); i++){
-        iVector=(*features[i]->getViewpoint()->getPosition())-position;
-        iVector/=iVector.norm();
-        for(unsigned int j(i+1); j<features.size(); j++){
-            jVector=(*features[j]->getViewpoint()->getPosition())-position;
-            jVector/=jVector.norm();
-            angleValue=acos(iVector.dot(jVector));
-            if((angleValue<minAngle)||(angleValue>maxAngle)){
-                return false;
-            }
+        if(features[i]->getRadius()>limitValue){
+            features[i]->setStructurePtr(NULL);
+        }else{
+            if(index!=i) features[index]=features[i];
+            index ++;
         }
     }
-    return true;
+    if(index<features.size()){
+        features.resize(index);
+    }
+    if(index<2){
+        filtered=false;
+        setFeaturesState();
+    }else{
+        filtered=true;
+    }
+}
+
+void Structure::filterDisparity(double limitValue){
+    unsigned int index(0);
+    for(unsigned int i(0); i<features.size(); i++){
+        if(features[i]->getDisparity()>limitValue){
+            features[i]->setStructurePtr(NULL);
+        }else{
+            if(index!=i) features[index]=features[i];
+            index ++;
+        }
+    }
+    if(index<features.size()){
+        features.resize(index);
+    }
+    if(index<2){
+        filtered=false;
+        setFeaturesState();
+    }else{
+        filtered=true;
+    }
 }
 

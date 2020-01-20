@@ -34,18 +34,19 @@ public:
     std::vector<Feature*> features;
     Viewpoint *originalViewpoint;
     bool optimised;
+    bool filtered;
 
 public:
-    Structure() : position(Eigen::Vector3d::Zero()), originalViewpoint(NULL), optimised(false) {}
-    Structure(Viewpoint *originalViewpoint) : position(Eigen::Vector3d::Zero()), originalViewpoint(originalViewpoint), optimised(false) {}
+    Structure() : position(Eigen::Vector3d::Zero()), originalViewpoint(NULL), optimised(false), filtered(true) {}
+    Structure(Viewpoint *originalViewpoint) : position(Eigen::Vector3d::Zero()), originalViewpoint(originalViewpoint), optimised(false), filtered(true) {}
     Eigen::Vector3d * getPosition();
-
     bool getOptimised();
-
+    bool getFiltered();
     int getFeaturesCount();
     bool getBootstrap(int lastViewpointIndex);
     bool getLastViewpointCreated(int lastViewpointIndex);
     bool getHasLastViewpoint(int lastViewpointIndex);
+    bool getHasScale();
     void setFeaturesState();
     void addFeature(Feature * feature);
     void sortFeatures();
@@ -54,13 +55,12 @@ public:
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeOptimalPosition();
     void computeRadius();
-    bool filterRadiusClamp(double clampValue);
-    bool filterRadiusLimit(double limitValue);
-    bool filterDisparityStatistics(double stdValue, int indexRange);
-    bool filterTriangulation(double minRatio);
-    /* not used yet */
-    bool filterRadiusStatistics(double meanValue, double stdValue, int indexRange);
-    bool filterTriangulation(double const minAngle, double const maxAngle);
+    unsigned int computeDisparityMean(double * const meanValue);
+    void computeDisparityStd(double * const stdValue, double const meanValue);
+    void computeDisparityMax(double * const maxValue);
+    void filterRadialPositivity(double clampValue);
+    void filterRadialLimitation(double limitValue);
+    void filterDisparity(double limitValue);
 
     Viewpoint *getOriginalViewpoint() { return originalViewpoint; }
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */

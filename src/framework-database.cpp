@@ -48,15 +48,21 @@ bool Database::getCheckError( double const currentError, double const lastError 
 }
 
 void Database::getTranslationMeanValue(int loopState){
-    unsigned int structureRange(transforms.size());
+    unsigned int transformRange(transforms.size());
     if(loopState==DB_LOOP_MODE_LAST){
-        structureRange--;
+        transformRange--;
     }
     transformMean=0.;
-    for(unsigned int i(0); i<structureRange; i++){
+    for(unsigned int i(0); i<transformRange; i++){
         transformMean+=transforms[i]->getTranslation()->norm();
     }
-    transformMean/=double(structureRange);
+    transformMean/=double(transformRange);
+
+    //transformMean=0.;
+    //for(unsigned int i(0); i<transforms.size(); i++){
+    //    transformMean+=transforms[i]->getTranslation()->norm();
+    //}
+    //transformMean/=double(transforms.size());
 }
 
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
@@ -176,6 +182,15 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 
 }
 
+void Database::prepareFeature(){
+
+    // parsing structures for features sorting based on relative viewpoint index //
+    for(auto & structure: structures){
+        structure->sortFeatures();
+    }
+
+}
+
 void Database::prepareStructure(){
 
     // Last viewpoint index
@@ -219,11 +234,6 @@ void Database::prepareStructure(){
         }
     }
 
-    // Prepare type A
-    //for(unsigned int i=0; i<sortStructTypeA; i++ ){
-    //    structures[i]->computeRadius();
-    //}
-
     // development feature - begin
     if(index!=structures.size()){
         std::cerr << "Fault : " << index << " vs " << structures.size() << std::endl;
@@ -231,15 +241,6 @@ void Database::prepareStructure(){
         std::cerr << "Structure distribution by types : " << sortStructTypeA << ", " << sortStructTypeB << ", " << structures.size() - sortStructTypeA - sortStructTypeB << std::endl;
     }
     // development feature - end
-
-}
-
-void Database::prepareFeature(){
-
-    // parsing structures for features sorting based on relative viewpoint index //
-    for(auto & structure: structures){
-        structure->sortFeatures();
-    }
 
 }
 
@@ -269,9 +270,6 @@ void Database::computeCentroids(int loopState){
     // Active transformation start index
     unsigned int transformationStart(0);
 
-    // Active structure range lower bound
-    unsigned int structureStart(0);
-
     // Active structure range upper bound
     unsigned int structureRange(structures.size());
 
@@ -293,8 +291,9 @@ void Database::computeCentroids(int loopState){
     }
 
     // Compute centroid contribution for active structures
-    for(unsigned int i(structureStart); i<structureRange; i++) {
-        if(structures[i]->getFeaturesCount()>2){ // <<<<<<<<< avoid 2 struct <<<<<<<<<
+    # pragma omp parallel for schedule(dynamic)
+    for(unsigned int i=0; i<structureRange; i++) {
+        if(structures[i]->getHasScale()){
             structures[i]->computeCentroid(transforms);
         }
     }
@@ -311,9 +310,6 @@ void Database::computeCorrelations(int loopState){
 
     // Active transformation start index
     unsigned int transformationStart(0);
-
-    // Active structure range lower bound
-    unsigned int structureStart(0);
 
     // Active structure range upper bound
     unsigned int structureRange(structures.size());
@@ -336,8 +332,9 @@ void Database::computeCorrelations(int loopState){
     }
 
     // Compute correlation matrix correlation for active structures
-    for(unsigned int i(structureStart); i<structureRange; i++){
-        if(structures[i]->getFeaturesCount()>2){ // <<<<<<<<< avoid 2 struct <<<<<<<<<
+    # pragma omp parallel for schedule(dynamic)
+    for(unsigned int i=0; i<structureRange; i++){
+        if(structures[i]->getHasScale()){
             structures[i]->computeCorrelation(transforms);
         }
     }
@@ -363,11 +360,17 @@ void Database::computePoses(int loopState){
         transforms[i]->computePose();
     }
 
-    // Compute translation mean value
-    getTranslationMeanValue(loopState);
+    // check pipeline state
+    //if(loopState==DB_LOOP_MODE_BOOT){
+
+        // Compute translation mean value
+        getTranslationMeanValue(loopState);
+
+    //}
 
     // Renormalise transformations translation
     # pragma omp parallel for 
+    //for(unsigned int i=transformationStart; i<transforms.size(); i++){
     for(unsigned int i=0; i<transforms.size(); i++){
         transforms[i]->setTranslationScale(transformMean);
     }
@@ -415,9 +418,7 @@ void Database::computeOptimals(long loopState){
     // Compute optimal structure position
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
-        //if(structures[i]->getFeaturesCount()>2){ // <<<<<<<<< avoid 2 struct <<<<<<<<<
-            structures[i]->computeOptimalPosition();
-        //}
+        structures[i]->computeOptimalPosition();
     }
 
 }
@@ -438,34 +439,15 @@ void Database::computeRadii(long loopState){
     // Updtae feature model position
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
-        //if(structures[i]->getFeaturesCount()>2){ // <<<<<<<<< avoid 2 struct <<<<<<<<<
-            structures[i]->computeRadius();
-        //}
+        structures[i]->computeRadius();
     }
 
 }
 
-void Database::computeTrailing(){
-
-    // parsing structures
-    # pragma omp parallel for schedule(dynamic)
-    for(unsigned int i=0;i<structures.size(); i++){
-        if((structures[i]->getFeaturesCount()==2)||(structures[i]->getOptimised()==false)){
-            structures[i]->computeOptimalPosition();
-            structures[i]->computeRadius();
-        }
-    }
-
-}
-
-/* encapsulation fault */
-void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
-
-    // Standard deviation component
-    double componentValue(0.);
+void Database::computeDisparityStatistics(long loopState){
 
     // Count increment
-    int countValue(0);
+    unsigned int countValue(0);
 
     // Active structure range
     unsigned int structureRange(structures.size());
@@ -480,123 +462,26 @@ void Database::computeStatistics(long loopState, double(Feature::*getValue)()){
 
     // Compute mean value
     meanValue=0.;
+    maxValue=0.;
     for(unsigned int i(0); i<structureRange; i++){
-        //if(structures[i]->getFeaturesCount()>2){
-            for(auto & feature: structures[i]->features){ /* encapsulation fault */
-                meanValue+=(feature->*getValue)(); /* encapsulation fault */
-                countValue++;
-            }
-        //}
+        countValue+=structures[i]->computeDisparityMean(&meanValue);
+        structures[i]->computeDisparityMax(&maxValue);
     }
     meanValue/=double(countValue);
 
     // Compute standard deviation
     stdValue=0.;
-    maxValue=0.;
     for(unsigned int i(0); i<structureRange; i++){
-        //if(structures[i]->getFeaturesCount()>2){
-            for(auto & feature: structures[i]->features){ /* encapsulation fault */
-                componentValue=(feature->*getValue)()-meanValue; /* encapsulation fault */
-                stdValue+=componentValue*componentValue;
-                if(maxValue<(feature->*getValue)()){ /* encapsulation fault */
-                    maxValue=(feature->*getValue)(); /* encapsulation fault */
-                }
-            }
-        //}
+        structures[i]->computeDisparityStd(&stdValue,meanValue);
     }
     stdValue=std::sqrt(stdValue/(countValue-1));
 
 }
 
-void Database::computeFiltersRadialClamp(int loopState){
+void Database::filterRadialPositivity(int loopState){
 
-    // Continuous indexation
+    // Differential indexation
     unsigned int index(0);
-
-    // Copy structures vector
-    std::vector<std::shared_ptr<Structure>> unfiltered(structures);
-
-    // Type-range tracking
-    unsigned int trackA(sortStructTypeA);
-    unsigned int trackB(sortStructTypeB);
-
-    // Apply filter condition on structures
-    for(unsigned int i(0); i<unfiltered.size(); i++){
-        if(unfiltered[i]->filterRadiusClamp(0.)==true){
-            structures[index++]=unfiltered[i];
-        }else{
-            unfiltered[i]->setFeaturesState();
-            if(i<(sortStructTypeA+sortStructTypeB)){
-                if(i<sortStructTypeA){
-                    trackA --;
-                }else{
-                    trackB --;
-                }
-            }
-        }
-    }
-
-    // resize structure vector
-    structures.resize(index);
-
-    // Update type-range
-    sortStructTypeA=trackA;
-    sortStructTypeB=trackB;
-
-    // development feature - begin
-    std::cerr << "R:R : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
-    // development feature - end
-
-}
-
-void Database::computeFiltersRadialLimit(){
-
-    // Continuous indexation
-    unsigned int index(0);
-
-    // Copy structures vector
-    std::vector<std::shared_ptr<Structure>> unfiltered(structures);
-
-    // Type-range tracking
-    unsigned int trackA(sortStructTypeA);
-    unsigned int trackB(sortStructTypeB);
-
-    // Apply filter condition on structures
-    for(unsigned int i(0); i<unfiltered.size(); i++){
-        if(unfiltered[i]->filterRadiusLimit(transformMean*100.)==true){
-            structures[index++]=unfiltered[i];
-        }else{
-            unfiltered[i]->setFeaturesState();
-            if(i<(sortStructTypeA+sortStructTypeB)){
-                if(i<sortStructTypeA){
-                    trackA --;
-                }else{
-                    trackB --;
-                }
-            }
-        }
-    }
-
-    // resize structure vector
-    structures.resize(index);
-
-    // Update type-range
-    sortStructTypeA=trackA;
-    sortStructTypeB=trackB;
-
-    // development feature - begin
-    std::cerr << "R:L : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
-    // development feature - end
-
-}
-
-void Database::computeFiltersDisparityStatistics(int loopState){
-
-    // Continuous indexation
-    unsigned int index(0);
-
-    // Copy structures vector
-    std::vector<std::shared_ptr<Structure>> unfiltered(structures);
 
     // Type-range tracking
     unsigned int trackA(sortStructTypeA);
@@ -609,137 +494,194 @@ void Database::computeFiltersDisparityStatistics(int loopState){
     if(loopState==DB_LOOP_MODE_LAST){
 
         // Update structure range
-        structureRange=sortStructTypeA;
-
-    }    
-
-    // Apply filter condition
-    for(unsigned int i(0); i<unfiltered.size(); i++){
-        //if(structures[i]->getFeaturesCount()<=2){
-        //    structures[index++]=unfiltered[i];
-        //}else{
-            if(unfiltered[i]->filterDisparityStatistics(stdValue*configDisparity,0)==true){
-                structures[index++]=unfiltered[i];
-            }else{
-                unfiltered[i]->setFeaturesState();
-                if(i<(sortStructTypeA+sortStructTypeB)){
-                    if(i<sortStructTypeA){
-                        trackA --;
-                    }else{
-                        trackB --;
-                    }
-                }
-            }
-        //}
+        structureRange=sortStructTypeA+sortStructTypeB;
+        
     }
 
-    // Resize structures vector
-    structures.resize(index);
+    // Compute filtering condition
+    # pragma omp parallel for schedule(dynamic)
+    for(unsigned int i=0; i<structureRange; i++){
 
-    // Update type-range
-    sortStructTypeA=trackA;
-    sortStructTypeB=trackB;
+        // Filter structure
+        structures[i]->filterRadialPositivity(0.);
 
-    // development feature - begin
-    std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
-    // development feature - end
+    }
 
-}
+    // Filtering loop
+    for(unsigned int i(0); i<structures.size(); i++){
 
-/* not used yet */
-void Database::computeFiltersTriangulation(){
+        // Check filter flag and passthrough range
+        if((i<structureRange)&&(structures[i]->getFiltered()==false)){
 
-    // Continuous indexation
-    unsigned int index(0);
-
-    // Copy structures vector
-    std::vector<std::shared_ptr<Structure>> unfiltered(structures);
-
-    // Type-range tracking
-    unsigned int trackA(sortStructTypeA);
-    unsigned int trackB(sortStructTypeB);
-
-    // Apply filter condition
-    for(unsigned int i(0); i<unfiltered.size(); i++){
-        if(unfiltered[i]->filterTriangulation(1./100.)==true){
-            structures[index++]=unfiltered[i];
-        }else{
-            unfiltered[i]->setFeaturesState();
-            if(i<(sortStructTypeA+sortStructTypeB)){
-                if(i<sortStructTypeA){
-                    trackA --;
-                }else{
-                    trackB --;
-                }
+            // Track type-range
+            if(i<sortStructTypeA){
+                trackA --;
+            }else if(i<(sortStructTypeA+sortStructTypeB)){
+                trackB --;
             }
+
+        } else {
+
+            // Check differential index - move structure
+            if(index!=i) structures[index]=structures[i];
+
+            // Update index
+            index ++;
+
         }
+
     }
 
-    // Resize structures vector
-    structures.resize(index);
+    // development feature - begin
+    std::cerr << "R:P : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
+    // development feature - end
+
+    // resize structure vector
+    if(index<structures.size()){
+        structures.resize(index);
+    }
 
     // Update type-range
     sortStructTypeA=trackA;
     sortStructTypeB=trackB;
 
-    // development feature - begin
-    std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ") - (" << stdValue << ")" << std::endl;
-    // development feature - end
-
 }
 
-/* not used yet */
-void Database::computeFiltersRadialStatistics(int loopState){
+void Database::filterRadialLimitation(int loopState){
 
-    // Continuous indexation
+    // Differential indexation
     unsigned int index(0);
-
-    // Copy structures vector
-    std::vector<std::shared_ptr<Structure>> unfiltered(structures);
 
     // Type-range tracking
     unsigned int trackA(sortStructTypeA);
     unsigned int trackB(sortStructTypeB);
 
-    // Active structures range
-    unsigned int structureRange(unfiltered.size());
+    // Active structure range
+    unsigned int structureRange(structures.size());
 
-    // Check pipeline state
+    // check pipeline state
     if(loopState==DB_LOOP_MODE_LAST){
 
-        // Update active structure
-        structureRange=sortStructTypeA;
+        // Update structure range
+        structureRange=sortStructTypeA+sortStructTypeB;
+        
+    }
+
+    // Compute filtering condition
+    # pragma omp parallel for schedule(dynamic)
+    for(unsigned int i=0; i<structureRange; i++){
+
+        // Filter structure
+        structures[i]->filterRadialLimitation(transformMean*100.);
 
     }
 
-    // Apply filter condition
-    for(unsigned int i(0); i<unfiltered.size(); i++){
-        //if((i>=structureRange)||(unfiltered[i]->filterRadiusStatistics(meanValue, stdValue*configRadius,0)==true)){
-        if((i>structureRange)||(unfiltered[i]->filterTriangulation(0.017453,2.0944)==true)){
+    // Filtering loop
+    for(unsigned int i(0); i<structures.size(); i++){
 
-            structures[index++]=unfiltered[i];
-        }else{
-            unfiltered[i]->setFeaturesState();
-            if(i<(sortStructTypeA+sortStructTypeB)){
-                if(i<sortStructTypeA){
-                    trackA --;
-                }else{
-                    trackB --;
-                }
+        // Check filter flag and passthrough range
+        if((i<structureRange)&&(structures[i]->getFiltered()==false)){
+
+            // Track type-range
+            if(i<sortStructTypeA){
+                trackA --;
+            }else if(i<(sortStructTypeA+sortStructTypeB)){
+                trackB --;
             }
+
+        } else {
+
+            // Check differential index - move structure
+            if(index!=i) structures[index]=structures[i];
+
+            // Update index
+            index ++;
+
         }
+
     }
 
-    // Resize structures vector
-    structures.resize(index);
+    // development feature - begin
+    std::cerr << "R:L : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
+    // development feature - end
+
+    // resize structure vector
+    if(index<structures.size()){
+        structures.resize(index);
+    }
 
     // Update type-range
     sortStructTypeA=trackA;
     sortStructTypeB=trackB;
 
+}
+
+void Database::filterDisparity(int loopState){
+
+    // Differential indexation
+    unsigned int index(0);
+
+    // Type-range tracking
+    unsigned int trackA(sortStructTypeA);
+    unsigned int trackB(sortStructTypeB);
+
+    // Active structure range
+    unsigned int structureRange(structures.size());
+
+    // check pipeline state
+    //if(loopState==DB_LOOP_MODE_LAST){
+
+        // Update structure range
+    //    structureRange=sortStructTypeA+sortStructTypeB;
+        
+    //}
+
+    // Compute filtering condition
+    # pragma omp parallel for schedule(dynamic)
+    for(unsigned int i=0; i<structureRange; i++){
+
+        // Filter structure
+        structures[i]->filterDisparity(stdValue*configDisparity);
+
+    }
+
+    // Filtering loop
+    for(unsigned int i(0); i<structures.size(); i++){
+
+        // Check filter flag and passthrough range
+        if((i<structureRange)&&(structures[i]->getFiltered()==false)){
+
+            // Track type-range
+            if(i<sortStructTypeA){
+                trackA --;
+            }else if(i<(sortStructTypeA+sortStructTypeB)){
+                trackB --;
+            }
+
+        } else {
+
+            // Check differential index - move structure
+            if(index!=i) structures[index]=structures[i];
+
+            // Update index
+            index ++;
+
+        }
+
+    }
+
     // development feature - begin
-    std::cerr << "R:D : " << index << "/" << unfiltered.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
+    std::cerr << "D:D : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
     // development feature - end
+
+    // resize structure vector
+    if(index<structures.size()){
+        structures.resize(index);
+    }
+
+    // Update type-range
+    sortStructTypeA=trackA;
+    sortStructTypeB=trackB;
 
 }
 
