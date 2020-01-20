@@ -45,12 +45,12 @@ public:
     Eigen::Vector3d * getModel();
     double getRadius();
     double getDisparity();
-    cv::Vec3b getColor();
     Viewpoint * getViewpoint();
     Structure * getStructure();
+    cv::Vec3b getColor();
     void setFeature(double x, double y, int imageWidth, int imageHeight);
-    void setRadius(double newRadius, double newDisparity);
     void setColor(cv::Vec3b color);
+    void setRadius(double newRadius, double newDisparity);
     void setViewpointPtr(Viewpoint * newViewpoint);
     void setStructurePtr(Structure * newStructure);
     void setDirection(Eigen::Vector3d newDirection); /* only used for synthetic models */

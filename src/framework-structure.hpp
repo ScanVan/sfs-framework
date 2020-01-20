@@ -32,19 +32,17 @@ class Structure {
 public:
     Eigen::Vector3d position;
     std::vector<Feature*> features;
-    Viewpoint *originalViewpoint;
+    Viewpoint *originalViewpoint; /* no more needed */
     bool optimised;
     bool filtered;
 
 public:
     Structure() : position(Eigen::Vector3d::Zero()), originalViewpoint(NULL), optimised(false), filtered(true) {}
-    Structure(Viewpoint *originalViewpoint) : position(Eigen::Vector3d::Zero()), originalViewpoint(originalViewpoint), optimised(false), filtered(true) {}
+    Structure(Viewpoint *originalViewpoint) : position(Eigen::Vector3d::Zero()), originalViewpoint(originalViewpoint), optimised(false), filtered(true) {}  /* no more needed - using standard constructor */
     Eigen::Vector3d * getPosition();
     bool getOptimised();
     bool getFiltered();
     int getFeaturesCount();
-    bool getBootstrap(int lastViewpointIndex);
-    bool getLastViewpointCreated(int lastViewpointIndex);
     bool getHasLastViewpoint(int lastViewpointIndex);
     bool getHasScale();
     void setFeaturesState();
@@ -61,7 +59,6 @@ public:
     void filterRadialPositivity(double clampValue);
     void filterRadialLimitation(double limitValue);
     void filterDisparity(double limitValue);
-
     Viewpoint *getOriginalViewpoint() { return originalViewpoint; }
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */
 

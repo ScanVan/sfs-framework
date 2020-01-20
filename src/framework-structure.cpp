@@ -37,26 +37,6 @@ int Structure::getFeaturesCount(){
     return features.size();
 }
 
-/* delete */
-bool Structure::getBootstrap(int lastViewpointIndex){
-    if (features.size()==2){
-        for(auto & feature: features){
-            if(feature->getViewpoint()->getIndex()==lastViewpointIndex){
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-/* delete */
-bool Structure::getLastViewpointCreated(int lastViewpointIndex){
-    if(originalViewpoint->getIndex()==lastViewpointIndex){
-        return true;
-    }
-    return false;
-}
-
 bool Structure::getHasLastViewpoint(int lastViewpointIndex){
     if(features.back()->getViewpoint()->getIndex()==lastViewpointIndex){
         return true;

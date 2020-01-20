@@ -45,17 +45,17 @@ Structure * Feature::getStructure(){
     return structure;
 }
 
+cv::Vec3b Feature::getColor(){
+    return color;
+}
+
 void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
     position=Eigen::Vector2f(x,y);
     direction=convertCartesian2Spherical(x,y,imageWidth,imageHeight);
 }
 
-void Feature::setColor(cv::Vec3b color){
-    this->color = color;
-}
-
-cv::Vec3b Feature::getColor(){
-    return this->color;
+void Feature::setColor(cv::Vec3b colorValue){
+    color = colorValue;
 }
 
 void Feature::setRadius(double newRadius, double newDisparity){

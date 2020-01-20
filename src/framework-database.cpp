@@ -22,29 +22,49 @@
 #include "framework-database.hpp"
 
 Database::Database(double initialError, double initialDisparity, double initialRadius, unsigned int initialMatchRange){
+
+    // Assign default parameters
     configError=initialError;
     configDisparity=initialDisparity;
     configRadius=initialRadius;
     configMatchRange=initialMatchRange;
+
 }
 
 bool Database::getBootstrap(){
-    return viewpoints.size()<DB_LOOP_BOOT_COUNT?true:false;
+    
+    // Check bootstrap condition
+    if(viewpoints.size()<DB_LOOP_BOOT_COUNT){
+        return true;
+    }else{
+        return false;
+    }
+
 }
 
 double Database::getPError(){
+
+    // Return displacement vector norm
     return (*viewpoints.back()->getPosition()-*viewpoints.front()->getPosition()).norm();
+
 }
 
 double Database::getDError(){
+
+    // Return maximum disparity value
     return maxValue;
+
 }
 
 bool Database::getCheckError( double const currentError, double const lastError ) {
+
+    // Apply stop condition on the provided error
     if(fabs(currentError-lastError)<configError){
         return true;
+    }else{
+        return false;
     }
-    return false;
+
 }
 
 void Database::getTranslationMeanValue(int loopState){
@@ -184,7 +204,7 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 
 void Database::prepareFeature(){
 
-    // parsing structures for features sorting based on relative viewpoint index //
+    // parsing structures for features sorting based on relative viewpoint index
     for(auto & structure: structures){
         structure->sortFeatures();
     }
