@@ -629,12 +629,12 @@ void Database::filterDisparity(int loopState){
     unsigned int structureRange(structures.size());
 
     // check pipeline state
-    //if(loopState==DB_LOOP_MODE_LAST){
+    if(loopState==DB_LOOP_MODE_LAST){
 
         // Update structure range
-    //    structureRange=sortStructTypeA+sortStructTypeB;
+        structureRange=sortStructTypeA+sortStructTypeB;
         
-    //}
+    }
 
     // Compute filtering condition
     # pragma omp parallel for schedule(dynamic)
