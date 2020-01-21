@@ -37,7 +37,7 @@ int main(int argc, char *argv[]){
         config["algorithm"]["radius"].as<double>(),
         config["matching"]["range"].as<unsigned int>()
     );
-    ThreadPool threadpool(8);
+    ThreadPool threadpool(2);
 
     bool inlinerEnabled = false;
     Frontend *frontend = NULL;
