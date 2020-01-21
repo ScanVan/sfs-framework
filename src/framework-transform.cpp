@@ -50,14 +50,12 @@ void Transform::pushCentroid(Eigen::Vector3d * pushFirst, Eigen::Vector3d * push
 }
 
 void Transform::resetCorrelation(){
-    correlation(0,0)=correlation(0,1)=correlation(0,2)=0.;
-    correlation(1,0)=correlation(1,1)=correlation(1,2)=0.;
-    correlation(2,0)=correlation(2,1)=correlation(2,2)=0.;
+    correlation=Eigen::Matrix3d::Zero();
 }
 
 void Transform::resetCentroid(){
-    centerFirst (0)=centerFirst (1)=centerFirst (2)=0.;
-    centerSecond(0)=centerSecond(1)=centerSecond(2)=0.;
+    centerFirst =Eigen::Vector3d::Zero();
+    centerSecond=Eigen::Vector3d::Zero();
     centerCount=0;
 }
 

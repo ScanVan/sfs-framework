@@ -68,21 +68,25 @@ bool Database::getCheckError( double const currentError, double const lastError 
 }
 
 void Database::getTranslationMeanValue(int loopState){
+
+    // Active transformation range
     unsigned int transformRange(transforms.size());
+
+    // Check pipeline state
     if(loopState==DB_LOOP_MODE_LAST){
+
+        // Update active transformation range
         transformRange--;
+
     }
+
+    // Compute translation norms mean value
     transformMean=0.;
     for(unsigned int i(0); i<transformRange; i++){
         transformMean+=transforms[i]->getTranslation()->norm();
     }
     transformMean/=double(transformRange);
 
-    //transformMean=0.;
-    //for(unsigned int i(0); i<transforms.size(); i++){
-    //    transformMean+=transforms[i]->getTranslation()->norm();
-    //}
-    //transformMean/=double(transforms.size());
 }
 
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
@@ -380,13 +384,8 @@ void Database::computePoses(int loopState){
         transforms[i]->computePose();
     }
 
-    // check pipeline state
-    //if(loopState==DB_LOOP_MODE_BOOT){
-
-        // Compute translation mean value
-        getTranslationMeanValue(loopState);
-
-    //}
+    // Compute translation mean value
+    getTranslationMeanValue(loopState);
 
     // Renormalise transformations translation
     # pragma omp parallel for 
