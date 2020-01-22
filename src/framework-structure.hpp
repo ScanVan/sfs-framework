@@ -51,6 +51,7 @@ public:
     void computeModel();
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
+    void computeOriented();
     void computeOptimalPosition();
     void computeRadius();
     unsigned int computeDisparityMean(double * const meanValue);

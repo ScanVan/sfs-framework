@@ -56,4 +56,5 @@ public:
     void setDirection(Eigen::Vector3d newDirection); /* only used for synthetic models */
     void reset();
     void computeModel();
+    void computeOriented(Eigen::Matrix3d * orientation);
 };

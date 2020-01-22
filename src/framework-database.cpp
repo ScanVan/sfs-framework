@@ -420,6 +420,27 @@ void Database::computeFrames(int loopState){
 
 }
 
+void Database::computeOriented(long loopState){
+
+    // Active structure range
+    unsigned int structureRange(structures.size());
+
+    // check pipeline state
+    if(loopState==DB_LOOP_MODE_LAST){
+
+        // Update active structure
+        structureRange=sortStructTypeA+sortStructTypeB;
+
+    }
+
+    // Compute optimal structure position
+    # pragma omp parallel for schedule(dynamic)
+    for(unsigned int i=0; i<structureRange; i++){
+        structures[i]->computeOriented();
+    }
+
+}
+
 void Database::computeOptimals(long loopState){
 
     // Active structure range

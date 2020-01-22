@@ -193,6 +193,7 @@ int main(int argc, char *argv[]){
                 database.computeCorrelations(loopState);
                 database.computePoses(loopState);
                 database.computeFrames(loopState);
+                database.computeOriented(loopState);
                 database.computeOptimals(loopState);
                 database.computeRadii(loopState);
 
@@ -249,7 +250,10 @@ int main(int argc, char *argv[]){
 
                     // Check optimisiation stop trigger
                     if(database.getCheckError(loopDError, pushDError)||(loopState==DB_LOOP_MODE_FULL)){
+                        
+                        // Set optimisation end trigger
                         loopTrig=true;
+
                     } else { loopTrig=false; }
 
                     // Push current error

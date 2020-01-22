@@ -83,3 +83,6 @@ void Feature::computeModel(){
     model=direction*radius;
 }
 
+void Feature::computeOriented(Eigen::Matrix3d * orientation){
+    model=(*orientation)*direction;
+}

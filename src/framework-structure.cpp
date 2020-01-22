@@ -106,14 +106,18 @@ void Structure::computeCorrelation(std::vector<std::shared_ptr<Transform>> & tra
     }
 }
 
+void Structure::computeOriented(){
+    for(auto & feature: features){
+        feature->computeOriented(feature->getViewpoint()->getOrientation());
+    }
+}
+
 void Structure::computeOptimalPosition(){
     Eigen::Matrix3d wacc(Eigen::Matrix3d::Zero());
     Eigen::Vector3d vacc(Eigen::Vector3d::Zero());
     Eigen::Matrix3d weight;
-    Eigen::Vector3d vector;
     for(auto & element: features){
-        vector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
-        weight=Eigen::Matrix3d::Identity()-vector*vector.transpose();
+        weight=Eigen::Matrix3d::Identity()-(*element->getModel())*(*element->getModel()).transpose();
         vacc+=weight*(*element->getViewpoint()->getPosition());
         wacc+=weight;
     }
@@ -122,13 +126,11 @@ void Structure::computeOptimalPosition(){
 }
 
 void Structure::computeRadius(){
-    Eigen::Vector3d fvector;
     Eigen::Vector3d fposition;
     double radius(0.);
     for(auto & element: features){
-        fvector=(*element->getViewpoint()->getOrientation())*(*element->getDirection());
-        radius=fvector.dot(position-(*element->getViewpoint()->getPosition()));
-        fposition=(*element->getViewpoint()->getPosition())+fvector*radius;
+        radius=(*element->getModel()).dot(position-(*element->getViewpoint()->getPosition()));
+        fposition=(*element->getViewpoint()->getPosition())+(*element->getModel())*radius;
         element->setRadius(radius,(fposition-position).norm());
     }
 }

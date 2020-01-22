@@ -74,6 +74,7 @@ public:
     void computeCorrelations(int loopState);
     void computePoses(int loopState);
     void computeFrames(int loopState);
+    void computeOriented(long loopState);
     void computeOptimals(long loopState);
     void computeRadii(long loopState);
     void computeDisparityStatistics(long loopState);
