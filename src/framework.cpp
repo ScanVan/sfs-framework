@@ -200,7 +200,7 @@ int main(int argc, char *argv[]){
                 database.filterRadialPositivity(loopState);
 
                 // Statistics computation on disparity
-                database.computeDisparityStatistics(loopState);
+                //database.computeDisparityStatistics(loopState);
 
                 // development feature - begin
                 //database._sanityCheckStructure();
@@ -210,30 +210,61 @@ int main(int argc, char *argv[]){
                 //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
                 // development feature - end
 
-                // Get error values
-                loopPError = database.getPError();
-                loopDError = database.getDError();
-
-                // Update minor iterator
-                loopMinor ++;
+                // Display information
+                //std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopPError << " + " << loopDError << std::endl;
 
                 // Display information
-                std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopPError << " + " << loopDError << std::endl;
+                std::cout << "step : " << std::setw(6) << loopMajor << " | iter : " << loopMinor << " | state " << loopState << " | ";
 
-                // Check trigger (optimisation loop)
-                if((std::isnan(loopPError))||(std::isnan(loopDError))){
-                    loopTrig=true;
-                } else {                
-                    if ((database.getCheckError(loopPError, pushPError))&&(database.getCheckError(loopDError, pushDError))){
-                        loopTrig=true;
-                    }else{
-                        loopTrig=false;
-                    }
+                // Get error value
+                loopPError = database.getPError();
+                //loopDError = database.getDError();
+
+                // development feature - begin
+                if(std::isnan(loopPError)){
+                    break;
                 }
+                // development feature - end
+
+                // Display information
+                std::cout << "error : " << loopPError;
+
+                // Check optimisiation stop trigger
+                if(database.getCheckError(loopPError, pushPError)||(loopState==DB_LOOP_MODE_FULL)){
+
+                    // Computation of disparity statistics
+                    database.computeDisparityStatistics(loopState);
+
+                    // Get error value
+                    loopDError = database.getDError();
+
+                    // development feature - begin
+                    if(std::isnan(loopDError)){
+                        break;
+                    }
+                    // development feature - end
+
+                    // Display information
+                    std::cout << " + " << loopDError;
+
+                    // Check optimisiation stop trigger
+                    if(database.getCheckError(loopDError, pushDError)||(loopState==DB_LOOP_MODE_FULL)){
+                        loopTrig=true;
+                    } else { loopTrig=false; }
+
+                    // Push current error
+                    pushDError=loopDError;
+
+                } else { loopTrig=false; }
+
+                // Push current error
+                pushPError=loopPError;
+
+                // Display information
+                std::cout << std::endl;
 
                 // Optimisation loop management
-                if((loopTrig)||(loopState==DB_LOOP_MODE_FULL)){
-                //if(loopTrig){
+                if(loopTrig){
 
                     // Push amount of structures
                     pushFilter = database.structures.size();
@@ -258,13 +289,10 @@ int main(int argc, char *argv[]){
 
                     }
 
-                } else {
-
-                    // Push current error
-                    pushPError=loopPError;
-                    pushDError=loopDError;
-
                 }
+
+                // Update minor iterator
+                loopMinor ++;
 
             }
 

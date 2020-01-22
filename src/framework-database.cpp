@@ -389,7 +389,6 @@ void Database::computePoses(int loopState){
 
     // Renormalise transformations translation
     # pragma omp parallel for 
-    //for(unsigned int i=transformationStart; i<transforms.size(); i++){
     for(unsigned int i=0; i<transforms.size(); i++){
         transforms[i]->setTranslationScale(transformMean);
     }
