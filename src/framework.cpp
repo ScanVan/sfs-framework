@@ -345,7 +345,7 @@ int main(int argc, char *argv[]){
             }
         }
 
-        if(allowDeallocateImages && database.viewpoints.size() >= 4) database.viewpoints[database.viewpoints.size()-4]->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
+        if(allowDeallocateImages && database.viewpoints.size() >= 4) database.viewpoints[database.viewpoints.size()-4]->getImage()->release(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
 
         // Major iteration exportation : model, odometry and transformation
         database.exportModel         (config["export"]["path"].as<std::string>(),loopMajor);
