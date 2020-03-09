@@ -48,6 +48,7 @@ public:
 public:
 	void setImage(cv::Mat &image){this->image = image;}
 	cv::Mat* getImage(){return &this->image;}
+    void releaseImage(){image.deallocate();}
 	void setCvFeatures(std::vector<cv::KeyPoint> &image){this->cvFeatures = cvFeatures;}
 	std::vector<cv::KeyPoint>* getCvFeatures(){return &this->cvFeatures;}
 	void setCvDescriptor(cv::Mat &image){this->cvDescriptor = cvDescriptor;}

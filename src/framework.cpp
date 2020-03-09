@@ -223,7 +223,7 @@ int main(int argc, char *argv[]){
 
                 // development feature - begin
                 if(std::isnan(loopPError)){
-                    break;
+                    std::cerr<<"Crash on NaN"<<std::endl; exit(1);
                 }
                 // development feature - end
 
@@ -241,7 +241,7 @@ int main(int argc, char *argv[]){
 
                     // development feature - begin
                     if(std::isnan(loopDError)){
-                        break;
+                        std::cerr<<"Crash on NaN"<<std::endl; exit(1);
                     }
                     // development feature - end
 
@@ -249,12 +249,12 @@ int main(int argc, char *argv[]){
                     std::cout << " + " << loopDError;
 
                     // Check optimisiation stop trigger
-                    if(database.getCheckError(loopDError, pushDError)||(loopState==DB_LOOP_MODE_FULL)){
+                    //if(database.getCheckError(loopDError, pushDError)||(loopState==DB_LOOP_MODE_FULL)){
                         
                         // Set optimisation end trigger
                         loopTrig=true;
 
-                    } else { loopTrig=false; }
+                    //} else { loopTrig=false; }
 
                     // Push current error
                     pushDError=loopDError;
@@ -310,10 +310,11 @@ int main(int argc, char *argv[]){
             if (loopState==DB_LOOP_MODE_LAST){
 
                 // Update loop mode
-                loopState=DB_LOOP_MODE_FULL;
+                //loopState=DB_LOOP_MODE_FULL;
+                loopState=DB_LOOP_MODE_LAST;
 
                 // Reset loop flag (continue optimisation)
-                loopFlag=true;
+                //loopFlag=true;
 
             }
 
@@ -345,7 +346,18 @@ int main(int argc, char *argv[]){
             }
         }
 
-        if(allowDeallocateImages && database.viewpoints.size() >= 4) database.viewpoints[database.viewpoints.size()-4]->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
+        // check viewpoint stack
+        if ( database.viewpoints.size() > database.configMatchRange ) {
+
+            // release viewpoint image memory
+            database.viewpoints[database.viewpoints.size()-database.configMatchRange]->releaseImage();
+
+        }
+
+        //if(allowDeallocateImages && database.viewpoints.size() >= 4) {
+            //database.viewpoints[database.viewpoints.size()-4]->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
+            //database.viewpoints[database.viewpoints.size()-4]->releaseImage();
+        //}
 
         // Major iteration exportation : model, odometry and transformation
         database.exportModel         (config["export"]["path"].as<std::string>(),loopMajor);
