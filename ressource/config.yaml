@@ -7,6 +7,7 @@ frontend:
 #    first: 20190319-103452-344895.bmp
 #    last: 20190319-103506-594998.bmp
     scale: 1.0
+    inc: 1
 
 #To use datapoints as viewpoint source, replace the frontend stuff with
 #frontend:
