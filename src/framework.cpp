@@ -101,7 +101,7 @@ int main(int argc, char *argv[]){
 
     // Algorithm loop
     bool loopFlag(true);
-    bool loopTrig(true);
+    //bool loopTrig(true);
     long loopState=0;
 
     // Algorithm error
@@ -197,113 +197,58 @@ int main(int argc, char *argv[]){
                 database.computeOptimals(loopState);
                 database.computeRadii(loopState);
 
+                // Push amount of structures
+                pushFilter = database.structures.size();
+
                 // Stability filtering - radius positivity
                 database.filterRadialPositivity(loopState);
 
                 // Statistics computation on disparity
-                //database.computeDisparityStatistics(loopState);
+                database.computeDisparityStatistics(loopState);
+
+                // Filtering processes
+                database.filterDisparity(loopState);
+
+                // Extarct error values
+                loopPError = database.getPError();
+                loopDError = database.getDError();
+
+                // development feature - begin
+                if(std::isnan(loopPError)){
+                    std::cerr<<"Crash on NaN"<<std::endl; exit(1);
+                }
+                if(std::isnan(loopDError)){
+                    std::cerr<<"Crash on NaN"<<std::endl; exit(1);
+                }
+                // development feature - end
+
+                // Display information
+                std::cout << "step : " << std::setw(6) << loopMajor << " | iter : " << loopMinor << " | state " << loopState << " | error : (" << loopPError << ", " << loopDError << ")" << std::endl;
 
                 // development feature - begin
                 //database._sanityCheckStructure();
                 // development feature - end
 
                 // development feature - begin
-                //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
+                database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
                 // development feature - end
 
-                // Display information
-                //std::cout << "step : " << std::setw(6) << loopMajor << " | iteration : " << std::setw(3) << loopMinor << " | state : " << loopState << " | error : " << loopPError << " + " << loopDError << std::endl;
-
-                // Display information
-                std::cout << "step : " << std::setw(6) << loopMajor << " | iter : " << loopMinor << " | state " << loopState << " | ";
-
-                // Get error value
-                loopPError = database.getPError();
-                //loopDError = database.getDError();
-
-                // development feature - begin
-                if(std::isnan(loopPError)){
-                    std::cerr<<"Crash on NaN"<<std::endl; exit(1);
-                }
-                // development feature - end
-
-                // Display information
-                std::cout << "error : " << loopPError;
-                
-
-                // Check optimisiation stop trigger
-                if(database.getCheckError(loopPError, pushPError)||(loopState==DB_LOOP_MODE_FULL)){
-
-                    // Computation of disparity statistics
-                    database.computeDisparityStatistics(loopState);
-
-                    // Get error value
-                    loopDError = database.getDError();
-
-                    // development feature - begin
-                    if(std::isnan(loopDError)){
-                        std::cerr<<"Crash on NaN"<<std::endl; exit(1);
-                    }
-                    // development feature - end
-
-                    // Display information
-                    std::cout << " + " << loopDError;
-
-                    // Check optimisiation stop trigger
-                    //if(database.getCheckError(loopDError, pushDError)||(loopState==DB_LOOP_MODE_FULL)){
-                        
-                        // Set optimisation end trigger
-                        loopTrig=true;
-
-                    //} else { loopTrig=false; }
-
-                    // Push current error
-                    pushDError=loopDError;
-
-                } else { loopTrig=false; }
-
-                // Push current error
-                pushPError=loopPError;
-
-                // Display information
-                std::cout << std::endl;
-
-                // Check iteration - avoid eternal loop
-                if(loopMinor>DB_LOOP_MAXITER){
-
-                    // Set optimisation end trigger
-                    loopTrig=true;
-
-                }
-
-
-                // Optimisation loop management
-                if(loopTrig){
-
-                    // Push amount of structures
-                    pushFilter = database.structures.size();
+                if (
+                    ( (database.getCheckError(loopPError, pushPError)) && (database.getCheckError(loopDError, pushDError)) ) ||
+                    (loopState==DB_LOOP_MODE_FULL) || (loopMinor>DB_LOOP_MAXITER)
+                ) {
 
                     // Filtering process
                     database.filterRadialLimitation(loopState);
 
-                    // Filtering processes
-                    database.filterDisparity(loopState);
-
-                    // Check filtering results
                     if((database.structures.size()==pushFilter)||(loopMinor>DB_LOOP_MAXITER)){
-
-                        // Interrupt optimisation loop
                         loopFlag = false;
-
-                    }else{
-
-                        // Reset pushed error
-                        pushPError=-1.;
-                        pushDError=-1.;
-
                     }
 
                 }
+
+                pushPError = loopPError;
+                pushDError = loopDError;
 
                 // Update minor iterator
                 loopMinor ++;
