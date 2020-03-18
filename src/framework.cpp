@@ -229,6 +229,7 @@ int main(int argc, char *argv[]){
 
                 // Display information
                 std::cout << "error : " << loopPError;
+                
 
                 // Check optimisiation stop trigger
                 if(database.getCheckError(loopPError, pushPError)||(loopState==DB_LOOP_MODE_FULL)){
@@ -267,6 +268,15 @@ int main(int argc, char *argv[]){
                 // Display information
                 std::cout << std::endl;
 
+                // Check iteration - avoid eternal loop
+                if(loopMinor>DB_LOOP_MAXITER){
+
+                    // Set optimisation end trigger
+                    loopTrig=true;
+
+                }
+
+
                 // Optimisation loop management
                 if(loopTrig){
 
@@ -280,7 +290,7 @@ int main(int argc, char *argv[]){
                     database.filterDisparity(loopState);
 
                     // Check filtering results
-                    if(database.structures.size()==pushFilter){
+                    if((database.structures.size()==pushFilter)||(loopMinor>DB_LOOP_MAXITER)){
 
                         // Interrupt optimisation loop
                         loopFlag = false;

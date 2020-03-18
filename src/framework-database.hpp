@@ -31,6 +31,8 @@
 #include "framework-transform.hpp"
 #include "framework-structure.hpp"
 
+#define DB_LOOP_MAXITER    ( 5000 )
+
 #define DB_LOOP_BOOT_COUNT ( 3 ) /* Amount of viewpoints to wait to trigger the initial boot optimisation */
 
 #define DB_LOOP_MODE_BOOT  ( 0 ) /* Initial structure */
