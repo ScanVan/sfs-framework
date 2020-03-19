@@ -235,7 +235,7 @@ int main(int argc, char *argv[]){
 
                 if (
                     ( (database.getCheckError(loopPError, pushPError)) && (database.getCheckError(loopDError, pushDError)) ) ||
-                    (loopState==DB_LOOP_MODE_FULL) || (loopMinor>DB_LOOP_MAXITER)
+                    (loopMinor>DB_LOOP_MAXITER)
                 ) {
 
                     // Filtering process
@@ -265,8 +265,8 @@ int main(int argc, char *argv[]){
             if (loopState==DB_LOOP_MODE_LAST){
 
                 // Update loop mode
-                //loopState=DB_LOOP_MODE_FULL;
-                loopState=DB_LOOP_MODE_LAST;
+                loopState=DB_LOOP_MODE_FULL;
+                //loopState=DB_LOOP_MODE_LAST;
 
                 // Reset loop flag (continue optimisation)
                 //loopFlag=true;
