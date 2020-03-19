@@ -45,6 +45,7 @@ public:
     int getFeaturesCount();
     bool getHasLastViewpoint(int lastViewpointIndex);
     bool getHasScale();
+    void setReset();
     void setFeaturesState();
     void addFeature(Feature * feature);
     void sortFeatures();

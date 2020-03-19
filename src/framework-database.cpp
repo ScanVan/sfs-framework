@@ -258,6 +258,10 @@ void Database::prepareStructure(){
         }
     }
 
+    for(unsigned int i=0; i<sortStructTypeA+sortStructTypeB; i++){
+        structures[i]->setReset();
+    }
+
     // development feature - begin
     if(index!=structures.size()){
         std::cerr << "Fault : " << index << " vs " << structures.size() << std::endl;

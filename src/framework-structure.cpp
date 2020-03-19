@@ -49,6 +49,13 @@ bool Structure::getHasScale(){
     return (features.size()>2) ? true : false;
 }
 
+void Structure::setReset(){
+    for(auto & feature: features){
+        feature->reset();
+    }
+    optimised=false;
+}
+
 void Structure::setFeaturesState(){
     for(auto & element: features){
         element->setStructurePtr(NULL);

@@ -230,7 +230,7 @@ int main(int argc, char *argv[]){
                 // development feature - end
 
                 // development feature - begin
-                database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
+                //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
                 // development feature - end
 
                 if (
