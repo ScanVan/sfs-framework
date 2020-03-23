@@ -233,14 +233,24 @@ int main(int argc, char *argv[]){
                 //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
                 // development feature - end
 
-                if (
-                    ( (database.getCheckError(loopPError, pushPError)) && (database.getCheckError(loopDError, pushDError)) ) ||
-                    (loopMinor>DB_LOOP_MAXITER)
-                ) {
+                bool loopTrig(false);
+
+                // optimisation step condition
+                if((database.getCheckError(loopPError, pushPError)) && (database.getCheckError(loopDError, pushDError))){
+                    loopTrig=true;
+                }
+
+                if(loopMinor>DB_LOOP_MAXITER){
+                    loopTrig=true;
+                }
+
+
+                if (loopTrig==true) {
 
                     // Filtering process
                     database.filterRadialLimitation(loopState);
 
+                    // optimisation end condition
                     if((database.structures.size()==pushFilter)||(loopMinor>DB_LOOP_MAXITER)){
                         loopFlag = false;
                     }
@@ -269,7 +279,7 @@ int main(int argc, char *argv[]){
                 //loopState=DB_LOOP_MODE_LAST;
 
                 // Reset loop flag (continue optimisation)
-                //loopFlag=true;
+                loopFlag=true;
 
             }
 
