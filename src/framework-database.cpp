@@ -728,53 +728,84 @@ void Database::filterDisparity(int loopState){
 
 }
 
-void Database::exportModel(std::string path, unsigned int major){
+void Database::exportStructure(std::string path, unsigned int major){
     std::fstream exportStream;
-    exportStream.open(path+"/dev/"+std::to_string(major)+"_structure.xyz",std::ios::out);
+    std::stringstream file_path;
+    std::string color;
+
+    file_path << path << "/sparse/" << std::setfill('0') << std::setw(4) << major << "_structure.xyz";
+
+    exportStream.open(file_path.str(),std::ios::out);
     if (exportStream.is_open() == false){
         std::cerr << "unable to create model exportation file" << std::endl;
         return;
     }
+
     for(auto & element: structures){
-        Eigen::Vector3d * position(element->getPosition());
-        if(element->features.size()==2){
-        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 255 0" << std::endl;
+        if(element->features.size()<=2){
+            color = " 255   0   0";
+        }else
+        if (element->features.size()>=7){
+            color = " 255   0 255";
         }else{
-        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 0 0" << std::endl;
+            color = " 255 255   0";
         }
+        exportStream << (*element->getPosition())(0) << " ";
+        exportStream << (*element->getPosition())(1) << " ";
+        exportStream << (*element->getPosition())(2) << color << std::endl;
     }
+
     exportStream.close();
 }
 
-void Database::exportOdometry(std::string path, unsigned int major){
+void Database::exportPosition(std::string path, unsigned int major){
     std::fstream exportStream;
-    exportStream.open(path+"/dev/"+std::to_string(major)+"_odometry.xyz",std::ios::out);
+    std::stringstream file_path;
+
+    file_path << path << "/sparse/" << std::setfill('0') << std::setw(4) << major << "_position.xyz";
+
+    exportStream.open(file_path.str(),std::ios::out);
     if (exportStream.is_open() == false){
         std::cerr << "unable to create odometry exportation file" << std::endl;
         return;
     }
+
     for(auto & element: viewpoints){
-        Eigen::Vector3d * position(element->getPosition());
-        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " 255 255 255" << std::endl;
+        exportStream << (*element->getPosition())(0) << " ";
+        exportStream << (*element->getPosition())(1) << " ";
+        exportStream << (*element->getPosition())(2) << "0 0 255" << std::endl;
     }
+
     exportStream.close();
 }
 
 void Database::exportTransformation(std::string path, unsigned int major){
     std::fstream exportStream;
-    exportStream.open(path+"/dev/"+std::to_string(major)+"_transformation.dat",std::ios::out);
+    std::stringstream file_path;
+
+    file_path << path << "/sparse/" << std::setfill('0') << std::setw(4) << major << "_transformation.dat";
+
+    exportStream.open(file_path.str(),std::ios::out);
     if (exportStream.is_open() == false ){
         std::cerr << "unable to create transformation file" << std::endl;
     }
+
     for(auto & viewpoint: viewpoints){
         exportStream << viewpoint->uid << " ";
-        Eigen::Vector3d * position(viewpoint->getPosition());
-        exportStream << (*position)(0) << " " << (*position)(1) << " " << (*position)(2) << " ";
-        Eigen::Matrix3d orientation(viewpoint->orientation);
-        exportStream << orientation(0,0) << " " << orientation(0,1) << " " << orientation(0,2) << " ";
-        exportStream << orientation(1,0) << " " << orientation(1,1) << " " << orientation(1,2) << " ";
-        exportStream << orientation(2,0) << " " << orientation(2,1) << " " << orientation(2,2) << std::endl;
+        exportStream << (*viewpoint->getPosition())(0) << " ";
+        exportStream << (*viewpoint->getPosition())(1) << " ";
+        exportStream << (*viewpoint->getPosition())(2) << " ";
+        exportStream << (*viewpoint->getOrientation())(0,0) << " "; 
+        exportStream << (*viewpoint->getOrientation())(0,1) << " ";
+        exportStream << (*viewpoint->getOrientation())(0,2) << " ";
+        exportStream << (*viewpoint->getOrientation())(1,0) << " "; 
+        exportStream << (*viewpoint->getOrientation())(1,1) << " ";
+        exportStream << (*viewpoint->getOrientation())(1,2) << " ";
+        exportStream << (*viewpoint->getOrientation())(2,0) << " "; 
+        exportStream << (*viewpoint->getOrientation())(2,1) << " ";
+        exportStream << (*viewpoint->getOrientation())(2,2) << std::endl;
     }
+
     exportStream.close();
 }
 

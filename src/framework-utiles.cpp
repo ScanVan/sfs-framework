@@ -94,3 +94,20 @@ float bilinear_sample(float *p, float x, float y, int width){
 
     return  (p[i00]*(1.0f-fx) + p[i01]*fx)*(1.0f-fy) + (p[i10]*(1.0f-fx) + p[i11]*fx)*fy;
 }
+
+void create_directories( std::string main_path ) {
+
+    // Sub-sequent path variable
+    std::string sub_path;
+
+    // Create main directory
+    fs::create_directories( main_path.c_str() );
+
+    // Compose and create sub-directories
+    sub_path = main_path + "/sparse";
+    fs::create_directory( sub_path.c_str() );
+    sub_path = main_path + "/dense";
+    fs::create_directory( sub_path.c_str() );
+
+}
+

@@ -21,10 +21,14 @@
 
 #pragma once
 
+// External includes
 #include <iostream>
 #include <cmath>
 #include <yaml-cpp/yaml.h>
 #include <unistd.h>
+#include <experimental/filesystem>
+
+// Internal includes
 #include "framework-database.hpp"
 #include "framework-viewpointsource.hpp"
 #include "framework-sparsefeature.hpp"
@@ -34,16 +38,5 @@
 #include "framework-utiles.hpp"
 #include "ThreadPool.h"
 
-/* is this still used ? */
-#define GETSET(type, var) \
-	private: \
-		type _##var; \
-	public: \
-		type get##var() \
-		{\
-		  return _##var; \
-		}\
-		void set##var(type val) \
-		{\
-		  _##var = val; \
-		}
+// Namespaces
+namespace fs = std::experimental::filesystem;

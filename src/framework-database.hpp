@@ -21,29 +21,37 @@
 
 #pragma once
 
+// External includes
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <cmath>
 #include <opencv4/opencv2/core.hpp>
 #include <omp.h>
+#include <sstream>
+#include <iomanip>
+
+// Internal includes
 #include "framework-viewpoint.hpp"
 #include "framework-transform.hpp"
 #include "framework-structure.hpp"
 
+// Optimisation algorithm maximum iteration per cycle
 #define DB_LOOP_MAXITER    ( 5000 )
 
-#define DB_LOOP_BOOT_COUNT ( 3 ) /* Amount of viewpoints to wait to trigger the initial boot optimisation */
+// Minimal number of viewpoints required to start optimisation algorithm
+#define DB_LOOP_BOOT_COUNT ( 3 )
 
+// Optimisation algorithm states
 #define DB_LOOP_MODE_BOOT  ( 0 ) /* Initial structure */
 #define DB_LOOP_MODE_LAST  ( 1 ) /* Optimising last viewpoint */
 //#define DB_LOOP_MODE_HEAD  ( 2 ) /* Optimising active head */
 #define DB_LOOP_MODE_FULL  ( 2 ) /* Optimising all structures */
 
+// Module object
 class Database {
 
-//private:
-public:
+public: /* Need to be set back to private */
 	std::vector<std::shared_ptr<Viewpoint>> viewpoints;
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Structure>> structures;
@@ -83,8 +91,8 @@ public:
     void filterRadialPositivity(int loopState);
     void filterRadialLimitation(int loopState);
     void filterDisparity(int loopState);
-    void exportModel(std::string path, unsigned int major);
-    void exportOdometry(std::string path, unsigned int major);
+    void exportStructure(std::string path, unsigned int major);
+    void exportPosition(std::string path, unsigned int major);
     void exportTransformation(std::string path, unsigned int major);
     Structure *newStructure(Viewpoint *originalViewpoint){ auto s = std::make_shared<Structure>(originalViewpoint); structures.push_back(s); return s.get();} /* need deletion */
 

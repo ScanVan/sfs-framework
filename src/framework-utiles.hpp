@@ -29,6 +29,9 @@
 #include <queue>
 #include <condition_variable>
 #include <future>
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
 
 Eigen::Vector3d convertCartesian2Spherical (double x, double y, int width, int height);
 void profile(std::string msg);
@@ -116,3 +119,5 @@ void exitRelease();
 
 double bilinear_sample(double *p, double x, double y, int width);
 double bilinear_sample(float *p, double x, double y, int width);
+
+void create_directories( std::string main_path );

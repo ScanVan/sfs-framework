@@ -128,11 +128,9 @@ void Structure::computeOptimalPosition(){
         vacc+=weight*(*element->getViewpoint()->getPosition());
         wacc+=weight;
     }
-    if(std::fabs(wacc.determinant())>0.){
-        position=wacc.inverse()*vacc;
-        if((std::isnan(position(0)))||(std::isnan(position(1)))||(std::isnan(position(2)))) std::cerr << "Nan on position" << std::endl;
-        optimised=true;
-    }
+    Eigen::Vector3d temp(position);
+    position=wacc.inverse()*vacc;
+    optimised=true;
 }
 
 void Structure::computeRadius(){
@@ -142,7 +140,6 @@ void Structure::computeRadius(){
         radius=(*element->getModel()).dot(position-(*element->getViewpoint()->getPosition()));
         fposition=(*element->getViewpoint()->getPosition())+(*element->getModel())*radius;
         element->setRadius(radius,(fposition-position).norm());
-        if(std::isnan(radius)) std::cerr << "Nan on radius" << std::endl;
     }
 }
 

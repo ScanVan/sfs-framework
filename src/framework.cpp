@@ -20,29 +20,76 @@
  */
 
 #include "framework.hpp"
-#include <experimental/filesystem>
 
-namespace fs = std::experimental::filesystem;
+int main(int argc, char ** argv){
 
-int main(int argc, char *argv[]){
-    //profile("boot");
-    assert(argc == 2);
-    std::cout << "Hello world!" << std::endl;
+    //
+    //  Usage check
+    //
 
+    // Check usage
+    if ( argc != 2 ) {
+        // Display minimal help
+        std::cerr << "Wrong usage" << std::endl << "Usage : sfs-framework .../config_file.yaml" << std::endl;
+    }
+
+    //
+    //  Framework initialisation
+    //
+
+    // Configuration file importation
     YAML::Node config = YAML::LoadFile(argv[1]);
 
-    auto database = Database(
+    // Framework main structure initialisation
+    Database database(
         config["algorithm"]["error"].as<double>(),
         config["algorithm"]["disparity"].as<double>(),
         config["algorithm"]["radius"].as<double>(),
         config["matching"]["range"].as<unsigned int>()
     );
+
+    // Thread pool initialisation
     ThreadPool threadpool(2);
 
+    // Framework front-end
+    Frontend * frontend(nullptr);
+
+    // Pipeline iterations
+    int loopMajor(1);
+    int loopMinor(0);
+
+    // Algorithm loop
+    bool loopFlag(true);
+    bool loopTrig(false);
+    long loopState=0;
+
+    // Algorithm error
+    double loopPError(1.);
+    double pushPError(0.);
+    double loopDError(1.);
+    double pushDError(0.);
+
+    // Algorithm filtering
+    unsigned int pushFilter(0);
+
+    // development feature - begin
     bool inlinerEnabled = false;
-    Frontend *frontend = NULL;
-    auto frontendType = config["frontend"]["type"].as<std::string>();
-    if(frontendType == "IMAGE"){
+    // development feature - end
+
+    //
+    //  Framework exportation
+    //
+
+    // Create exportation directories
+    create_directories(config["export"]["path"].as<std::string>());
+
+    //
+    //  Framework front-end
+    //
+
+    // Framework front-end : odometry (IMAGE), densification (DENSE), synthetic model (CLOUDPOINT)
+    if(config["frontend"]["type"].as<std::string>() == "IMAGE"){
+
         auto fs = config["frontend"]["source"];
         ViewPointSource *source = NULL;
         auto sourceType = fs["type"].as<std::string>();
@@ -57,9 +104,10 @@ int main(int argc, char *argv[]){
             cv::resize(mask, mask, cv::Size(), scale, scale, cv::INTER_AREA );
         }
         frontend = new FrontendPicture(source, mask, &threadpool, &database);
-    }
 
-    if(frontendType == "DENSE"){
+    } else
+    if(config["frontend"]["type"].as<std::string>() == "DENSE"){
+
         auto fs = config["frontend"]["source"];
         ViewPointSource *source = NULL;
         auto sourceType = fs["type"].as<std::string>();
@@ -80,10 +128,10 @@ int main(int argc, char *argv[]){
             cv::resize(mask, mask, cv::Size(), scale, scale, cv::INTER_AREA );
         }
         frontend = new FrontendDense(source, mask, &database, config["frontend"]["ofCacheFolder"].as<std::string>());
-    }
 
+    } else
+    if(config["frontend"]["type"].as<std::string>() == "CLOUDPOINT"){
 
-    if(frontendType == "CLOUDPOINT"){
         auto fn = config["frontend"];
         frontend = new FrontendCloudpoint(
                 &database, fn["model"].as<std::string>(),
@@ -93,32 +141,15 @@ int main(int argc, char *argv[]){
                 fn["baseNoise"].as<double>(),
                 fn["badMatchNoise"].as<double>());
         inlinerEnabled = true;
+
     }
 
-    // Pipeline iterations
-    int loopMajor(1);
-    int loopMinor(0);
+    //
+    //  Framework main loop
+    //
 
-    // Algorithm loop
-    bool loopFlag(true);
-    //bool loopTrig(true);
-    long loopState=0;
-
-    // Algorithm error
-    double loopPError(1.);
-    double pushPError(0.);
-    double loopDError(1.);
-    double pushDError(0.);
-
-    // Algorithm filtering
-    unsigned int pushFilter(0);
-
-    // pipeline loop
+    // framework loop
     while(true){
-
-        //
-        // image stream front-end
-        //
 
         // Query image from source
         if(!frontend->next()){
@@ -129,10 +160,6 @@ int main(int argc, char *argv[]){
         // development feature - begin
         database._sanityCheck(inlinerEnabled);
         // development feature - end
-
-        //
-        // geometry estimation solver
-        //
 
         // Wait bootstrap image count
         if(database.getBootstrap()){
@@ -174,7 +201,7 @@ int main(int argc, char *argv[]){
         // development feature - end
 
         // development feature - begin
-        std::cerr << "Distribution " << database.sortStructTypeA << " " << database.sortStructTypeB << std::endl;
+        //std::cerr << "Distribution " << database.sortStructTypeA << " " << database.sortStructTypeB << std::endl;
         // development feature - end
 
         // Algorithm state loop
@@ -233,24 +260,22 @@ int main(int argc, char *argv[]){
                 //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
                 // development feature - end
 
-                bool loopTrig(false);
-
-                // optimisation step condition
+                // Optimisation step condition
+                loopTrig=false;
                 if((database.getCheckError(loopPError, pushPError)) && (database.getCheckError(loopDError, pushDError))){
                     loopTrig=true;
                 }
-
                 if(loopMinor>DB_LOOP_MAXITER){
                     loopTrig=true;
                 }
 
-
+                // Check step condition
                 if (loopTrig==true) {
 
                     // Filtering process
                     database.filterRadialLimitation(loopState);
 
-                    // optimisation end condition
+                    // Optimisation end condition
                     if((database.structures.size()==pushFilter)||(loopMinor>DB_LOOP_MAXITER)){
                         loopFlag = false;
                     }
@@ -313,10 +338,8 @@ int main(int argc, char *argv[]){
 
         // check viewpoint stack
         if ( database.viewpoints.size() > database.configMatchRange ) {
-
             // release viewpoint image memory
             database.viewpoints[database.viewpoints.size()-database.configMatchRange]->releaseImage();
-
         }
 
         //if(allowDeallocateImages && database.viewpoints.size() >= 4) {
@@ -325,8 +348,8 @@ int main(int argc, char *argv[]){
         //}
 
         // Major iteration exportation : model, odometry and transformation
-        database.exportModel         (config["export"]["path"].as<std::string>(),loopMajor);
-        database.exportOdometry      (config["export"]["path"].as<std::string>(),loopMajor);
+        database.exportStructure     (config["export"]["path"].as<std::string>(),loopMajor);
+        database.exportPosition      (config["export"]["path"].as<std::string>(),loopMajor);
         database.exportTransformation(config["export"]["path"].as<std::string>(),loopMajor);
 
         // update major iterator
