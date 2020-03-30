@@ -319,7 +319,7 @@ void Database::computeCentroids(int loopState){
     }
 
     // Compute centroid contribution for active structures
-    //# pragma omp parallel for schedule(dynamic)
+    # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++) {
         if(structures[i]->getHasScale()){
             structures[i]->computeCentroid(transforms);
@@ -360,7 +360,7 @@ void Database::computeCorrelations(int loopState){
     }
 
     // Compute correlation matrix correlation for active structures
-    //# pragma omp parallel for schedule(dynamic)
+    # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
         if(structures[i]->getHasScale()){
             structures[i]->computeCorrelation(transforms);

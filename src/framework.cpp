@@ -81,14 +81,14 @@ int main(int argc, char ** argv){
     //
 
     // Create exportation directories
-    create_directories(config["export"]["path"].as<std::string>());
+    create_directories(config["export"]["path"].as<std::string>(), config["frontend"]["type"].as<std::string>());
 
     //
     //  Framework front-end
     //
 
-    // Framework front-end : odometry (IMAGE), densification (DENSE), synthetic model (CLOUDPOINT)
-    if(config["frontend"]["type"].as<std::string>() == "IMAGE"){
+    // Switch on front-end : odometry (IMAGE), densification (DENSE), synthetic model (CLOUDPOINT)
+    if(config["frontend"]["type"].as<std::string>() == "sparse"){
 
         auto fs = config["frontend"]["source"];
         ViewPointSource *source = NULL;
