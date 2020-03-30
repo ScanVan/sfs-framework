@@ -356,7 +356,12 @@ int main(int argc, char ** argv){
         loopMajor ++;
 
         exitRelease();
+
     }
+
+    // Copy last file in the main directory
+    std::cerr << loopMajor - 1 << std::endl;
+    copy_result(config["export"]["path"].as<std::string>(),config["frontend"]["type"].as<std::string>(),loopMajor-1);
 
     // system message
     return 0;

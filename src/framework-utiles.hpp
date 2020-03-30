@@ -30,6 +30,8 @@
 #include <condition_variable>
 #include <future>
 #include <experimental/filesystem>
+#include <sstream>
+#include <iomanip>
 
 namespace fs = std::experimental::filesystem;
 
@@ -121,3 +123,5 @@ double bilinear_sample(double *p, double x, double y, int width);
 double bilinear_sample(float *p, double x, double y, int width);
 
 void create_directories( std::string rootPath, std::string modeName );
+void copy_result(std::string rootPath, std::string modeName, unsigned int lastMajor);
+

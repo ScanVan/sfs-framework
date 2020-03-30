@@ -104,5 +104,45 @@ void create_directories( std::string rootPath, std::string modeName ) {
     fs::create_directories( rootPath.c_str() );
     fs::create_directory  ( modePath.c_str() );
 
+    // Specific directory
+    if (modeName == "dense" ){
+
+        // Create path
+        modePath = rootPath + "/cache";
+
+        // Create directory
+        fs::create_directory( modePath.c_str() );
+
+    }
+
+}
+
+void copy_result(std::string rootPath, std::string modeName, unsigned int lastMajor){
+    std::stringstream resultPath;
+    std::stringstream finalPath;
+
+    // Copy result
+    resultPath << rootPath << "/" << modeName << "/" << std::setfill('0') << std::setw(4) << lastMajor << "_position.xyz";
+    finalPath << rootPath << "/" << modeName << "_position.xyz";
+    fs::copy( resultPath.str(), finalPath.str() );
+
+    // Clear string
+    resultPath.clear();
+    finalPath.clear();
+
+    // Copy result
+    resultPath << rootPath << "/" << modeName << "/" << std::setfill('0') << std::setw(4) << lastMajor << "_structure.xyz";
+    finalPath << rootPath << "/" << modeName << "_structure.xyz";
+    fs::copy( resultPath.str(), finalPath.str() );
+
+    // Clear string
+    resultPath.clear();
+    finalPath.clear();
+
+    // Copy result
+    resultPath << rootPath << "/" << modeName << "/" << std::setfill('0') << std::setw(4) << lastMajor << "_transformation.dat";
+    finalPath << rootPath << "/" << modeName << "_transformation.dat";
+    fs::copy( resultPath.str(), finalPath.str() );
+
 }
 
