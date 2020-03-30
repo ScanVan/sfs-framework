@@ -91,9 +91,9 @@ public:
     void filterRadialPositivity(int loopState);
     void filterRadialLimitation(int loopState);
     void filterDisparity(int loopState);
-    void exportStructure(std::string path, unsigned int major);
-    void exportPosition(std::string path, unsigned int major);
-    void exportTransformation(std::string path, unsigned int major);
+    void exportStructure(std::string path, std::string mode, unsigned int major);
+    void exportPosition(std::string path, std::string mode, unsigned int major);
+    void exportTransformation(std::string path, std::string mode, unsigned int major);
     Structure *newStructure(Viewpoint *originalViewpoint){ auto s = std::make_shared<Structure>(originalViewpoint); structures.push_back(s); return s.get();} /* need deletion */
 
 public:

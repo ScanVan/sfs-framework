@@ -106,7 +106,7 @@ int main(int argc, char ** argv){
         frontend = new FrontendPicture(source, mask, &threadpool, &database);
 
     } else
-    if(config["frontend"]["type"].as<std::string>() == "DENSE"){
+    if(config["frontend"]["type"].as<std::string>() == "dense"){
 
         auto fs = config["frontend"]["source"];
         ViewPointSource *source = NULL;
@@ -348,9 +348,9 @@ int main(int argc, char ** argv){
         //}
 
         // Major iteration exportation : model, odometry and transformation
-        database.exportStructure     (config["export"]["path"].as<std::string>(),loopMajor);
-        database.exportPosition      (config["export"]["path"].as<std::string>(),loopMajor);
-        database.exportTransformation(config["export"]["path"].as<std::string>(),loopMajor);
+        database.exportStructure     (config["export"]["path"].as<std::string>(),config["frontend"]["type"].as<std::string>(),loopMajor);
+        database.exportPosition      (config["export"]["path"].as<std::string>(),config["frontend"]["type"].as<std::string>(),loopMajor);
+        database.exportTransformation(config["export"]["path"].as<std::string>(),config["frontend"]["type"].as<std::string>(),loopMajor);
 
         // update major iterator
         loopMajor ++;

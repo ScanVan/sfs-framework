@@ -728,12 +728,12 @@ void Database::filterDisparity(int loopState){
 
 }
 
-void Database::exportStructure(std::string path, unsigned int major){
+void Database::exportStructure(std::string path, std::string mode, unsigned int major){
     std::fstream exportStream;
     std::stringstream file_path;
     std::string color;
 
-    file_path << path << "/sparse/" << std::setfill('0') << std::setw(4) << major << "_structure.xyz";
+    file_path << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_structure.xyz";
 
     exportStream.open(file_path.str(),std::ios::out);
     if (exportStream.is_open() == false){
@@ -758,11 +758,11 @@ void Database::exportStructure(std::string path, unsigned int major){
     exportStream.close();
 }
 
-void Database::exportPosition(std::string path, unsigned int major){
+void Database::exportPosition(std::string path, std::string mode, unsigned int major){
     std::fstream exportStream;
     std::stringstream file_path;
 
-    file_path << path << "/sparse/" << std::setfill('0') << std::setw(4) << major << "_position.xyz";
+    file_path << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_position.xyz";
 
     exportStream.open(file_path.str(),std::ios::out);
     if (exportStream.is_open() == false){
@@ -779,11 +779,11 @@ void Database::exportPosition(std::string path, unsigned int major){
     exportStream.close();
 }
 
-void Database::exportTransformation(std::string path, unsigned int major){
+void Database::exportTransformation(std::string path, std::string mode, unsigned int major){
     std::fstream exportStream;
     std::stringstream file_path;
 
-    file_path << path << "/sparse/" << std::setfill('0') << std::setw(4) << major << "_transformation.dat";
+    file_path << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_transformation.dat";
 
     exportStream.open(file_path.str(),std::ios::out);
     if (exportStream.is_open() == false ){
