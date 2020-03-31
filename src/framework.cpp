@@ -29,23 +29,56 @@ int main(int argc, char ** argv){
 
     // Check usage
     if ( argc != 2 ) {
-        // Display minimal help
+        // Display minimal help and exit
         std::cerr << "Wrong usage" << std::endl << "Usage : sfs-framework .../yamlConfig_file.yaml" << std::endl;
+        return 1;
     }
 
     //
-    //  Framework initialisation
+    //  Framework configuration
     //
 
     // Configuration file importation
     YAML::Node yamlConfig = YAML::LoadFile(argv[1]);
 
+    // Check yaml format
+    if ( yamlConfig["frontend"].IsDefined() != true ) {
+        // Display error and exit
+        std::cerr << "Missing section in YAML configuration file" << std::endl;
+        return 1;
+    } else
+    if ( yamlConfig["matching"].IsDefined() != true ) {
+        // Display error and exit
+        std::cerr << "Missing section in YAML configuration file" << std::endl;
+        return 1;
+    } else
+    if ( yamlConfig["algorithm"].IsDefined() != true ) {
+        // Display error and exit
+        std::cerr << "Missing section in YAML configuration file" << std::endl;
+        return 1;
+    } else
+    if ( yamlConfig["export"].IsDefined() != true ) {
+        // Display error and exit
+        std::cerr << "Missing section in YAML configuration file" << std::endl;
+        return 1;
+    }
+
+    // Instance of main yaml section
+    YAML::Node yamlFrontend  = yamlConfig["frontend"];
+    YAML::Node yamlMatching  = yamlConfig["matching"];
+    YAML::Node yamlAlgorithm = yamlConfig["algorithm"];
+    YAML::Node yamlExport    = yamlConfig["export"];
+
+    //
+    //  Framework initialisation
+    //
+
     // Framework main structure initialisation
     Database database(
-        yamlConfig["algorithm"]["error"].as<double>(),
-        yamlConfig["algorithm"]["disparity"].as<double>(),
-        yamlConfig["algorithm"]["radius"].as<double>(),
-        yamlConfig["matching"]["range"].as<unsigned int>()
+        yamlAlgorithm["error"].as<double>(),
+        yamlAlgorithm["disparity"].as<double>(),
+        yamlAlgorithm["radius"].as<double>(),
+        yamlMatching["range"].as<unsigned int>()
     );
 
     // Thread pool initialisation
@@ -81,17 +114,14 @@ int main(int argc, char ** argv){
     //
 
     // Create exportation directories
-    create_directories(yamlConfig["export"]["path"].as<std::string>(), yamlConfig["frontend"]["type"].as<std::string>());
+    create_directories(yamlExport["path"].as<std::string>(), yamlFrontend["type"].as<std::string>());
 
     //
     //  Framework front-end
     //
 
     // Switch on front-end : odometry (IMAGE), densification (DENSE), synthetic model (CLOUDPOINT)
-    if(yamlConfig["frontend"]["type"].as<std::string>() == "sparse"){
-
-        // Front-end yaml node
-        YAML::Node yamlFrontend = yamlConfig["frontend"];
+    if(yamlFrontend["type"].as<std::string>() == "sparse"){
 
         // Detect image list boundary
         std::string firstFile = yamlFrontend["first"].IsDefined() ? yamlFrontend["first"].as<std::string>() : "";
@@ -115,10 +145,7 @@ int main(int argc, char ** argv){
         frontend = new FrontendPicture(viewpointsource, mask, &threadpool, &database);
 
     } else
-    if(yamlConfig["frontend"]["type"].as<std::string>() == "dense"){
-
-        // Front-end yaml node
-        YAML::Node yamlFrontend = yamlConfig["frontend"];
+    if(yamlFrontend["type"].as<std::string>() == "dense"){
 
         // Detect image list boundary
         std::string firstFile = yamlFrontend["first"].IsDefined() ? yamlFrontend["first"].as<std::string>() : "";
@@ -126,7 +153,7 @@ int main(int argc, char ** argv){
 
         // Front-end source
         ViewPointSource * viewpointsource = new ViewPointSourceWithOdometry(
-            yamlConfig["export"]["path"].as<std::string>() + "/sparse_transformation.dat",
+            yamlExport["path"].as<std::string>() + "/sparse_transformation.dat",
             yamlFrontend["image"].as<std::string>(),
             yamlFrontend["scale"].as<double>(),
             firstFile,
@@ -140,12 +167,12 @@ int main(int argc, char ** argv){
         cv::resize(mask, mask, cv::Size(), yamlFrontend["scale"].as<double>(), yamlFrontend["scale"].as<double>(), cv::INTER_AREA );
 
         // Create front-end instance
-        frontend = new FrontendDense(viewpointsource, mask, &database, yamlConfig["export"]["path"].as<std::string>() + "/cache" );
+        frontend = new FrontendDense(viewpointsource, mask, &database, yamlExport["path"].as<std::string>() + "/cache" );
 
     } else
-    if(yamlConfig["frontend"]["type"].as<std::string>() == "CLOUDPOINT"){
+    if(yamlFrontend["type"].as<std::string>() == "CLOUDPOINT"){
 
-        auto fn = yamlConfig["frontend"];
+        auto fn = yamlFrontend;
         frontend = new FrontendCloudpoint(
                 &database, fn["model"].as<std::string>(),
                 fn["odometry"].as<std::string>(),
@@ -186,7 +213,7 @@ int main(int argc, char ** argv){
             if(yamlConfig["debug"]["structureImageDump"].IsDefined()){
                 for(auto viewpoint : database.viewpoints){
                     auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
-                    auto folder = yamlConfig["export"]["path"].as<std::string>() + "/viewpointStructuresImages";
+                    auto folder = yamlExport["path"].as<std::string>() + "/viewpointStructuresImages";
                     auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "a.png";
                     fs::create_directories(folder);
                     cv::imwrite(path, image);
@@ -210,7 +237,7 @@ int main(int argc, char ** argv){
         loopMinor=0;
 
         // development feature - begin
-        //database._exportMatchDistribution(yamlConfig["export"]["path"].as<std::string>(),loopMajor,"front");
+        //database._exportMatchDistribution(yamlExport["path"].as<std::string>(),loopMajor,"front");
         // development feature - end
 
         // development feature - begin
@@ -270,7 +297,7 @@ int main(int argc, char ** argv){
                 // development feature - end
 
                 // development feature - begin
-                //database._exportState(yamlConfig["export"]["path"].as<std::string>(),loopMajor,loopMinor);
+                //database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor);
                 // development feature - end
 
                 // Optimisation step condition
@@ -341,7 +368,7 @@ int main(int argc, char ** argv){
                 allowDeallocateImages = false;
                 for(auto viewpoint : database.viewpoints){
                     auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
-                    auto folder = yamlConfig["export"]["path"].as<std::string>() + "/viewpointStructuresImages";
+                    auto folder = yamlExport["path"].as<std::string>() + "/viewpointStructuresImages";
                     auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "b.png";
                     fs::create_directories(folder);
                     cv::imwrite(path, image);
@@ -361,9 +388,9 @@ int main(int argc, char ** argv){
         //}
 
         // Major iteration exportation : model, odometry and transformation
-        database.exportStructure     (yamlConfig["export"]["path"].as<std::string>(),yamlConfig["frontend"]["type"].as<std::string>(),loopMajor);
-        database.exportPosition      (yamlConfig["export"]["path"].as<std::string>(),yamlConfig["frontend"]["type"].as<std::string>(),loopMajor);
-        database.exportTransformation(yamlConfig["export"]["path"].as<std::string>(),yamlConfig["frontend"]["type"].as<std::string>(),loopMajor);
+        database.exportStructure     (yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor);
+        database.exportPosition      (yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor);
+        database.exportTransformation(yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor);
 
         // update major iterator
         loopMajor ++;
