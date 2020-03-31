@@ -28,6 +28,7 @@
 #include <cmath>
 #include <opencv4/opencv2/core.hpp>
 #include <omp.h>
+#include <experimental/filesystem>
 #include <sstream>
 #include <iomanip>
 
@@ -35,6 +36,9 @@
 #include "framework-viewpoint.hpp"
 #include "framework-transform.hpp"
 #include "framework-structure.hpp"
+
+// Namespaces
+namespace fs = std::experimental::filesystem;
 
 // Optimisation algorithm maximum iteration per cycle
 #define DB_LOOP_MAXITER    ( 5000 )

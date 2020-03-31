@@ -30,7 +30,7 @@ int main(int argc, char ** argv){
     // Check usage
     if ( argc != 2 ) {
         // Display minimal help
-        std::cerr << "Wrong usage" << std::endl << "Usage : sfs-framework .../config_file.yaml" << std::endl;
+        std::cerr << "Wrong usage" << std::endl << "Usage : sfs-framework .../yamlConfig_file.yaml" << std::endl;
     }
 
     //
@@ -38,14 +38,14 @@ int main(int argc, char ** argv){
     //
 
     // Configuration file importation
-    YAML::Node config = YAML::LoadFile(argv[1]);
+    YAML::Node yamlConfig = YAML::LoadFile(argv[1]);
 
     // Framework main structure initialisation
     Database database(
-        config["algorithm"]["error"].as<double>(),
-        config["algorithm"]["disparity"].as<double>(),
-        config["algorithm"]["radius"].as<double>(),
-        config["matching"]["range"].as<unsigned int>()
+        yamlConfig["algorithm"]["error"].as<double>(),
+        yamlConfig["algorithm"]["disparity"].as<double>(),
+        yamlConfig["algorithm"]["radius"].as<double>(),
+        yamlConfig["matching"]["range"].as<unsigned int>()
     );
 
     // Thread pool initialisation
@@ -81,58 +81,71 @@ int main(int argc, char ** argv){
     //
 
     // Create exportation directories
-    create_directories(config["export"]["path"].as<std::string>(), config["frontend"]["type"].as<std::string>());
+    create_directories(yamlConfig["export"]["path"].as<std::string>(), yamlConfig["frontend"]["type"].as<std::string>());
 
     //
     //  Framework front-end
     //
 
     // Switch on front-end : odometry (IMAGE), densification (DENSE), synthetic model (CLOUDPOINT)
-    if(config["frontend"]["type"].as<std::string>() == "sparse"){
+    if(yamlConfig["frontend"]["type"].as<std::string>() == "sparse"){
 
-        auto fs = config["frontend"]["source"];
-        ViewPointSource *source = NULL;
-        auto sourceType = fs["type"].as<std::string>();
-        if(sourceType == "FOLDER") {
-            std::string firstFile =  fs["first"].IsDefined() ? fs["first"].as<std::string>() : "";
-            std::string lastFile = fs["last"].IsDefined() ? fs["last"].as<std::string>() : "";
-            source = new ViewPointSourceFs(fs["path"].as<std::string>(), fs["scale"].as<double>(), firstFile, lastFile, fs["inc"].as<uint32_t>());
-        }
-        auto mask = cv::imread(fs["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
-        if(fs["scale"].IsDefined()){
-            auto scale = fs["scale"].as<double>();
-            cv::resize(mask, mask, cv::Size(), scale, scale, cv::INTER_AREA );
-        }
-        frontend = new FrontendPicture(source, mask, &threadpool, &database);
+        // Front-end yaml node
+        YAML::Node yamlFrontend = yamlConfig["frontend"];
 
-    } else
-    if(config["frontend"]["type"].as<std::string>() == "dense"){
+        // Detect image list boundary
+        std::string firstFile = yamlFrontend["first"].IsDefined() ? yamlFrontend["first"].as<std::string>() : "";
+        std::string lastFile  = yamlFrontend["last" ].IsDefined() ? yamlFrontend["last" ].as<std::string>() : "";
 
-        auto fs = config["frontend"]["source"];
-        ViewPointSource *source = NULL;
-        auto sourceType = fs["type"].as<std::string>();
-        if(sourceType == "ODOMETRY") {
-            std::string firstFile =  fs["first"].IsDefined() ? fs["first"].as<std::string>() : "";
-            std::string lastFile = fs["last"].IsDefined() ? fs["last"].as<std::string>() : "";
-            source = new ViewPointSourceWithOdometry(
-                fs["odometryFile"].as<std::string>(),
-                fs["pictureFolder"].as<std::string>(),
-                fs["scale"].as<double>(),
-                firstFile,
-                lastFile
-            );
-        }
-        auto mask = cv::imread(fs["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
-        if(fs["scale"].IsDefined()){
-            auto scale = fs["scale"].as<double>();
-            cv::resize(mask, mask, cv::Size(), scale, scale, cv::INTER_AREA );
-        }
-        frontend = new FrontendDense(source, mask, &database, config["frontend"]["ofCacheFolder"].as<std::string>());
+        // Front-end source
+        ViewPointSource * viewpointsource = new ViewPointSourceFs(
+            yamlFrontend["image"].as<std::string>(), 
+            yamlFrontend["scale"].as<double>(), 
+            firstFile, lastFile, 
+            yamlFrontend["step"].as<uint32_t>()
+        );
+
+        // Import mask image
+        cv::Mat mask = cv::imread(yamlFrontend["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
+
+        // Apply scale factor on mask image
+        cv::resize(mask, mask, cv::Size(), yamlFrontend["scale"].as<double>(), yamlFrontend["scale"].as<double>(), cv::INTER_AREA );
+
+        // Create front-end instance
+        frontend = new FrontendPicture(viewpointsource, mask, &threadpool, &database);
 
     } else
-    if(config["frontend"]["type"].as<std::string>() == "CLOUDPOINT"){
+    if(yamlConfig["frontend"]["type"].as<std::string>() == "dense"){
 
-        auto fn = config["frontend"];
+        // Front-end yaml node
+        YAML::Node yamlFrontend = yamlConfig["frontend"];
+
+        // Detect image list boundary
+        std::string firstFile = yamlFrontend["first"].IsDefined() ? yamlFrontend["first"].as<std::string>() : "";
+        std::string lastFile  = yamlFrontend["last" ].IsDefined() ? yamlFrontend["last" ].as<std::string>() : "";
+
+        // Front-end source
+        ViewPointSource * viewpointsource = new ViewPointSourceWithOdometry(
+            yamlConfig["export"]["path"].as<std::string>() + "/sparse_transformation.dat",
+            yamlFrontend["image"].as<std::string>(),
+            yamlFrontend["scale"].as<double>(),
+            firstFile,
+            lastFile
+        );
+
+        // Import mask image
+        cv::Mat mask = cv::imread(yamlFrontend["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
+
+        // Apply scale factor on mask image
+        cv::resize(mask, mask, cv::Size(), yamlFrontend["scale"].as<double>(), yamlFrontend["scale"].as<double>(), cv::INTER_AREA );
+
+        // Create front-end instance
+        frontend = new FrontendDense(viewpointsource, mask, &database, yamlConfig["export"]["path"].as<std::string>() + "/cache" );
+
+    } else
+    if(yamlConfig["frontend"]["type"].as<std::string>() == "CLOUDPOINT"){
+
+        auto fn = yamlConfig["frontend"];
         frontend = new FrontendCloudpoint(
                 &database, fn["model"].as<std::string>(),
                 fn["odometry"].as<std::string>(),
@@ -169,11 +182,11 @@ int main(int argc, char ** argv){
         }
 
         // development feature - begin
-        if(config["debug"].IsDefined()){
-            if(config["debug"]["structureImageDump"].IsDefined()){
+        if(yamlConfig["debug"].IsDefined()){
+            if(yamlConfig["debug"]["structureImageDump"].IsDefined()){
                 for(auto viewpoint : database.viewpoints){
                     auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
-                    auto folder = config["export"]["path"].as<std::string>() + "/viewpointStructuresImages";
+                    auto folder = yamlConfig["export"]["path"].as<std::string>() + "/viewpointStructuresImages";
                     auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "a.png";
                     fs::create_directories(folder);
                     cv::imwrite(path, image);
@@ -197,7 +210,7 @@ int main(int argc, char ** argv){
         loopMinor=0;
 
         // development feature - begin
-        //database._exportMatchDistribution(config["export"]["path"].as<std::string>(),loopMajor,"front");
+        //database._exportMatchDistribution(yamlConfig["export"]["path"].as<std::string>(),loopMajor,"front");
         // development feature - end
 
         // development feature - begin
@@ -257,7 +270,7 @@ int main(int argc, char ** argv){
                 // development feature - end
 
                 // development feature - begin
-                //database._exportState(config["export"]["path"].as<std::string>(),loopMajor,loopMinor);
+                //database._exportState(yamlConfig["export"]["path"].as<std::string>(),loopMajor,loopMinor);
                 // development feature - end
 
                 // Optimisation step condition
@@ -316,19 +329,19 @@ int main(int argc, char ** argv){
 
         bool allowDeallocateImages = true;
 
-        if(config["debug"].IsDefined()){
-            auto lastViewPointGui = config["debug"]["lastViewPointGui"];
+        if(yamlConfig["debug"].IsDefined()){
+            auto lastViewPointGui = yamlConfig["debug"]["lastViewPointGui"];
             if(lastViewPointGui.IsDefined() && database.viewpoints.back()->getImage()->cols != 0){
                 database._displayViewpointStructures(database.viewpoints.back().get(), lastViewPointGui["structureSizeMin"].as<int>());
                 cv::waitKey(0); //Wait 100 ms give opencv the time to display the GUI
             }
 
 
-            if(config["debug"]["structureImageDump"].IsDefined()){
+            if(yamlConfig["debug"]["structureImageDump"].IsDefined()){
                 allowDeallocateImages = false;
                 for(auto viewpoint : database.viewpoints){
                     auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
-                    auto folder = config["export"]["path"].as<std::string>() + "/viewpointStructuresImages";
+                    auto folder = yamlConfig["export"]["path"].as<std::string>() + "/viewpointStructuresImages";
                     auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "b.png";
                     fs::create_directories(folder);
                     cv::imwrite(path, image);
@@ -348,9 +361,9 @@ int main(int argc, char ** argv){
         //}
 
         // Major iteration exportation : model, odometry and transformation
-        database.exportStructure     (config["export"]["path"].as<std::string>(),config["frontend"]["type"].as<std::string>(),loopMajor);
-        database.exportPosition      (config["export"]["path"].as<std::string>(),config["frontend"]["type"].as<std::string>(),loopMajor);
-        database.exportTransformation(config["export"]["path"].as<std::string>(),config["frontend"]["type"].as<std::string>(),loopMajor);
+        database.exportStructure     (yamlConfig["export"]["path"].as<std::string>(),yamlConfig["frontend"]["type"].as<std::string>(),loopMajor);
+        database.exportPosition      (yamlConfig["export"]["path"].as<std::string>(),yamlConfig["frontend"]["type"].as<std::string>(),loopMajor);
+        database.exportTransformation(yamlConfig["export"]["path"].as<std::string>(),yamlConfig["frontend"]["type"].as<std::string>(),loopMajor);
 
         // update major iterator
         loopMajor ++;
@@ -359,9 +372,9 @@ int main(int argc, char ** argv){
 
     }
 
-    // Copy last file in the main directory
-    std::cerr << loopMajor - 1 << std::endl;
-    copy_result(config["export"]["path"].as<std::string>(),config["frontend"]["type"].as<std::string>(),loopMajor-1);
+    // Need release of : 
+    //     ViewPointSource * source = NULL;
+    //     Frontend * frontend(nullptr);
 
     // system message
     return 0;

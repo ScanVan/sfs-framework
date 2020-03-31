@@ -730,12 +730,13 @@ void Database::filterDisparity(int loopState){
 
 void Database::exportStructure(std::string path, std::string mode, unsigned int major){
     std::fstream exportStream;
-    std::stringstream file_path;
+    std::stringstream filePath;
+    std::stringstream fileCopy;
     std::string color;
 
-    file_path << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_structure.xyz";
+    filePath << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_structure.xyz";
 
-    exportStream.open(file_path.str(),std::ios::out);
+    exportStream.open(filePath.str(),std::ios::out);
     if (exportStream.is_open() == false){
         std::cerr << "unable to create model exportation file" << std::endl;
         return;
@@ -756,15 +757,20 @@ void Database::exportStructure(std::string path, std::string mode, unsigned int 
     }
 
     exportStream.close();
+
+    fileCopy << path << "/" << mode << "_structure.xyz";
+    fs::copy(filePath.str(), fileCopy.str(),fs::copy_options::overwrite_existing);
+
 }
 
 void Database::exportPosition(std::string path, std::string mode, unsigned int major){
     std::fstream exportStream;
-    std::stringstream file_path;
+    std::stringstream filePath;
+    std::stringstream fileCopy;
 
-    file_path << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_position.xyz";
+    filePath << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_position.xyz";
 
-    exportStream.open(file_path.str(),std::ios::out);
+    exportStream.open(filePath.str(),std::ios::out);
     if (exportStream.is_open() == false){
         std::cerr << "unable to create odometry exportation file" << std::endl;
         return;
@@ -777,15 +783,20 @@ void Database::exportPosition(std::string path, std::string mode, unsigned int m
     }
 
     exportStream.close();
+
+    fileCopy << path << "/" << mode << "_position.xyz";
+    fs::copy(filePath.str(), fileCopy.str(),fs::copy_options::overwrite_existing);
+
 }
 
 void Database::exportTransformation(std::string path, std::string mode, unsigned int major){
     std::fstream exportStream;
-    std::stringstream file_path;
+    std::stringstream filePath;
+    std::stringstream fileCopy;
 
-    file_path << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_transformation.dat";
+    filePath << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_transformation.dat";
 
-    exportStream.open(file_path.str(),std::ios::out);
+    exportStream.open(filePath.str(),std::ios::out);
     if (exportStream.is_open() == false ){
         std::cerr << "unable to create transformation file" << std::endl;
     }
@@ -807,6 +818,10 @@ void Database::exportTransformation(std::string path, std::string mode, unsigned
     }
 
     exportStream.close();
+
+    fileCopy << path << "/" << mode << "_transformation.dat";
+    fs::copy(filePath.str(), fileCopy.str(),fs::copy_options::overwrite_existing);
+
 }
 
 //
