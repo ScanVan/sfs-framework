@@ -94,7 +94,7 @@ int main(int argc, char ** argv){
     // Algorithm loop
     bool loopFlag(true);
     bool loopTrig(false);
-    long loopState=0;
+    long loopState(DB_MODE_NULL);
 
     // Algorithm error
     double loopPError(1.);
@@ -144,6 +144,9 @@ int main(int argc, char ** argv){
         // Create front-end instance
         frontend = new FrontendPicture(viewpointsource, mask, &threadpool, &database);
 
+        // Initialise algorithm state
+        loopState = DB_MODE_BOOT;
+
     } else
     if(yamlFrontend["type"].as<std::string>() == "dense"){
 
@@ -169,6 +172,9 @@ int main(int argc, char ** argv){
         // Create front-end instance
         frontend = new FrontendDense(viewpointsource, mask, &database, yamlExport["path"].as<std::string>() + "/cache" );
 
+        // Initialise algorithm state
+        loopState = DB_MODE_MASS;
+
     } else
     if(yamlFrontend["type"].as<std::string>() == "CLOUDPOINT"){
 
@@ -185,7 +191,7 @@ int main(int argc, char ** argv){
     }
 
     //
-    //  Framework main loop
+    //  Framework optimisation algorithm
     //
 
     // framework loop
@@ -259,6 +265,9 @@ int main(int argc, char ** argv){
                 database.computeCentroids(loopState);
                 database.computeCorrelations(loopState);
                 database.computePoses(loopState);
+
+                database.computeNormalisePoses(loopState);
+
                 database.computeFrames(loopState);
                 database.computeOriented(loopState);
                 database.computeOptimals(loopState);
@@ -308,6 +317,9 @@ int main(int argc, char ** argv){
                 if(loopMinor>DB_LOOP_MAXITER){
                     loopTrig=true;
                 }
+                if(loopState==DB_MODE_MASS){
+                    loopTrig=true;
+                }
 
                 // Check step condition
                 if (loopTrig==true) {
@@ -331,19 +343,18 @@ int main(int argc, char ** argv){
             }
 
             // State loop management
-            if((loopState==DB_LOOP_MODE_BOOT)||(loopState==DB_LOOP_MODE_FULL)){
+            if((loopState==DB_MODE_BOOT)||(loopState==DB_MODE_FULL)){
 
                 // Update loop mode
-                loopState=DB_LOOP_MODE_LAST;
+                loopState=DB_MODE_LAST;
 
             } else
-            if (loopState==DB_LOOP_MODE_LAST){
+            if (loopState==DB_MODE_LAST){
 
                 // Update loop mode
-                loopState=DB_LOOP_MODE_FULL;
-                //loopState=DB_LOOP_MODE_LAST;
+                loopState=DB_MODE_FULL;
 
-                // Reset loop flag (continue optimisation)
+                // Continue optimisation
                 loopFlag=true;
 
             }

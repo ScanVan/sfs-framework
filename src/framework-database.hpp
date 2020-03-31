@@ -47,10 +47,12 @@ namespace fs = std::experimental::filesystem;
 #define DB_LOOP_BOOT_COUNT ( 3 )
 
 // Optimisation algorithm states
-#define DB_LOOP_MODE_BOOT  ( 0 ) /* Initial structure */
-#define DB_LOOP_MODE_LAST  ( 1 ) /* Optimising last viewpoint */
-//#define DB_LOOP_MODE_HEAD  ( 2 ) /* Optimising active head */
-#define DB_LOOP_MODE_FULL  ( 2 ) /* Optimising all structures */
+#define DB_MODE_NULL ( -1 ) /* Null mode */
+#define DB_MODE_BOOT (  0 ) /* Initial structure */
+#define DB_MODE_LAST (  1 ) /* Optimising last viewpoint */
+//#define DB_MODE_HEAD  ( 2 ) /* Optimising active head */
+#define DB_MODE_FULL (  2 ) /* Optimising all structures */
+#define DB_MODE_MASS (  3 ) /* Only compute position of structures and strict filter */
 
 // Module object
 class Database {
@@ -77,7 +79,6 @@ public:
     double getPError();
     double getDError();
     bool getCheckError( double const currentError, double const lastError );
-    void getTranslationMeanValue(int loopState);
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
@@ -87,6 +88,7 @@ public:
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);
     void computePoses(int loopState);
+    void computeNormalisePoses(int loopState);
     void computeFrames(int loopState);
     void computeOriented(long loopState);
     void computeOptimals(long loopState);
