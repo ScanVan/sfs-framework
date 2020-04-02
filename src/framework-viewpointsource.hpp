@@ -52,10 +52,10 @@ public:
 class ViewPointSourceFs : public ViewPointSource{
 private:
 	std::vector<std::string> files;
-    uint32_t fileIndex;
-    uint32_t fileLastIndex;
-    uint32_t fileIncrement = 1;
-    double imageScale = 1.0;
+    int32_t fileIndex; /* to base class */
+    int32_t fileLastIndex;/* to base class */
+    int32_t fileIncrement = 1;/* to base class */
+    double imageScale = 1.0;/* to base class */
 
 public:
     ViewPointSourceFs(std::string imageFolder, std::string firstImage, std::string lastImage, uint32_t increment, double scale);
@@ -74,13 +74,14 @@ private:
         Eigen::Matrix3d orientation;
     };
     std::vector<ViewPointInfo> list;
-    uint32_t fileIndex;
-    uint32_t fileLastIndex;
-    double scale = 1.0;
+    int32_t fileIndex;/* to base class */
+    int32_t fileLastIndex;/* to base class */
+    int32_t fileIncrement = 1;/* to base class */
+    double scale = 1.0;/* to base class */
     std::string pictureFolder;
 
 public:
-    ViewPointSourceWithOdometry(std::string viewpointsPath, std::string pictureFolder, double scale, std::string firstFile, std::string lastFile);
+    ViewPointSourceWithOdometry(std::string imageFolder, std::string transformationFile, std::string firstFile, std::string lastFile, int increment, double scale);
     virtual ~ViewPointSourceWithOdometry() {}
     virtual std::shared_ptr<Viewpoint> next();
     virtual bool hasNext();

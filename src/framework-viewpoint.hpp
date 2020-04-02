@@ -39,8 +39,8 @@ public: /* Need to be set back to private */
     std::string uid;
     int index; /* changing to long ? */
 	cv::Mat image;
-    int width; /* maybe to delete : only used in allocateFeaturesFromCvFeatures : passed as parameter ? */
-    int height; /* maybe to delete : only used in allocateFeaturesFromCvFeatures : passed as parameter ? */
+    int width;
+    int height;
 	std::vector<Feature*> features;
 	std::vector<cv::KeyPoint> cvFeatures;
 	cv::Mat cvDescriptor;

@@ -157,11 +157,12 @@ int main(int argc, char ** argv){
 
         // Front-end source
         ViewPointSource * viewpointsource = new ViewPointSourceWithOdometry(
-            yamlExport["path"].as<std::string>() + "/sparse_transformation.dat",
             yamlFrontend["image"].as<std::string>(),
-            yamlFrontend["scale"].as<double>(),
+            yamlExport["path"].as<std::string>() + "/sparse_transformation.dat",
             firstFile,
-            lastFile
+            lastFile,
+            yamlFrontend["step"].as<uint32_t>(),
+            yamlFrontend["scale"].as<double>()
         );
 
         // Import mask image

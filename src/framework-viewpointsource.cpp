@@ -38,7 +38,7 @@ ViewPointSourceFs::ViewPointSourceFs(std::string imageFolder, std::string firstI
         /* Selection based on file extension */
         if((imageExtension==".bmp")||(imageExtension==".jpg")||(imageExtension==".png")||(imageExtension==".tif")){
 
-            /* display pushed file name */
+            /* Display pushed file name */
             std::cout << "Pusing image " << entry.path().filename() << " ..." << std::endl;
 
             /* Push image in the list */
@@ -126,63 +126,145 @@ bool ViewPointSourceFs::hasNext(){
 
 }
 
+ViewPointSourceWithOdometry::ViewPointSourceWithOdometry(std::string imageFolder, std::string transformationFile, std::string firstImage, std::string lastImage, int increment, double scale) : fileIncrement(increment), scale(scale), pictureFolder(imageFolder){
 
+    /* Transformation input stream */
+    std::ifstream transformationStream(transformationFile);
 
+    /* Viewpoint transformation structure */
+    ViewPointInfo importTransformation;
 
-
-
-
-
-ViewPointSourceWithOdometry::ViewPointSourceWithOdometry(std::string viewpointsPath, std::string pictureFolder, double scale, std::string firstFile, std::string lastFile) : scale(scale), pictureFolder(pictureFolder){
-    std::ifstream listFile(viewpointsPath);
-
-    ViewPointInfo info;
-
+    /* Initialise index and boundary */
     fileIndex = -1;
     fileLastIndex = -1;
 
-    while (listFile >>
-            info.fileName >>
-            info.position[0] >> info.position[1] >> info.position[2] >>
-            info.orientation(0,0) >> info.orientation(0,1) >> info.orientation(0,2) >>
-            info.orientation(1,0) >> info.orientation(1,1) >> info.orientation(1,2) >>
-            info.orientation(2,0) >> info.orientation(2,1) >> info.orientation(2,2))
-    {
-        if(info.fileName == firstFile) fileIndex = list.size();
-        if(info.fileName == lastFile) fileLastIndex = list.size();
-        list.push_back(info);
+    /* Check stream */
+    if(transformationStream.is_open()==false){
+
+        /* Send critical message */
+        throw std::runtime_error("Error : unable to read transformation file");
+
     }
 
-    if(firstFile == "") fileIndex = 0;
-    if(lastFile == "") fileLastIndex = list.size()-1;
+    /* Reading transformation */
+    while(transformationStream.eof()==false) {
 
-    if(fileIndex < 0) throw std::runtime_error("can't fine first file");
-    if(fileLastIndex < 0) throw std::runtime_error("can't fine last file");
+        /* Import viewpoint uid (filename) */
+        if(transformationStream >> importTransformation.fileName) {
+
+            /* Display imported file name */
+            std::cout << "Pusing image " << importTransformation.fileName << " ..." << std::endl;
+
+            /* Import position */
+            transformationStream >> importTransformation.position(0);
+            transformationStream >> importTransformation.position(1);
+            transformationStream >> importTransformation.position(2);
+
+            /* Import orientation */
+            transformationStream >> importTransformation.orientation(0,0);
+            transformationStream >> importTransformation.orientation(0,1);
+            transformationStream >> importTransformation.orientation(0,2);
+            transformationStream >> importTransformation.orientation(1,0);
+            transformationStream >> importTransformation.orientation(1,1);
+            transformationStream >> importTransformation.orientation(1,2);
+            transformationStream >> importTransformation.orientation(2,0);
+            transformationStream >> importTransformation.orientation(2,1);
+            transformationStream >> importTransformation.orientation(2,2);
+
+            /* Push transformation on list */
+            list.push_back(importTransformation);
+
+            /* Detect first image boundary */
+            if(importTransformation.fileName==firstImage) {
+
+                /* Update index */
+                fileIndex = list.size() - 1;
+
+            }
+
+            /* Detect last image boundary */
+            if(importTransformation.fileName==lastImage) {
+
+                /* Update last index */
+                fileLastIndex = list.size();
+
+            }
+
+        }
+
+    }
+
+    /* Close transformation stream */
+    transformationStream.close();
+
+    /* Check detected boundary */
+    if(fileIndex<0){
+
+        /* Check specified boundary */
+        if(firstImage.empty()==false) {
+
+            /* display warning */
+            std::cerr << "Warning : unable to locate specified frist file. Using first file in the list" << std::endl;
+
+        }
+
+        /* initialise file index */
+        fileIndex = 0;
+
+    }
+
+    /* Check detected boundary */
+    if(fileLastIndex<0){
+
+        /* Check specified boundary */
+        if(lastImage.empty()==false){
+
+            /* Display warning */
+            std::cerr << "Warning : unable to locate specified last file. Using last file in the list" << std::endl;
+
+        }
+
+        /* Initialise last index */
+        fileLastIndex = list.size();
+
+    }
+
 }
 
 std::shared_ptr<Viewpoint> ViewPointSourceWithOdometry::next(){
-    auto viewpoint = std::make_shared<Viewpoint>();
-    auto info = list[fileIndex];
 
-    auto image = cv::Mat();
-    auto path = pictureFolder + "/" + info.fileName;
-    cv::resize(cv::imread(path, cv::IMREAD_COLOR), image, cv::Size(), scale, scale, cv::INTER_AREA );
+    /* Create new viewpoint instance */
+    std::shared_ptr<Viewpoint> pushViewpoint = std::make_shared<Viewpoint>();
 
-    if (image.empty()) throw new std::runtime_error("imread path failure : " + path );
-    viewpoint->setImage(image);
-    viewpoint->setImageDimension(image.cols, image.rows);
+    /* import and scale image */
+    if(pushViewpoint->setImage(pictureFolder + "/" + list[fileIndex].fileName, scale)==false){
 
-    viewpoint->position = info.position;
-    viewpoint->orientation = info.orientation;
-    fileIndex++;
-    return viewpoint;
+        /* send critical message */
+        throw std::runtime_error("Error : unable to import image " + list[fileIndex].fileName);
+
+    }
+    
+    /* assign viewpoint uid (filename) */
+    pushViewpoint->uid = list[fileIndex].fileName;
+
+    /* assign viewpoint position */
+    pushViewpoint->position = list[fileIndex].position;
+
+    /* assign viewpoint orientation */
+    pushViewpoint->orientation = list[fileIndex].orientation;
+
+    /* update file index */
+    fileIndex += fileIncrement;
+
+    /* return created viewpoint */
+    return pushViewpoint;
+
 }
 
 bool ViewPointSourceWithOdometry::hasNext(){
-    return fileIndex <= fileLastIndex;
+
+    /* Detect end of image list */
+    return fileIndex < fileLastIndex;
+
 }
-
-
-
-
 
