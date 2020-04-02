@@ -9,13 +9,12 @@ This program is licensed under the terms of the GNU GPLv3. Documentation and ill
 
 [Optical Flow Matlab/C++ Code](https://people.csail.mit.edu/celiu/OpticalFlow/) - Redistributed as **libflow** <br />
 C. Liu <br />
-Beyond Pixels : Exploring New Representations and Applications for Motion Analysis <br />
-Massachusetts Institute of Technology <br />
-May 2009 <br />
+_Beyond Pixels : Exploring New Representations and Applications for Motion Analysis_ <br />
+_Massachusetts Institute of Technology, May 2009_ <br />
 _Corrections for compilation under Ubuntu 16.04 LTS_
 
-[GMS: Grid-based Motion Statistics for Fast, Ultra-robust Feature Correspondence](https://github.com/JiawangBian/GMS-Feature-Matcher) - Redistributed as **gms_matcher.h**
+[GMS: Grid-based Motion Statistics for Fast, Ultra-robust Feature Correspondence](https://github.com/JiawangBian/GMS-Feature-Matcher) - Redistributed as **gms_matcher.h** <br />
 JiaWang Bian and Wen-Yan Lin and Yasuyuki Matsushita and Sai-Kit Yeung and Tan Dat Nguyen and Ming-Ming Cheng <br />
-GMS: Grid-based Motion Statistics for Fast, Ultra-robust Feature Correspondence <br />
-IEEE Conference on Computer Vision and Pattern Recognition, 2017 <br />
+_GMS : Grid-based Motion Statistics for Fast, Ultra-robust Feature Correspondence_ <br />
+_IEEE Conference on Computer Vision and Pattern Recognition, 2017_ <br />
 _Included in the main source code as header file_
