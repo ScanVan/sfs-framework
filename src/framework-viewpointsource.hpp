@@ -41,8 +41,14 @@ namespace fs = std::experimental::filesystem;
 
 // Module object
 class ViewPointSource{
+protected:
+    int fileIndex;
+    int fileLastIndex;
+    int fileIncrement;
+    double imageScale;
 public:
 	ViewPointSource() {}
+    ViewPointSource(int increment, double scale) : fileIndex(-1), fileLastIndex(-1), fileIncrement(increment), imageScale(scale) {}
 	virtual ~ViewPointSource() {}
 	virtual std::shared_ptr<Viewpoint> next() = 0;
 	virtual bool hasNext() = 0;
@@ -52,16 +58,11 @@ public:
 class ViewPointSourceFs : public ViewPointSource{
 private:
 	std::vector<std::string> files;
-    int32_t fileIndex; /* to base class */
-    int32_t fileLastIndex;/* to base class */
-    int32_t fileIncrement = 1;/* to base class */
-    double imageScale = 1.0;/* to base class */
-
 public:
     ViewPointSourceFs(std::string imageFolder, std::string firstImage, std::string lastImage, uint32_t increment, double scale);
-	virtual ~ViewPointSourceFs() {}
-	virtual std::shared_ptr<Viewpoint> next();
-	virtual bool hasNext();
+	~ViewPointSourceFs() {}
+	std::shared_ptr<Viewpoint> next();
+	bool hasNext();
 };
 
 // Module derived object
@@ -74,16 +75,11 @@ private:
         Eigen::Matrix3d orientation;
     };
     std::vector<ViewPointInfo> list;
-    int32_t fileIndex;/* to base class */
-    int32_t fileLastIndex;/* to base class */
-    int32_t fileIncrement = 1;/* to base class */
-    double scale = 1.0;/* to base class */
     std::string pictureFolder;
-
 public:
     ViewPointSourceWithOdometry(std::string imageFolder, std::string transformationFile, std::string firstFile, std::string lastFile, int increment, double scale);
-    virtual ~ViewPointSourceWithOdometry() {}
-    virtual std::shared_ptr<Viewpoint> next();
-    virtual bool hasNext();
+    ~ViewPointSourceWithOdometry() {}
+    std::shared_ptr<Viewpoint> next();
+    bool hasNext();
 };
 

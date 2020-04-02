@@ -21,7 +21,14 @@
 
 #include "framework-viewpointsource.hpp"
 
-ViewPointSourceFs::ViewPointSourceFs(std::string imageFolder, std::string firstImage, std::string lastImage, uint32_t increment, double scale) : fileIncrement(increment), imageScale(scale) {
+ViewPointSourceFs::ViewPointSourceFs(std::string imageFolder, std::string firstImage, std::string lastImage, uint32_t increment, double scale) :
+
+    ViewPointSource(
+        increment, 
+        scale
+    )
+
+{
 
     /* Image path */
     fs::path imagePath(fs::u8path(imageFolder));
@@ -126,7 +133,15 @@ bool ViewPointSourceFs::hasNext(){
 
 }
 
-ViewPointSourceWithOdometry::ViewPointSourceWithOdometry(std::string imageFolder, std::string transformationFile, std::string firstImage, std::string lastImage, int increment, double scale) : fileIncrement(increment), scale(scale), pictureFolder(imageFolder){
+ViewPointSourceWithOdometry::ViewPointSourceWithOdometry(std::string imageFolder, std::string transformationFile, std::string firstImage, std::string lastImage, int increment, double scale) : 
+
+    ViewPointSource(
+        increment, 
+        scale
+    ), 
+    pictureFolder(imageFolder) 
+
+{
 
     /* Transformation input stream */
     std::ifstream transformationStream(transformationFile);
@@ -237,7 +252,7 @@ std::shared_ptr<Viewpoint> ViewPointSourceWithOdometry::next(){
     std::shared_ptr<Viewpoint> pushViewpoint = std::make_shared<Viewpoint>();
 
     /* import and scale image */
-    if(pushViewpoint->setImage(pictureFolder + "/" + list[fileIndex].fileName, scale)==false){
+    if(pushViewpoint->setImage(pictureFolder + "/" + list[fileIndex].fileName, imageScale)==false){
 
         /* send critical message */
         throw std::runtime_error("Error : unable to import image " + list[fileIndex].fileName);
