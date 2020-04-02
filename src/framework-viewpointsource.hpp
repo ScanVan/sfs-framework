@@ -3,7 +3,7 @@
  *
  *      Nils Hamel - nils.hamel@bluewin.ch
  *      Charles Papon - charles.papon.90@gmail.com
- *      Copyright (c) 2019 DHLAB, EPFL & HES-SO Valais-Wallis
+ *      Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,14 +21,25 @@
 
 #pragma once
 
-
-#include <opencv4/opencv2/core/types.hpp>
-#include <opencv4/opencv2/core.hpp>
+// External include
 #include <stdint.h>
 #include <vector>
+#include <ctime>
+#include <fstream>
+#include <iostream>
+#include <experimental/filesystem>
+#include <opencv4/opencv2/core/types.hpp>
+#include <opencv4/opencv2/core.hpp>
+#include <opencv4/opencv2/imgcodecs.hpp>
+#include <opencv4/opencv2/highgui.hpp>
 
+// Internal includes
 #include "framework-viewpoint.hpp"
 
+// Namespaces
+namespace fs = std::experimental::filesystem;
+
+// Module object
 class ViewPointSource{
 public:
 	ViewPointSource() {}
@@ -37,23 +48,23 @@ public:
 	virtual bool hasNext() = 0;
 };
 
+// Module derived object
 class ViewPointSourceFs : public ViewPointSource{
 private:
 	std::vector<std::string> files;
     uint32_t fileIndex;
     uint32_t fileLastIndex;
-    double scale = 1.0;
-    uint32_t increment = 1;
+    uint32_t fileIncrement = 1;
+    double imageScale = 1.0;
 
 public:
-	ViewPointSourceFs(std::vector<std::string> files);
-	ViewPointSourceFs(std::string folder, double scale, std::string firstFile, std::string lastFile, uint32_t increment);
+    ViewPointSourceFs(std::string imageFolder, std::string firstImage, std::string lastImage, uint32_t increment, double scale);
 	virtual ~ViewPointSourceFs() {}
 	virtual std::shared_ptr<Viewpoint> next();
 	virtual bool hasNext();
 };
 
-
+// Module derived object
 class ViewPointSourceWithOdometry : public ViewPointSource{
 private:
     class ViewPointInfo{
@@ -74,3 +85,4 @@ public:
     virtual std::shared_ptr<Viewpoint> next();
     virtual bool hasNext();
 };
+

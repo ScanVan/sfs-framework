@@ -3,7 +3,7 @@
  *
  *      Nils Hamel - nils.hamel@bluewin.ch
  *      Charles Papon - charles.papon.90@gmail.com
- *      Copyright (c) 2019 DHLAB, EPFL & HES-SO Valais-Wallis
+ *      Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,79 +21,109 @@
 
 #include "framework-viewpointsource.hpp"
 
-#include <iostream>
-#include <experimental/filesystem>
-#include <opencv4/opencv2/imgcodecs.hpp>
-#include <opencv4/opencv2/highgui.hpp>
-#include <ctime>
-#include <fstream>
+ViewPointSourceFs::ViewPointSourceFs(std::string imageFolder, std::string firstImage, std::string lastImage, uint32_t increment, double scale) : fileIncrement(increment), imageScale(scale) {
 
-namespace fs = std::experimental::filesystem;
+    /* Image path */
+    fs::path imagePath(fs::u8path(imageFolder));
 
-ViewPointSourceFs::ViewPointSourceFs(std::vector<std::string> files){
-	this->files = files;
-	this->fileIndex = 0;
-}
+    /* Image extension */
+    fs::path imageExtension;
 
-ViewPointSourceFs::ViewPointSourceFs(std::string folder, double scale, std::string firstFile, std::string lastFile, uint32_t increment) : scale(scale), increment(increment) {
-	// read the contents of the directory where the images are located
-	fs::path pt = fs::u8path(folder);
-	for (auto& p : fs::directory_iterator(pt)) {
-		std::string str = p.path().u8string();
-		if (str.substr(str.length()-3)=="bmp") {
-			files.push_back(p.path().u8string());
-		}
-	}
+    /* Detect valid image in folder */
+    for(auto & entry: fs::directory_iterator(imagePath)){
 
-	// sort the filenames alphabetically
-	std::sort(files.begin(), files.end());
+        /* Extract image extension */
+        imageExtension = fs::path(entry.path().u8string()).extension();
 
-	firstFile = firstFile == "" ? files.front() : folder + "/" + firstFile;
-	lastFile = lastFile == "" ? files.back() : folder + "/" + lastFile;
+        /* Selection based on file extension */
+        if((imageExtension==".bmp")||(imageExtension==".jpg")||(imageExtension==".png")||(imageExtension==".tif")){
 
-    fileIndex = findInVector(files, firstFile).second;
-    fileLastIndex = findInVector(files, lastFile).second;
+            /* display pushed file name */
+            std::cout << "Pusing image " << entry.path().filename() << " ..." << std::endl;
 
-    if(fileIndex < 0) throw std::runtime_error("can't fine first file");
-    if(fileLastIndex < 0) throw std::runtime_error("can't fine last file");
+            /* Push image in the list */
+            files.push_back(entry.path().u8string());
+
+        }
+
+    }
+
+    /* sort files list alphabetically */
+    std::sort(files.begin(), files.end());
+
+    /* check for file range boundary */
+    if(firstImage.empty()){
+
+        /* initialise file index */
+        fileIndex = 0;
+
+    }else{
+
+        /* detect index of specified initial file */
+        if((fileIndex = findInVector(files, firstImage).second)<0){
+
+            /* display warning */
+            std::cerr << "Warning : unable to locate specified frist file. Using first file in the list" << std::endl;
+
+            /* initialise file index */
+            fileIndex = 0;
+
+        }
+
+    }
+
+    /* check for file range boundary */
+    if(lastImage.empty()){
+
+        /* initialise last index */
+        fileLastIndex = files.size();
+
+    }else{
+
+        /* detect index of specified initial file */
+        if((fileIndex = findInVector(files, lastImage).second)<0){
+
+            /* display warning */
+            std::cerr << "Warning : unable to locate specified last file. Using last file in the list" << std::endl;
+
+            /* initialise last index */
+            fileLastIndex = files.size();
+
+        }
+
+    }
+
 }
 
 std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
-	auto viewpoint = std::make_shared<Viewpoint>();
-	std::string path = files[fileIndex];
-    auto read = cv::Mat();
-	auto image = cv::Mat();
-    read = cv::imread(path, cv::IMREAD_COLOR);
-	cv::resize(read, image, cv::Size(), scale, scale, cv::INTER_AREA );
-    read.release();
 
-	if (image.empty()) throw new std::runtime_error("imread path failure : " + path );
-	viewpoint->setImage(image);
-	viewpoint->setImageDimension(image.cols, image.rows);
-    image.release();
+    /* Create new viewpoint instance */
+    std::shared_ptr<Viewpoint> pushViewpoint = std::make_shared<Viewpoint>();
 
-	struct tm tm;
-	auto fileName = fs::path(path).filename();
-	auto dateString = fileName.string().substr(0, fileName.string().size() - fileName.extension().string().size());
-	viewpoint->microsecond = std::stoi(dateString.substr(16, 16+6));
-	dateString = dateString.substr(0, 15);
-	dateString.insert(13,"-");
-	dateString.insert(11,"-");
-	dateString.insert(6,"-");
-	dateString.insert(4,"-");
+    /* import and scale image */
+    if(pushViewpoint->setImage(files[fileIndex], imageScale)==false){
 
-	assert(strptime(dateString.c_str(), "%Y-%m-%d-%H-%M-%S", &tm));
-	viewpoint->time = mktime(&tm);
+        /* send critical message */
+        throw std::runtime_error("Error : unable to import image " + files[fileIndex]);
 
-	viewpoint->uid = fileName.string();
+    }
 
-	//fileIndex++;
-    fileIndex += increment;
-	return viewpoint;
+    /* assign viewpoint uid (filename) */
+    pushViewpoint->uid = fs::path(files[fileIndex]).filename();
+
+    /* update file index */
+    fileIndex += fileIncrement;
+
+    /* return created viewpoint */
+    return pushViewpoint;
+
 }
 
 bool ViewPointSourceFs::hasNext(){
-	return fileIndex <= fileLastIndex;
+
+    /* Detect end of image list */
+	return fileIndex < fileLastIndex;
+
 }
 
 

@@ -46,8 +46,8 @@ public: /* Need to be set back to private */
 	cv::Mat cvDescriptor;
     Eigen::Matrix3d orientation;
     Eigen::Vector3d position;
-    time_t time;
-    int microsecond;
+    time_t time; /* delete */
+    int microsecond; /* delete */
 
 public:
 	void setImage(cv::Mat &image){this->image = image;}
@@ -65,6 +65,7 @@ public:
     double getDisparity(int featID);
     void resetFrame();
     void setIndex(int newIndex);
+    bool setImage(std::string imagePath, double imageScale);
     void setImageDimension(int newWidth, int newHeight);
     void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
     void allocateFeaturesFromCvFeatures();

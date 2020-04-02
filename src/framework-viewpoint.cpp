@@ -42,6 +42,18 @@ void Viewpoint::setIndex(int newIndex){
     index=newIndex;
 }
 
+bool Viewpoint::setImage(std::string imagePath, double imageScale){
+    image = cv::imread(imagePath, cv::IMREAD_COLOR);
+    if(image.empty()==false){
+        cv::resize(image, image, cv::Size(), imageScale, imageScale, cv::INTER_AREA);
+        width=image.cols;
+        height=image.rows;
+        return true;
+    }else{
+        return false;
+    }
+}
+
 void Viewpoint::setImageDimension(int newWidth, int newHeight){
     width=newWidth;
     height=newHeight;

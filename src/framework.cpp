@@ -130,16 +130,17 @@ int main(int argc, char ** argv){
         // Front-end source
         ViewPointSource * viewpointsource = new ViewPointSourceFs(
             yamlFrontend["image"].as<std::string>(), 
-            yamlFrontend["scale"].as<double>(), 
-            firstFile, lastFile, 
-            yamlFrontend["step"].as<uint32_t>()
+            firstFile,
+            lastFile, 
+            yamlFrontend["step"].as<uint32_t>(),
+            yamlFrontend["scale"].as<double>()
         );
 
         // Import mask image
         cv::Mat mask = cv::imread(yamlFrontend["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
 
         // Apply scale factor on mask image
-        cv::resize(mask, mask, cv::Size(), yamlFrontend["scale"].as<double>(), yamlFrontend["scale"].as<double>(), cv::INTER_AREA );
+        cv::resize(mask, mask, cv::Size(), yamlFrontend["scale"].as<double>(), yamlFrontend["scale"].as<double>(), cv::INTER_NEAREST );
 
         // Create front-end instance
         frontend = new FrontendPicture(viewpointsource, mask, &threadpool, &database);
@@ -167,7 +168,7 @@ int main(int argc, char ** argv){
         cv::Mat mask = cv::imread(yamlFrontend["mask"].as<std::string>(), cv::IMREAD_GRAYSCALE);
 
         // Apply scale factor on mask image
-        cv::resize(mask, mask, cv::Size(), yamlFrontend["scale"].as<double>(), yamlFrontend["scale"].as<double>(), cv::INTER_AREA );
+        cv::resize(mask, mask, cv::Size(), yamlFrontend["scale"].as<double>(), yamlFrontend["scale"].as<double>(), cv::INTER_NEAREST );
 
         // Create front-end instance
         frontend = new FrontendDense(viewpointsource, mask, &database, yamlExport["path"].as<std::string>() + "/cache" );
