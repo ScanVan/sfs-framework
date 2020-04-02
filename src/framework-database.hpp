@@ -47,12 +47,12 @@ namespace fs = std::experimental::filesystem;
 #define DB_LOOP_BOOT_COUNT ( 3 )
 
 // Optimisation algorithm states
-#define DB_MODE_NULL ( -1 ) /* Null mode */
-#define DB_MODE_BOOT (  0 ) /* Initial structure */
-#define DB_MODE_LAST (  1 ) /* Optimising last viewpoint */
-//#define DB_MODE_HEAD  ( 2 ) /* Optimising active head */
-#define DB_MODE_FULL (  2 ) /* Optimising all structures */
-#define DB_MODE_MASS (  3 ) /* Only compute position of structures and strict filter */
+#define DB_MODE_NULL       ( -1 ) /* Null mode */
+#define DB_MODE_BOOT       (  0 ) /* Initial structure */
+#define DB_MODE_LAST       (  1 ) /* Optimising last viewpoint */
+#define DB_MODE_HEAD       (  2 ) /* Optimising active head */
+#define DB_MODE_FULL       (  4 ) /* Optimising all structures */
+#define DB_MODE_MASS       (  5 ) /* Only compute position of structures and strict filter */
 
 // Module object
 class Database {

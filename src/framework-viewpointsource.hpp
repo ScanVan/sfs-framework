@@ -41,32 +41,39 @@ namespace fs = std::experimental::filesystem;
 
 // Module object
 class ViewPointSource{
+
 protected:
     int fileIndex;
     int fileLastIndex;
     int fileIncrement;
     double imageScale;
+
 public:
 	ViewPointSource() {}
     ViewPointSource(int increment, double scale) : fileIndex(-1), fileLastIndex(-1), fileIncrement(increment), imageScale(scale) {}
 	virtual ~ViewPointSource() {}
 	virtual std::shared_ptr<Viewpoint> next() = 0;
 	virtual bool hasNext() = 0;
+
 };
 
 // Module derived object
 class ViewPointSourceFs : public ViewPointSource{
+
 private:
 	std::vector<std::string> files;
+
 public:
     ViewPointSourceFs(std::string imageFolder, std::string firstImage, std::string lastImage, uint32_t increment, double scale);
 	~ViewPointSourceFs() {}
 	std::shared_ptr<Viewpoint> next();
 	bool hasNext();
+
 };
 
 // Module derived object
 class ViewPointSourceWithOdometry : public ViewPointSource{
+
 private:
     class ViewPointInfo{
     public:
@@ -76,10 +83,12 @@ private:
     };
     std::vector<ViewPointInfo> list;
     std::string pictureFolder;
+
 public:
     ViewPointSourceWithOdometry(std::string imageFolder, std::string transformationFile, std::string firstFile, std::string lastFile, int increment, double scale);
     ~ViewPointSourceWithOdometry() {}
     std::shared_ptr<Viewpoint> next();
     bool hasNext();
+
 };
 

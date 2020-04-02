@@ -262,29 +262,30 @@ int main(int argc, char ** argv){
             // algorithm optimisation loop
             while ( loopFlag == true ) {
 
+                // Push amount of structures
+                pushFilter = database.structures.size();
+
                 // Algorithm core
                 database.computeModels(loopState);
                 database.computeCentroids(loopState);
                 database.computeCorrelations(loopState);
                 database.computePoses(loopState);
-
                 database.computeNormalisePoses(loopState);
-
                 database.computeFrames(loopState);
                 database.computeOriented(loopState);
                 database.computeOptimals(loopState);
                 database.computeRadii(loopState);
 
-                // Push amount of structures
-                pushFilter = database.structures.size();
-
                 // Stability filtering - radius positivity
                 database.filterRadialPositivity(loopState);
+
+                // Stability filtering - radius limitation
+                database.filterRadialLimitation(loopState);
 
                 // Statistics computation on disparity
                 database.computeDisparityStatistics(loopState);
 
-                // Filtering processes
+                // Filtering on disparity
                 database.filterDisparity(loopState);
 
                 // Extarct error values
@@ -327,7 +328,7 @@ int main(int argc, char ** argv){
                 if (loopTrig==true) {
 
                     // Filtering process
-                    database.filterRadialLimitation(loopState);
+                    //database.filterRadialLimitation(loopState);
 
                     // Optimisation end condition
                     if((database.structures.size()==pushFilter)||(loopMinor>DB_LOOP_MAXITER)){
