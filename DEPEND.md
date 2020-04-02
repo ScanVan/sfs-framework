@@ -1,6 +1,19 @@
 ## External dependencies installation
 
-The following section gives the installation instruction for the external dependencies for the supported platforms.
+The following sections give the installation instructions for the required distribution packages and external dependencies for the supported platforms.
+
+## Required distribution packages
+
+### Ubuntu 16.04 LTS
+
+Required distribution packages installation :
+
+```
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install build-essential cmake libeigen3-dev
+
+```
 
 ## OpenCV 4.0.1
 
