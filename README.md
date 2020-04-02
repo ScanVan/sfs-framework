@@ -12,15 +12,11 @@ The _EPFL_ team realized the theoretical design of the camera and defined a new 
 
 Summary of the _ScanVan Project_ codes :
 
-    [Camera calibration](https://github.com/ScanVan/Calibration-CPP)
-
-    [Camera images acquisition](https://github.com/ScanVan/CameraImageAcquisition-CPP)
-
-    [Camera images debayering](https://github.com/ScanVan/ConvertRawToBmp)
-
-    [Panoramic image computation](https://github.com/ScanVan/Equirectangular-CPP)
-
-    [Structure from spheres pipeline](https://github.com/ScanVan/sfs-framework)
+* [Camera calibration](https://github.com/ScanVan/Calibration-CPP)
+* [Camera images acquisition](https://github.com/ScanVan/CameraImageAcquisition-CPP)
+* [Camera images debayering](https://github.com/ScanVan/ConvertRawToBmp)
+* [Panoramic image computation](https://github.com/ScanVan/Equirectangular-CPP)
+* [Structure from spheres pipeline](https://github.com/ScanVan/sfs-framework)
 
 These codes and the physical camera give access to a full city digitization pipeline.
 
