@@ -9,6 +9,8 @@ Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
 
 This program is licensed under the terms of the GNU GPLv3. Documentation and illustrations are licensed under the terms of the CC BY 4.0.
 
+See [COPYRIGHT](COPYRIGHT.md) file for third parties redistribution.
+
 # Dependencies
 
 The _sfs-framework_ is developed on Ubuntu 16.40 LTS and comes with the following package dependencies :
@@ -22,7 +24,7 @@ and the following external dependencies :
 * opencv 4.0.1 ([Instructions](EXTERNAL.md))
 * yaml-cpp 0.6.3 ([Instructions](EXTERNAL.md))
 
-The code documentation is built using doxygen. See [COPYRIGHT](COPYRIGHT.md) file for third parties redistribution.
+The code documentation is built using doxygen.
 
 # Usage
 
