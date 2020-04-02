@@ -15,12 +15,50 @@ Summary of the _ScanVan Project_ codes :
 * [Camera calibration](https://github.com/ScanVan/Calibration-CPP)
 * [Camera images acquisition](https://github.com/ScanVan/CameraImageAcquisition-CPP)
 * [Camera images debayering](https://github.com/ScanVan/ConvertRawToBmp)
-* [Panoramic image computation](https://github.com/ScanVan/Equirectangular-CPP)
+* [Panoramic images computation](https://github.com/ScanVan/Equirectangular-CPP)
 * [Structure from spheres pipeline](https://github.com/ScanVan/sfs-framework)
 
 These codes and the physical camera give access to a full city digitization pipeline. Other codes were implemented during the research phase and can be found [here](https://github.com/ScanVan).
 
 # Structure from Spheres
+
+_Camera and image presentation_ ...
+
+<br />
+<p align="center">
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/20200220-155121-476244.jpg?raw=true" width="384">
+&nbsp;
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/20200220-155121-726279.jpg?raw=true" width="384">
+<br />
+<i>Example of central spherical camera images sequence</i>
+</p>
+<br />
+
+_Sparse model computation explanation _ ...
+
+<br />
+<p align="center">
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/sparse-1.png?raw=true" width="384">
+&nbsp;
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/sparse-2.png?raw=true" width="384">
+<br />
+<i>Example of sparse model obtain with a 20 image sequence</i>
+</p>
+<br />
+
+_Dense model computation explanation_ ...
+
+<br />
+<p align="center">
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/dense-1.png?raw=true" width="384">
+&nbsp;
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/dense-2.png?raw=true" width="384">
+<br />
+<i>Example of sparse model obtain with a 20 image sequence</i>
+</p>
+<br />
+
+_Add link to a USAGE page giving the full usage instructions_
 
 # Copyright and License
 
