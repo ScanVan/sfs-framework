@@ -1,4 +1,4 @@
-## External dependencies installation
+## Packages and external dependencies installation
 
 The following sections give the installation instructions for the required distribution packages and external dependencies for the supported platforms.
 

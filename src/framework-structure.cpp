@@ -3,7 +3,7 @@
  *
  *      Nils Hamel - nils.hamel@bluewin.ch
  *      Charles Papon - charles.papon.90@gmail.com
- *      Copyright (c) 2019 DHLAB, EPFL & HES-SO Valais-Wallis
+ *      Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -187,28 +187,6 @@ void Structure::filterRadialPositivity(double clampValue){
     }
 
 }
-
-//bool Structure::filterRadiusClamp(double clampValue){
-//    std::vector<Feature*> unfiltered(features);
-//    unsigned int index(0);
-//    for(unsigned int i(0); i<unfiltered.size(); i++){
-//        auto radius = unfiltered[i]->getRadius();
-//        if(radius > 0){
-//            features[index++]=unfiltered[i];
-//        } else if(-radius > clampValue/2.0){
-//            features[index++]=unfiltered[i];
-//            unfiltered[i]->radius = clampValue*0.95;
-//        } else {
-//            unfiltered[i]->setStructurePtr(NULL);
-//        }
-//    }
-//    features.resize(index);
-//    if(index>=2){
-//        return true;
-//    }else{
-//        return false;
-//    }
-//}
 
 void Structure::filterRadialLimitation(double limitValue){
     unsigned int index(0);

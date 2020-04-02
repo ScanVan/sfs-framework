@@ -3,7 +3,7 @@
  *
  *      Nils Hamel - nils.hamel@bluewin.ch
  *      Charles Papon - charles.papon.90@gmail.com
- *      Copyright (c) 2019 DHLAB, EPFL & HES-SO Valais-Wallis
+ *      Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -114,35 +114,6 @@ void create_directories( std::string rootPath, std::string modeName ) {
         fs::create_directory( modePath.c_str() );
 
     }
-
-}
-
-void copy_result(std::string rootPath, std::string modeName, unsigned int lastMajor){
-    std::stringstream resultPath;
-    std::stringstream finalPath;
-
-    // Copy result
-    resultPath << rootPath << "/" << modeName << "/" << std::setfill('0') << std::setw(4) << lastMajor << "_position.xyz";
-    finalPath << rootPath << "/" << modeName << "_position.xyz";
-    fs::copy( resultPath.str(), finalPath.str() );
-
-    // Clear string
-    resultPath.clear();
-    finalPath.clear();
-
-    // Copy result
-    resultPath << rootPath << "/" << modeName << "/" << std::setfill('0') << std::setw(4) << lastMajor << "_structure.xyz";
-    finalPath << rootPath << "/" << modeName << "_structure.xyz";
-    fs::copy( resultPath.str(), finalPath.str() );
-
-    // Clear string
-    resultPath.clear();
-    finalPath.clear();
-
-    // Copy result
-    resultPath << rootPath << "/" << modeName << "/" << std::setfill('0') << std::setw(4) << lastMajor << "_transformation.dat";
-    finalPath << rootPath << "/" << modeName << "_transformation.dat";
-    fs::copy( resultPath.str(), finalPath.str() );
 
 }
 

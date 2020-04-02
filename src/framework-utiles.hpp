@@ -3,7 +3,7 @@
  *
  *      Nils Hamel - nils.hamel@bluewin.ch
  *      Charles Papon - charles.papon.90@gmail.com
- *      Copyright (c) 2019 DHLAB, EPFL & HES-SO Valais-Wallis
+ *      Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #pragma once
 
+// External includes
 #include <Eigen/Core>
 #include <string>
 #include <time.h>
@@ -33,12 +34,10 @@
 #include <sstream>
 #include <iomanip>
 
+// Namespaces
 namespace fs = std::experimental::filesystem;
 
-Eigen::Vector3d convertCartesian2Spherical (double x, double y, int width, int height);
-void profile(std::string msg);
-
-//ThreadPool threadPool(8);
+// Module object
 template <typename T> class BlockingQueue{
 	std::mutex pushMutex, popMutex, queueMutex;
 	std::condition_variable pushCond, popCond;
@@ -96,6 +95,7 @@ public:
 	}
 };
 
+// Module object
 template<typename T> std::pair<bool, int> findInVector(
         const std::vector<T> &vecOfElements, const T &element) {
     std::pair<bool, int> result;
@@ -114,14 +114,14 @@ template<typename T> std::pair<bool, int> findInVector(
     return result;
 }
 
+Eigen::Vector3d convertCartesian2Spherical (double x, double y, int width, int height);
+void profile(std::string msg);
 
 void exitRetain();
 void exitRelease();
-
 
 double bilinear_sample(double *p, double x, double y, int width);
 double bilinear_sample(float *p, double x, double y, int width);
 
 void create_directories( std::string rootPath, std::string modeName );
-void copy_result(std::string rootPath, std::string modeName, unsigned int lastMajor);
 

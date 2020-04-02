@@ -13,7 +13,7 @@ See [COPYRIGHT](COPYRIGHT.md) file for third parties redistribution.
 
 # Dependencies
 
-The _sfs-framework_ comes with the following package dependencies (Ubuntu 16.04 LTS, [Instruction](DEPEND.md)) :
+The _sfs-framework_ comes with the following package dependencies (Ubuntu 16.04 LTS, [Instructions](DEPEND.md)) :
 
 * build-essential
 * cmake

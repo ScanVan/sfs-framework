@@ -3,7 +3,7 @@
  *
  *      Nils Hamel - nils.hamel@bluewin.ch
  *      Charles Papon - charles.papon.90@gmail.com
- *      Copyright (c) 2019 DHLAB, EPFL & HES-SO Valais-Wallis
+ *      Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,15 +21,19 @@
 
 #pragma once
 
+// External includes
 #include <Eigen/Dense>
 #include <vector>
 #include <limits>
+
+// Internal includes
 #include "framework-feature.hpp"
 #include "framework-transform.hpp"
 #include "framework-viewpoint.hpp"
 
+// Module object
 class Structure {
-public:
+public: /* Need to be set back to private */
     Eigen::Vector3d position;
     std::vector<Feature*> features;
     Viewpoint *originalViewpoint; /* no more needed */

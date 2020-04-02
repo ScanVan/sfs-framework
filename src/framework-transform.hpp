@@ -3,7 +3,7 @@
  *
  *      Nils Hamel - nils.hamel@bluewin.ch
  *      Charles Papon - charles.papon.90@gmail.com
- *      Copyright (c) 2019 DHLAB, EPFL & HES-SO Valais-Wallis
+ *      Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,12 +21,15 @@
 
 #pragma once
 
+// External includes
 #include <Eigen/Dense>
+
+// Internal includes
 #include "framework-viewpoint.hpp"
 
+// Module object
 class Transform {
-//private:
-public:
+public: /* Need to be set back to private */
     Eigen::Matrix3d correlation;
     Eigen::Matrix3d rotation;
     Eigen::Vector3d translation;

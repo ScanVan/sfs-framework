@@ -3,7 +3,7 @@
  *
  *      Nils Hamel - nils.hamel@bluewin.ch
  *      Charles Papon - charles.papon.90@gmail.com
- *      Copyright (c) 2019 DHLAB, EPFL & HES-SO Valais-Wallis
+ *      Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,15 +21,20 @@
 
 #pragma once
 
+// External includes
 #include <Eigen/Core>
-#include "framework-utiles.hpp"
-#include <opencv2/core.hpp>
+#include <opencv4/opencv2/core.hpp>
 
+// Internal includes
+#include "framework-utiles.hpp"
+
+// External objects
 class Viewpoint;
 class Structure;
 
+// Module object
 class Feature{
-public:
+public: /* Need to be set back to private */
 	Viewpoint *viewpoint;
 	Structure *structure;
 	Eigen::Vector2f position;

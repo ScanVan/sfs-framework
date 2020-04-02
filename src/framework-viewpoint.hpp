@@ -3,7 +3,7 @@
  *
  *      Nils Hamel - nils.hamel@bluewin.ch
  *      Charles Papon - charles.papon.90@gmail.com
- *      Copyright (c) 2019 DHLAB, EPFL & HES-SO Valais-Wallis
+ *      Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #pragma once
 
+// External includes
 #include <string>
 #include <Eigen/Dense>
 #include <opencv4/opencv2/core/types.hpp>
@@ -28,10 +29,13 @@
 #include <opencv4/opencv2/features2d.hpp>
 #include <opencv4/opencv2/imgcodecs.hpp>
 #include <opencv4/opencv2/opencv.hpp>
+
+// Internal includes
 #include "framework-feature.hpp"
 
+// Module object
 class Viewpoint {
-public:
+public: /* Need to be set back to private */
     std::string uid;
     int index; /* changing to long ? */
 	cv::Mat image;
