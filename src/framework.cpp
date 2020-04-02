@@ -312,31 +312,26 @@ int main(int argc, char ** argv){
                 //database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor);
                 // development feature - end
 
-                // Optimisation step condition
-                loopTrig=false;
-                if((database.getCheckError(loopPError, pushPError)) && (database.getCheckError(loopDError, pushDError))){
-                    loopTrig=true;
-                }
-                if(loopMinor>DB_LOOP_MAXITER){
-                    loopTrig=true;
-                }
-                if(loopState==DB_MODE_MASS){
-                    loopTrig=true;
-                }
+                // Detect optimisation condition check requirement
+                if(database.structures.size()==pushFilter){
 
-                // Check step condition
-                if (loopTrig==true) {
-
-                    // Filtering process
-                    //database.filterRadialLimitation(loopState);
-
-                    // Optimisation end condition
-                    if((database.structures.size()==pushFilter)||(loopMinor>DB_LOOP_MAXITER)){
-                        loopFlag = false;
+                    // Apply optimisation condition
+                    if(loopMinor>DB_LOOP_MAXITER){
+                        // Iterations limit
+                        loopFlag=false;
+                    }else
+                    if(loopState==DB_MODE_MASS){
+                        // Specific mode
+                        loopFlag=false;
+                    }else
+                    if(database.getCheckError(loopDError, pushDError)&&(database.getCheckError(loopPError, pushPError))){
+                        // Convergence reached
+                        loopFlag=false;
                     }
 
                 }
 
+                // Push error values
                 pushPError = loopPError;
                 pushDError = loopDError;
 

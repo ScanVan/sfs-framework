@@ -41,7 +41,7 @@
 namespace fs = std::experimental::filesystem;
 
 // Optimisation algorithm maximum iteration per cycle
-#define DB_LOOP_MAXITER    ( 5000 )
+#define DB_LOOP_MAXITER    ( 1024 )
 
 // Minimal number of viewpoints required to start optimisation algorithm
 #define DB_LOOP_BOOT_COUNT ( 3 )

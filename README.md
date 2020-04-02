@@ -54,7 +54,7 @@ _Dense model computation explanation_ ...
 &nbsp;
 <img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/dense-2.png?raw=true" width="384">
 <br />
-<i>Example of sparse model obtain with a 20 image sequence</i>
+<i>Example of dense model obtain with a 20 image sequence</i>
 </p>
 <br />
 
