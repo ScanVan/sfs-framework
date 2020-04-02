@@ -18,7 +18,7 @@ Summary of the _ScanVan Project_ codes :
 * [Panoramic image computation](https://github.com/ScanVan/Equirectangular-CPP)
 * [Structure from spheres pipeline](https://github.com/ScanVan/sfs-framework)
 
-These codes and the physical camera give access to a full city digitization pipeline.
+These codes and the physical camera give access to a full city digitization pipeline. Other codes were implemented during the research phase and can be found [here](https://github.com/ScanVan).
 
 # Structure from Spheres
 
