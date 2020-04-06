@@ -22,7 +22,7 @@ These codes and the physical camera give access to a full city digitization pipe
 
 # Structure from Spheres
 
-_Camera and image presentation_ ...
+To illustrate the pipeline results, the following spherical image are used. They are produced by the spherical central camera built during the _ScanVan Project_ that is able to produce _true_ spherical images. The following images shows example of such images in equirectangular projection :
 
 <br />
 <p align="center">
@@ -34,7 +34,11 @@ _Camera and image presentation_ ...
 </p>
 <br />
 
-_Sparse model computation explanation _ ...
+As the camera acquire almost everything surrounding it, it also capture part of itself and the vehicle on which it is mounted. This parts have been hidden on the previous images and replaced by extrapolated pixels.
+
+The pipeline starts by computing a sparse model using traditional features (_AKAZE_) in small amount. This allows to compute the odometry of the camera. In order to improve the performances, the pipeline assumes that the images are acquired in continuous sequence. It is also able to remove _duplicated images_ in order to take into account the effect of traffic and traffic lights during image acquisition.
+
+The following images gives an example of a computed odometry and its sparse model on a small sequence of images :
 
 <br />
 <p align="center">
@@ -46,7 +50,9 @@ _Sparse model computation explanation _ ...
 </p>
 <br />
 
-_Dense model computation explanation_ ...
+The blue dots are associated to the computed camera position while the other points are colored according to the quality of the constraint that led to their placement in the 3D space.
+
+Based on the computed odometry, the pipeline is able to produce dense model using _optical flow_ to derive dense matching between the connected images. As the odometry is known, this allows to place the dense matches in the 3D space with limited computation. The following images gives an illustration of the obtained result on the previous example :
 
 <br />
 <p align="center">
@@ -58,7 +64,9 @@ _Dense model computation explanation_ ...
 </p>
 <br />
 
-_Add link to a USAGE page giving the full usage instructions_
+The color are assigned in the same way as for the sparse model.
+
+The _following page (in preparation)_ gives you the detailed instructions to use the pipeline on a set of spherical images.
 
 # Copyright and License
 
