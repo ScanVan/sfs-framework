@@ -42,28 +42,58 @@ bool Database::getBootstrap(){
 
 }
 
-double Database::getPError(){
+bool Database::getError(int loopState, int loopMajor, int loopMinor){
 
-    // Return displacement vector norm
-    return (*viewpoints.back()->getPosition()-*viewpoints.front()->getPosition()).norm();
+    /* iteration end condition flag */
+    bool returnValue(true);
 
-}
-
-double Database::getDError(){
-
-    // Return maximum disparity value
-    return maxValue;
-
-}
-
-bool Database::getCheckError( double const currentError, double const lastError ) {
-
-    // Apply stop condition on the provided error
-    if(fabs(currentError-lastError)<configError){
-        return true;
-    }else{
-        return false;
+    /* specific condition */
+    if(loopMinor>DB_LOOP_MAXITER){
+        returnValue=false;
     }
+
+    /* specific condition */
+    if(loopState==DB_MODE_MASS){
+        returnValue=false;
+    }
+
+    /* error on translation */
+    static double pushError(-1.);
+    double maxError(0.);
+
+    int tstart=(0);
+
+    if(loopState==DB_MODE_LAST){
+        tstart=transforms.size()-1;
+    }
+
+    for(int i(tstart); i< transforms.size(); i++){
+        if(transforms[i]->getError()>maxError){
+            maxError=transforms[i]->getError();
+        }
+    }
+    maxError=0.;
+
+    /* error on disparity */
+    static double pushError2(-1.);
+    double maxError2(0.);
+    maxError2=maxValue;
+
+    //if(maxError<configError) return false; else return true;
+    if (
+        (std::fabs(maxError-pushError)<configError) &&
+        (std::fabs(maxError2-pushError2)<configError)
+    ) returnValue=false;
+
+    /* display information on iteration */
+    std::cout << "step : " << std::setw(6) << loopMajor << " | iter : " << loopMinor << " | state " << loopState << " | error : (" << maxError << ", " << maxError2 << ")" << std::endl;
+
+    /* pushing errors */
+    pushError=maxError;
+    pushError2=maxError2;
+
+    /* send answser */
+    return returnValue;
 
 }
 
@@ -419,6 +449,7 @@ void Database::computeNormalisePoses(int loopState){
         transformMean+=transforms[i]->getTranslation()->norm();
     }
     transformMean/=double(transformRange); 
+    //transformMean=transforms[0]->getTranslation()->norm();
 
     // Renormalise translation
     # pragma omp parallel for schedule(dynamic)
@@ -767,6 +798,75 @@ void Database::filterDisparity(int loopState){
 
     // development feature - begin
     std::cerr << "D:D : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
+    // development feature - end
+
+    // resize structure vector
+    if(index<structures.size()){
+        structures.resize(index);
+    }
+
+    // Update type-range
+    sortStructTypeA=trackA;
+    sortStructTypeB=trackB;
+
+}
+
+void Database::filterAmplitude(int loopState){
+
+    // Differential indexation
+    unsigned int index(0);
+
+    // Type-range tracking
+    unsigned int trackA(sortStructTypeA);
+    unsigned int trackB(sortStructTypeB);
+
+    // Active structure range
+    unsigned int structureRange(structures.size());
+
+    // check pipeline state
+    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){
+
+        // Update structure range
+        structureRange=sortStructTypeA+sortStructTypeB;
+        
+    }
+
+    // Compute filtering condition
+    # pragma omp parallel for schedule(dynamic)
+    for(unsigned int i=0; i<structureRange; i++){
+
+        // Filter structure
+        structures[i]->filterAmplitude(1.1);
+
+    }
+
+    // Filtering loop
+    for(unsigned int i(0); i<structures.size(); i++){
+
+        // Check filter flag and passthrough range
+        if((i<structureRange)&&(structures[i]->getFiltered()==false)){
+
+            // Track type-range
+            if(i<sortStructTypeA){
+                trackA --;
+            }else if(i<(sortStructTypeA+sortStructTypeB)){
+                trackB --;
+            }
+
+        } else {
+
+            // Check differential index - move structure
+            if(index!=i) structures[index]=structures[i];
+
+            // Update index
+            index ++;
+
+        }
+
+    }
+
+    // development feature - begin
+    std::cerr << "A:A : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
     // development feature - end
 
     // resize structure vector

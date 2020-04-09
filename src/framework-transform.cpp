@@ -21,6 +21,10 @@
 
 #include "framework-transform.hpp"
 
+double Transform::getError(){
+    return (push-translation).norm();
+}
+
 Eigen::Matrix3d * Transform::getRotation(){
     return &rotation;
 }
@@ -66,6 +70,7 @@ void Transform::computeCentroid(){
 
 void Transform::computePose(){
     Eigen::JacobiSVD<Eigen::Matrix3d> svd(correlation, Eigen::ComputeFullU | Eigen::ComputeFullV);
+prot=rotation;
     rotation=svd.matrixV()*svd.matrixU().transpose();
     if (rotation.determinant()<0){
         std::cerr << "SVD fault" << std::endl;
@@ -75,6 +80,7 @@ void Transform::computePose(){
         correctV(2,2)=-correctV(2,2);
         rotation=correctV*svd.matrixU().transpose();
     }
+push=translation;
     translation=centerSecond-rotation*centerFirst;
 }
 

@@ -88,19 +88,13 @@ int main(int argc, char ** argv){
     Frontend * frontend(nullptr);
 
     // Pipeline iterations
-    int loopMajor(1);
+    int loopMajor(DB_LOOP_BOOT_COUNT);
     int loopMinor(0);
 
     // Algorithm loop
     bool loopFlag(true);
     bool loopTrig(false);
     long loopState(DB_MODE_NULL);
-
-    // Algorithm error
-    double loopPError(1.);
-    double pushPError(0.);
-    double loopDError(1.);
-    double pushDError(0.);
 
     // Algorithm filtering
     unsigned int pushFilter(0);
@@ -255,10 +249,6 @@ int main(int argc, char ** argv){
         // Algorithm state loop
         while ( loopFlag == true ) {
 
-            // reset algorithm
-            pushPError=-1.;
-            pushDError=-1.;
-
             // algorithm optimisation loop
             while ( loopFlag == true ) {
 
@@ -288,57 +278,24 @@ int main(int argc, char ** argv){
                 // Filtering on disparity
                 database.filterDisparity(loopState);
 
-                // Extarct error values
-                loopPError = database.getPError();
-                loopDError = database.getDError();
-
                 // development feature - begin
-                if(std::isnan(loopPError)){
-                    std::cerr<<"Crash on NaN"<<std::endl; exit(1);
-                }
-                if(std::isnan(loopDError)){
-                    std::cerr<<"Crash on NaN"<<std::endl; exit(1);
-                }
+                //if(std::isnan(loopPError)){
+                //    std::cerr<<"Crash on NaN"<<std::endl; exit(1);
+                //}
+                //if(std::isnan(loopDError)){
+                //    std::cerr<<"Crash on NaN"<<std::endl; exit(1);
+                //}
                 // development feature - end
 
-                // Display information
-                std::cout << "step : " << std::setw(6) << loopMajor << " | iter : " << loopMinor << " | state " << loopState << " | error : (" << loopPError << ", " << loopDError << ")" << std::endl;
-
-                // development feature - begin
-                //database._sanityCheckStructure();
-                // development feature - end
-
-                // development feature - begin
-                //database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor);
-                // development feature - end
-
-                // Detect optimisation condition check requirement
-                if(database.structures.size()==pushFilter){
-
-                    // Apply optimisation condition
-                    if(loopMinor>DB_LOOP_MAXITER){
-                        // Iterations limit
-                        loopFlag=false;
-                    }else
-                    if(loopState==DB_MODE_MASS){
-                        // Specific mode
-                        loopFlag=false;
-                    }else
-                    if(database.getCheckError(loopDError, pushDError)&&(database.getCheckError(loopPError, pushPError))){
-                        // Convergence reached
-                        loopFlag=false;
-                    }
-
-                }
-
-                // Push error values
-                pushPError = loopPError;
-                pushDError = loopDError;
+                /* iteration end condition */
+                loopFlag=database.getError(loopState, loopMajor, loopMinor);
 
                 // Update minor iterator
                 loopMinor ++;
 
             }
+
+            //database.filterAmplitude(loopState);
 
             // State loop management
             if((loopState==DB_MODE_BOOT)||(loopState==DB_MODE_FULL)){
@@ -350,10 +307,10 @@ int main(int argc, char ** argv){
             if (loopState==DB_MODE_LAST){
 
                 // Update loop mode
-                loopState=DB_MODE_FULL;
+                //loopState=DB_MODE_FULL;
 
                 // Continue optimisation
-                loopFlag=true;
+                //loopFlag=true;
 
             }
 

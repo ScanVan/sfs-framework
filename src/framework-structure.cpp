@@ -230,3 +230,38 @@ void Structure::filterDisparity(double limitValue){
     }
 }
 
+void Structure::filterAmplitude(double limitFactor){
+    unsigned int index(0);
+    double minCandidate(0.);
+    double minDistance(1e9);
+    if(features.size()<=5){
+        filtered=true;
+    }else{
+        for(auto & feature: features){
+            minCandidate=(position-*(feature->getViewpoint()->getPosition())).norm();
+            if(minCandidate<minDistance){
+                minDistance=minCandidate;
+            }
+        }
+        minDistance=limitFactor*minDistance;
+        for(unsigned int i(0); i<features.size(); i++){
+            minCandidate=(position-*(features[i]->getViewpoint()->getPosition())).norm();
+            if(minCandidate>minDistance){
+                features[i]->setStructurePtr(NULL);
+            }else{
+                if(index!=i) features[index]=features[i];
+                index ++;
+            }
+        }
+        if(index<features.size()){
+            features.resize(index);
+        }
+        if(index<2){
+            filtered=false;
+            setFeaturesState();
+        }else{
+            filtered=true;
+        }
+    }
+}
+

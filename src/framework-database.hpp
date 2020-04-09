@@ -76,9 +76,7 @@ public: /* Need to be set back to private */
 public:
     Database(double initialError, double initialDisparity, double initialRadius, unsigned int initialMatchRange);
     bool getBootstrap();
-    double getPError();
-    double getDError();
-    bool getCheckError( double const currentError, double const lastError );
+    bool getError(int loopState, int loopMajor, int loopMinor);
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
@@ -97,6 +95,9 @@ public:
     void filterRadialPositivity(int loopState);
     void filterRadialLimitation(int loopState);
     void filterDisparity(int loopState);
+
+    void filterAmplitude(int loopState);
+
     void exportStructure(std::string path, std::string mode, unsigned int major);
     void exportPosition(std::string path, std::string mode, unsigned int major);
     void exportTransformation(std::string path, std::string mode, unsigned int major);
