@@ -81,13 +81,14 @@ See [COPYRIGHT](COPYRIGHT.md) file for third parties redistribution.
 
 # Dependencies
 
-The _sfs-framework_ comes with the following package dependencies (Ubuntu 16.04 LTS, [Instructions](DEPEND.md)) :
+The _sfs-framework_ comes with the following package (Ubuntu 16.04 LTS) dependencies ([Instructions](DEPEND.md)) :
+
 
 * build-essential
 * cmake
 * libeigen3-dev
 
-and the following external dependencies (Ubuntu 16.04 LTS, [Instructions](DEPEND.md)) :
+and the following external dependencies ([Instructions](DEPEND.md)) :
 
 * opencv 4.0.1 
 * yaml-cpp 0.6.3
