@@ -22,7 +22,7 @@ Summary of the _ScanVan Project_ codes :
 
 These codes and the physical camera give access to a full city digitization pipeline. Other codes were implemented during the research phase and can be found [here](https://github.com/ScanVan).
 
-# Structure from Spheres
+# sfs-framework
 
 To illustrate the pipeline results, the following spherical image are used. They are produced by the spherical central camera built during the _ScanVan Project_ that is able to produce _true_ spherical images. The following images shows example of such images in equirectangular projection :
 
