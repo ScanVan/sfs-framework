@@ -66,15 +66,16 @@ public: /* Need to be set back to private */
     unsigned int sortStructTypeB;
     double transformMean;
     double configError;
-    double configDisparity;
+    double configErrorDisparity;
     double configRadius;
+    double configDenseDisparity;
     unsigned int configMatchRange;
     double meanValue;
     double stdValue;
     double maxValue;
 
 public:
-    Database(double initialError, double initialDisparity, double initialRadius, unsigned int initialMatchRange);
+    Database(double initialError, double initialErrorDisparity, double initialRadius, double initialDenseDisparity, unsigned int initialMatchRange);
     bool getBootstrap();
     bool getError(int loopState, int loopMajor, int loopMinor);
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);

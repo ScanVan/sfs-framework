@@ -21,12 +21,13 @@
 
 #include "framework-database.hpp"
 
-Database::Database(double initialError, double initialDisparity, double initialRadius, unsigned int initialMatchRange){
+Database::Database(double initialError, double initialErrorDisparity, double initialRadius, double initialDenseDisparity, unsigned int initialMatchRange){
 
     // Assign default parameters
     configError=initialError;
-    configDisparity=initialDisparity;
+    configErrorDisparity=initialErrorDisparity;
     configRadius=initialRadius;
+    configDenseDisparity=initialDenseDisparity;
     configMatchRange=initialMatchRange;
 
 }
@@ -34,11 +35,7 @@ Database::Database(double initialError, double initialDisparity, double initialR
 bool Database::getBootstrap(){
     
     // Check bootstrap condition
-    if(viewpoints.size()<DB_LOOP_BOOT_COUNT){
-        return true;
-    }else{
-        return false;
-    }
+    return (viewpoints.size()<DB_LOOP_BOOT_COUNT) ? true : false;
 
 }
 
@@ -694,7 +691,8 @@ void Database::filterDisparity(int loopState){
     // Active structure range
     unsigned int structureRange(structures.size());
 
-    double thresholdValue(stdValue*configDisparity);
+    // Filtering threshold value
+    double thresholdValue(stdValue*configErrorDisparity);
 
     // check pipeline state
     if(loopState==DB_MODE_LAST){
@@ -708,7 +706,8 @@ void Database::filterDisparity(int loopState){
         // Update structure range
         structureRange=sortStructTypeA+sortStructTypeB;
 
-        thresholdValue=(4.*3.1415926535)/6016.;
+        // Compute threshold value
+        thresholdValue=(2.*M_PI)*configDenseDisparity;
 
     }
 

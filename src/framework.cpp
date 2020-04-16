@@ -65,8 +65,10 @@ int main(int argc, char ** argv){
 
     // Instance of main yaml section
     YAML::Node yamlFrontend  = yamlConfig["frontend"];
+    YAML::Node yamlFeatures  = yamlConfig["features"]; // To add
     YAML::Node yamlMatching  = yamlConfig["matching"];
     YAML::Node yamlAlgorithm = yamlConfig["algorithm"];
+    YAML::Node yamlDense     = yamlConfig["dense"];
     YAML::Node yamlExport    = yamlConfig["export"];
 
     //
@@ -78,6 +80,7 @@ int main(int argc, char ** argv){
         yamlAlgorithm["error"].as<double>(),
         yamlAlgorithm["disparity"].as<double>(),
         yamlAlgorithm["radius"].as<double>(),
+        yamlDense["disparity"].as<double>(),
         yamlMatching["range"].as<unsigned int>()
     );
 
@@ -106,7 +109,7 @@ int main(int argc, char ** argv){
     //  Framework front-end
     //
 
-    // Switch on front-end : odometry (IMAGE), densification (DENSE), synthetic model (CLOUDPOINT)
+    // Switch on front-end : odometry (IMAGE), densification (DENSE)
     if(yamlFrontend["type"].as<std::string>() == "sparse"){
 
         // Detect image list boundary
