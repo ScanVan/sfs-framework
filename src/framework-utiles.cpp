@@ -115,5 +115,8 @@ void create_directories( std::string rootPath, std::string modeName ) {
 
     }
 
+    // Create debug
+    fs::create_directory( rootPath + "/debug" );
+
 }
 

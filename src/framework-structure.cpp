@@ -166,32 +166,10 @@ void Structure::computeDisparityMax(double * const maxValue){
     }
 }
 
-void Structure::filterRadialPositivity(double clampValue){
+void Structure::filterRadialRange(double lowClamp, double highClamp){
     unsigned int index(0);
     for(unsigned int i(0); i<features.size(); i++){
-        if(features[i]->getRadius()<clampValue){
-            features[i]->setStructurePtr(NULL);
-        }else{
-            if(index!=i) features[index]=features[i];
-            index ++;
-        }
-    }
-    if(index<features.size()){
-        features.resize(index);
-    }
-    if(index<2){
-        filtered=false;
-        setFeaturesState();
-    }else{
-        filtered=true;
-    }
-
-}
-
-void Structure::filterRadialLimitation(double limitValue){
-    unsigned int index(0);
-    for(unsigned int i(0); i<features.size(); i++){
-        if(features[i]->getRadius()>limitValue){
+        if((features[i]->getRadius()<lowClamp)||(features[i]->getRadius()>highClamp)){
             features[i]->setStructurePtr(NULL);
         }else{
             if(index!=i) features[index]=features[i];
@@ -229,39 +207,3 @@ void Structure::filterDisparity(double limitValue){
         filtered=true;
     }
 }
-
-void Structure::filterAmplitude(double limitFactor){
-    unsigned int index(0);
-    double minCandidate(0.);
-    double minDistance(1e9);
-    if(features.size()<=5){
-        filtered=true;
-    }else{
-        for(auto & feature: features){
-            minCandidate=(position-*(feature->getViewpoint()->getPosition())).norm();
-            if(minCandidate<minDistance){
-                minDistance=minCandidate;
-            }
-        }
-        minDistance=limitFactor*minDistance;
-        for(unsigned int i(0); i<features.size(); i++){
-            minCandidate=(position-*(features[i]->getViewpoint()->getPosition())).norm();
-            if(minCandidate>minDistance){
-                features[i]->setStructurePtr(NULL);
-            }else{
-                if(index!=i) features[index]=features[i];
-                index ++;
-            }
-        }
-        if(index<features.size()){
-            features.resize(index);
-        }
-        if(index<2){
-            filtered=false;
-            setFeaturesState();
-        }else{
-            filtered=true;
-        }
-    }
-}
-

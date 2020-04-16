@@ -92,12 +92,8 @@ public:
     void computeOptimals(long loopState);
     void computeRadii(long loopState);
     void computeDisparityStatistics(long loopState);
-    void filterRadialPositivity(int loopState);
-    void filterRadialLimitation(int loopState);
+    void filterRadialRange(int loopState);
     void filterDisparity(int loopState);
-
-    void filterAmplitude(int loopState);
-
     void exportStructure(std::string path, std::string mode, unsigned int major);
     void exportPosition(std::string path, std::string mode, unsigned int major);
     void exportTransformation(std::string path, std::string mode, unsigned int major);
@@ -111,6 +107,7 @@ public:
     void _sanityCheckFeatureOrder();
     void _exportState(std::string path,int major, int iter); /* need deletion */
     void _exportMatchDistribution(std::string path, unsigned int major, std::string type); /* need deletion */
+    void _exportStructureModel(std::string path, unsigned int major);
 
 };
 

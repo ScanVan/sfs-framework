@@ -93,7 +93,7 @@ and the following external dependencies ([Instructions](DEPEND.md)) :
 * opencv 4.0.1 
 * yaml-cpp 0.6.3
 
-The code documentation is built using doxygen.
+The code documentation is built using Doxygen.
 
 # Compilation
 

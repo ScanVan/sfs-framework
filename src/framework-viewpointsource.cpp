@@ -46,7 +46,7 @@ ViewPointSourceFs::ViewPointSourceFs(std::string imageFolder, std::string firstI
         if((imageExtension==".bmp")||(imageExtension==".jpg")||(imageExtension==".png")||(imageExtension==".tif")){
 
             /* Display pushed file name */
-            std::cout << "Pusing image " << entry.path().filename() << " ..." << std::endl;
+            std::cout << "Pushing image " << entry.path().filename() << " ..." << std::endl;
 
             /* Push image in the list */
             files.push_back(entry.path().u8string());
@@ -168,7 +168,7 @@ ViewPointSourceWithOdometry::ViewPointSourceWithOdometry(std::string imageFolder
         if(transformationStream >> importTransformation.fileName) {
 
             /* Display imported file name */
-            std::cout << "Pusing image " << importTransformation.fileName << " ..." << std::endl;
+            std::cout << "Pushing image " << importTransformation.fileName << " ..." << std::endl;
 
             /* Import position */
             transformationStream >> importTransformation.position(0);

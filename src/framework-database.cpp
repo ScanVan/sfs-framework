@@ -44,6 +44,21 @@ bool Database::getBootstrap(){
 
 bool Database::getError(int loopState, int loopMajor, int loopMinor){
 
+    /* memory of error on transformation */
+    static double pushtError(-1.);
+
+    /* memory of error on disparity */
+    static double pushdError(-1.);
+
+    /* error on transformation */
+    double tError(0.);
+
+    /* error on disparity */
+    double dError(0.);
+
+    // Active transformation range
+    unsigned int transformStart(0);
+    
     /* iteration end condition flag */
     bool returnValue(true);
 
@@ -57,40 +72,45 @@ bool Database::getError(int loopState, int loopMajor, int loopMinor){
         returnValue=false;
     }
 
-    /* error on translation */
-    static double pushError(-1.);
-    double maxError(0.);
-
-    int tstart=(0);
-
+    // Check pipeline state
     if(loopState==DB_MODE_LAST){
-        tstart=transforms.size()-1;
+        
+        // Update active transformation start index
+        transformStart=transforms.size()-1;
+
     }
 
-    for(int i(tstart); i< transforms.size(); i++){
-        if(transforms[i]->getError()>maxError){
-            maxError=transforms[i]->getError();
+    // Detect maximum error on transformation
+    for(int i(transformStart); i< transforms.size(); i++){
+        if(transforms[i]->getError()>tError){
+            tError=transforms[i]->getError();
         }
     }
-    maxError=0.;
 
-    /* error on disparity */
-    static double pushError2(-1.);
-    double maxError2(0.);
-    maxError2=maxValue;
+    // Assign maximum disparity as error on disparity
+    dError=maxValue;
 
-    //if(maxError<configError) return false; else return true;
-    if (
-        (std::fabs(maxError-pushError)<configError) &&
-        (std::fabs(maxError2-pushError2)<configError)
-    ) returnValue=false;
+    // Apply error to deduce iterations stop condition
+    if ( (std::fabs(tError-pushtError)<configError) && (std::fabs(dError-pushdError)<configError) ) {
+    
+        // Error is stable enough to stop iterations
+        returnValue=false;
 
-    /* display information on iteration */
-    std::cout << "step : " << std::setw(6) << loopMajor << " | iter : " << loopMinor << " | state " << loopState << " | error : (" << maxError << ", " << maxError2 << ")" << std::endl;
+    }
+
+    /* display information on iterations and errors */
+    std::cout << "step : " << std::setw(6) << loopMajor 
+              << " | "
+              << "iter : " << loopMinor
+              << " | "
+              << "state " << loopState 
+              << " | "
+              << "error : (" << tError << ", " << dError << ")" 
+              << std::endl;
 
     /* pushing errors */
-    pushError=maxError;
-    pushError2=maxError2;
+    pushtError=tError;
+    pushdError=dError;
 
     /* send answser */
     return returnValue;
@@ -449,7 +469,6 @@ void Database::computeNormalisePoses(int loopState){
         transformMean+=transforms[i]->getTranslation()->norm();
     }
     transformMean/=double(transformRange); 
-    //transformMean=transforms[0]->getTranslation()->norm();
 
     // Renormalise translation
     # pragma omp parallel for schedule(dynamic)
@@ -594,7 +613,7 @@ void Database::computeDisparityStatistics(long loopState){
 
 }
 
-void Database::filterRadialPositivity(int loopState){
+void Database::filterRadialRange(int loopState){
 
     // Differential indexation
     unsigned int index(0);
@@ -619,7 +638,7 @@ void Database::filterRadialPositivity(int loopState){
     for(unsigned int i=0; i<structureRange; i++){
 
         // Filter structure
-        structures[i]->filterRadialPositivity(0.);
+        structures[i]->filterRadialRange(0.,25.);
 
     }
 
@@ -649,76 +668,7 @@ void Database::filterRadialPositivity(int loopState){
     }
 
     // development feature - begin
-    std::cerr << "R:P : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
-    // development feature - end
-
-    // resize structure vector
-    if(index<structures.size()){
-        structures.resize(index);
-    }
-
-    // Update type-range
-    sortStructTypeA=trackA;
-    sortStructTypeB=trackB;
-
-}
-
-void Database::filterRadialLimitation(int loopState){
-
-    // Differential indexation
-    unsigned int index(0);
-
-    // Type-range tracking
-    unsigned int trackA(sortStructTypeA);
-    unsigned int trackB(sortStructTypeB);
-
-    // Active structure range
-    unsigned int structureRange(structures.size());
-
-    // check pipeline state
-    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){
-
-        // Update structure range
-        structureRange=sortStructTypeA+sortStructTypeB;
-        
-    }
-
-    // Compute filtering condition
-    # pragma omp parallel for schedule(dynamic)
-    for(unsigned int i=0; i<structureRange; i++){
-
-        // Filter structure
-        structures[i]->filterRadialLimitation(50.);
-
-    }
-
-    // Filtering loop
-    for(unsigned int i(0); i<structures.size(); i++){
-
-        // Check filter flag and passthrough range
-        if((i<structureRange)&&(structures[i]->getFiltered()==false)){
-
-            // Track type-range
-            if(i<sortStructTypeA){
-                trackA --;
-            }else if(i<(sortStructTypeA+sortStructTypeB)){
-                trackB --;
-            }
-
-        } else {
-
-            // Check differential index - move structure
-            if(index!=i) structures[index]=structures[i];
-
-            // Update index
-            index ++;
-
-        }
-
-    }
-
-    // development feature - begin
-    std::cerr << "R:L : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
+    std::cerr << "F:R : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
     // development feature - end
 
     // resize structure vector
@@ -797,76 +747,7 @@ void Database::filterDisparity(int loopState){
     }
 
     // development feature - begin
-    std::cerr << "D:D : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
-    // development feature - end
-
-    // resize structure vector
-    if(index<structures.size()){
-        structures.resize(index);
-    }
-
-    // Update type-range
-    sortStructTypeA=trackA;
-    sortStructTypeB=trackB;
-
-}
-
-void Database::filterAmplitude(int loopState){
-
-    // Differential indexation
-    unsigned int index(0);
-
-    // Type-range tracking
-    unsigned int trackA(sortStructTypeA);
-    unsigned int trackB(sortStructTypeB);
-
-    // Active structure range
-    unsigned int structureRange(structures.size());
-
-    // check pipeline state
-    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){
-
-        // Update structure range
-        structureRange=sortStructTypeA+sortStructTypeB;
-        
-    }
-
-    // Compute filtering condition
-    # pragma omp parallel for schedule(dynamic)
-    for(unsigned int i=0; i<structureRange; i++){
-
-        // Filter structure
-        structures[i]->filterAmplitude(1.1);
-
-    }
-
-    // Filtering loop
-    for(unsigned int i(0); i<structures.size(); i++){
-
-        // Check filter flag and passthrough range
-        if((i<structureRange)&&(structures[i]->getFiltered()==false)){
-
-            // Track type-range
-            if(i<sortStructTypeA){
-                trackA --;
-            }else if(i<(sortStructTypeA+sortStructTypeB)){
-                trackB --;
-            }
-
-        } else {
-
-            // Check differential index - move structure
-            if(index!=i) structures[index]=structures[i];
-
-            // Update index
-            index ++;
-
-        }
-
-    }
-
-    // development feature - begin
-    std::cerr << "A:A : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
+    std::cerr << "F:D : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
     // development feature - end
 
     // resize structure vector
@@ -1166,6 +1047,68 @@ void Database::_exportMatchDistribution(std::string path, unsigned int major, st
             for(unsigned int j(0); j<element->features.size(); j++){
                 stream << element->features[i]->viewpoint->index+1 << " " << element->features[j]->viewpoint->index+1 << std::endl;
             }
+        }
+    }
+    stream.close();
+}
+
+void Database::_exportStructureModel(std::string path, unsigned int major){
+    if(viewpoints.size()<DB_LOOP_BOOT_COUNT){
+        return;
+    }
+    std::fstream stream;
+    stream.open( path + "/debug/" + std::to_string(major) + "_strucutre" + ".uv3", std::ios::out | std::ios::binary );
+    if(stream.is_open()==false){
+        std::cerr << "unable to create structure model file" << std::endl;
+    }
+
+    double pos[3] = { 0. };
+    unsigned char col[4] = { 2, 0, 0, 0 };
+    char * posp= (char *)pos;
+    char * colp= (char *)col;
+
+    for(int i(0); i<structures.size(); i++){
+
+        for(int j(0); j<structures[i]->features.size(); j++){
+
+            Eigen::Vector3d dir((structures[i]->features[j]->viewpoint->position)-(structures[i]->position));
+
+            pos[0]=structures[i]->position(0);
+            pos[1]=structures[i]->position(1);
+            pos[2]=structures[i]->position(2);
+            col[1]=64+structures[i]->features.size()*4;
+            col[2]=0;
+            col[3]=0;
+            stream.write(posp,3*sizeof(double));
+            stream.write(colp,4*sizeof(unsigned char));
+
+            pos[0]=structures[i]->position(0)+dir(0)*0.3;
+            pos[1]=structures[i]->position(1)+dir(1)*0.3;
+            pos[2]=structures[i]->position(2)+dir(2)*0.3;
+            col[1]=64+structures[i]->features.size()*4;
+            col[2]=0;
+            col[3]=0;
+            stream.write(posp,3*sizeof(double));
+            stream.write(colp,4*sizeof(unsigned char));
+
+            pos[0]=structures[i]->features[j]->viewpoint->position(0)-dir(0)*0.1;
+            pos[1]=structures[i]->features[j]->viewpoint->position(1)-dir(1)*0.1;
+            pos[2]=structures[i]->features[j]->viewpoint->position(2)-dir(2)*0.1;
+            col[1]=0;
+            col[2]=0;
+            col[3]=64+structures[i]->features.size()*4;
+            stream.write(posp,3*sizeof(double));
+            stream.write(colp,4*sizeof(unsigned char));
+
+            pos[0]=structures[i]->features[j]->viewpoint->position(0);
+            pos[1]=structures[i]->features[j]->viewpoint->position(1);
+            pos[2]=structures[i]->features[j]->viewpoint->position(2);
+            col[1]=0;
+            col[2]=0;
+            col[3]=64+structures[i]->features.size()*4;
+            stream.write(posp,3*sizeof(double));
+            stream.write(colp,4*sizeof(unsigned char));
+
         }
     }
     stream.close();

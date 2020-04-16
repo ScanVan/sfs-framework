@@ -62,12 +62,8 @@ public:
     unsigned int computeDisparityMean(double * const meanValue);
     void computeDisparityStd(double * const stdValue, double const meanValue);
     void computeDisparityMax(double * const maxValue);
-    void filterRadialPositivity(double clampValue);
-    void filterRadialLimitation(double limitValue);
+    void filterRadialRange(double lowClamp, double highClamp);
     void filterDisparity(double limitValue);
-
-    void filterAmplitude(double limitFactor);
-
     Viewpoint *getOriginalViewpoint() { return originalViewpoint; }
     std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */
 

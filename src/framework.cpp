@@ -216,7 +216,7 @@ int main(int argc, char ** argv){
                 for(auto viewpoint : database.viewpoints){
                     auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
                     auto folder = yamlExport["path"].as<std::string>() + "/viewpointStructuresImages";
-                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "a.png";
+                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "a.jpg";
                     fs::create_directories(folder);
                     cv::imwrite(path, image);
                 }
@@ -238,14 +238,6 @@ int main(int argc, char ** argv){
         loopFlag=true;
         loopMinor=0;
 
-        // development feature - begin
-        //database._exportMatchDistribution(yamlExport["path"].as<std::string>(),loopMajor,"front");
-        // development feature - end
-
-        // development feature - begin
-        //std::cerr << "Distribution " << database.sortStructTypeA << " " << database.sortStructTypeB << std::endl;
-        // development feature - end
-
         // Algorithm state loop
         while ( loopFlag == true ) {
 
@@ -266,26 +258,14 @@ int main(int argc, char ** argv){
                 database.computeOptimals(loopState);
                 database.computeRadii(loopState);
 
-                // Stability filtering - radius positivity
-                database.filterRadialPositivity(loopState);
-
-                // Stability filtering - radius limitation
-                database.filterRadialLimitation(loopState);
+                // Stability filtering - radial limitation
+                database.filterRadialRange(loopState);
 
                 // Statistics computation on disparity
                 database.computeDisparityStatistics(loopState);
 
                 // Filtering on disparity
                 database.filterDisparity(loopState);
-
-                // development feature - begin
-                //if(std::isnan(loopPError)){
-                //    std::cerr<<"Crash on NaN"<<std::endl; exit(1);
-                //}
-                //if(std::isnan(loopDError)){
-                //    std::cerr<<"Crash on NaN"<<std::endl; exit(1);
-                //}
-                // development feature - end
 
                 /* iteration end condition */
                 loopFlag=database.getError(loopState, loopMajor, loopMinor);
@@ -295,7 +275,9 @@ int main(int argc, char ** argv){
 
             }
 
-            //database.filterAmplitude(loopState);
+            // development feature - begin
+            database._exportStructureModel(yamlExport["path"].as<std::string>(),loopMajor);
+            // development feature - end
 
             // State loop management
             if((loopState==DB_MODE_BOOT)||(loopState==DB_MODE_FULL)){
@@ -307,10 +289,10 @@ int main(int argc, char ** argv){
             if (loopState==DB_MODE_LAST){
 
                 // Update loop mode
-                //loopState=DB_MODE_FULL;
+                loopState=DB_MODE_FULL;
 
                 // Continue optimisation
-                //loopFlag=true;
+                loopFlag=true;
 
             }
 
@@ -323,19 +305,12 @@ int main(int argc, char ** argv){
         bool allowDeallocateImages = true;
 
         if(yamlConfig["debug"].IsDefined()){
-            auto lastViewPointGui = yamlConfig["debug"]["lastViewPointGui"];
-            if(lastViewPointGui.IsDefined() && database.viewpoints.back()->getImage()->cols != 0){
-                database._displayViewpointStructures(database.viewpoints.back().get(), lastViewPointGui["structureSizeMin"].as<int>());
-                cv::waitKey(0); //Wait 100 ms give opencv the time to display the GUI
-            }
-
-
             if(yamlConfig["debug"]["structureImageDump"].IsDefined()){
                 allowDeallocateImages = false;
                 for(auto viewpoint : database.viewpoints){
                     auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
                     auto folder = yamlExport["path"].as<std::string>() + "/viewpointStructuresImages";
-                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "b.png";
+                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "b.jpg";
                     fs::create_directories(folder);
                     cv::imwrite(path, image);
                 }
