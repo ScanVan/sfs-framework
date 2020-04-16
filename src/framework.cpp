@@ -93,15 +93,7 @@ int main(int argc, char ** argv){
 
     // Algorithm loop
     bool loopFlag(true);
-    bool loopTrig(false);
     long loopState(DB_MODE_NULL);
-
-    // Algorithm filtering
-    unsigned int pushFilter(0);
-
-    // development feature - begin
-    bool inlinerEnabled = false;
-    // development feature - end
 
     //
     //  Framework exportation
@@ -171,19 +163,6 @@ int main(int argc, char ** argv){
         // Initialise algorithm state
         loopState = DB_MODE_MASS;
 
-    } else
-    if(yamlFrontend["type"].as<std::string>() == "CLOUDPOINT"){
-
-        auto fn = yamlFrontend;
-        frontend = new FrontendCloudpoint(
-                &database, fn["model"].as<std::string>(),
-                fn["odometry"].as<std::string>(),
-                fn["distanceMax"].as<double>(),
-                fn["badMatchRate"].as<double>(),
-                fn["baseNoise"].as<double>(),
-                fn["badMatchNoise"].as<double>());
-        inlinerEnabled = true;
-
     }
 
     //
@@ -198,10 +177,6 @@ int main(int argc, char ** argv){
             // drop the pushed image
             continue;
         }
-
-        // development feature - begin
-        database._sanityCheck(inlinerEnabled);
-        // development feature - end
 
         // Wait bootstrap image count
         if(database.getBootstrap()){
@@ -230,10 +205,6 @@ int main(int argc, char ** argv){
         // Prepare structure vector - type-based segment sort
         database.prepareStructure();
 
-        // development feature - begin
-        database._sanityCheckFeatureOrder();
-        // development feature - end
-
         // Reset algorithm loop
         loopFlag=true;
         loopMinor=0;
@@ -243,9 +214,6 @@ int main(int argc, char ** argv){
 
             // algorithm optimisation loop
             while ( loopFlag == true ) {
-
-                // Push amount of structures
-                pushFilter = database.structures.size();
 
                 // Algorithm core
                 database.computeModels(loopState);
@@ -299,14 +267,8 @@ int main(int argc, char ** argv){
         }
 
         // development feature - begin
-        database._sanityCheck(inlinerEnabled);
-        // development feature - end
-
-        bool allowDeallocateImages = true;
-
         if(yamlConfig["debug"].IsDefined()){
             if(yamlConfig["debug"]["structureImageDump"].IsDefined()){
-                allowDeallocateImages = false;
                 for(auto viewpoint : database.viewpoints){
                     auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
                     auto folder = yamlExport["path"].as<std::string>() + "/viewpointStructuresImages";
@@ -316,17 +278,15 @@ int main(int argc, char ** argv){
                 }
             }
         }
+        // development feature - end
 
-        // check viewpoint stack
+        // Need to be placed after features extraction, as an image is not needed from there
         if ( database.viewpoints.size() > database.configMatchRange ) {
+
             // release viewpoint image memory
             database.viewpoints[database.viewpoints.size()-database.configMatchRange]->releaseImage();
-        }
 
-        //if(allowDeallocateImages && database.viewpoints.size() >= 4) {
-            //database.viewpoints[database.viewpoints.size()-4]->getImage()->deallocate(); //TODO As currently we aren't using the image, we can just throw it aways to avoid memory overflow.
-            //database.viewpoints[database.viewpoints.size()-4]->releaseImage();
-        //}
+        }
 
         // Major iteration exportation : model, odometry and transformation
         database.exportStructure     (yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor);
