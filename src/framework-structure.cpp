@@ -128,7 +128,6 @@ void Structure::computeOptimalPosition(){
         vacc+=weight*(*element->getViewpoint()->getPosition());
         wacc+=weight;
     }
-    Eigen::Vector3d temp(position);
     position=wacc.inverse()*vacc;
     optimised=true;
 }
@@ -201,6 +200,24 @@ void Structure::filterDisparity(double limitValue){
         features.resize(index);
     }
     if(index<2){
+        filtered=false;
+        setFeaturesState();
+    }else{
+        filtered=true;
+    }
+}
+
+void Structure::filterExperimental(double minValue){
+    double maxDetect(0.), maxCandidate(0.);
+    for(unsigned int i(0); i<features.size(); i++){
+        Eigen::Vector3d iDirection=*features[i]->getModel();
+        for(unsigned int j(i+1); j<features.size(); j++){
+            Eigen::Vector3d jDirection=*features[j]->getModel();
+            maxCandidate=iDirection.dot(jDirection)/(iDirection.norm()*jDirection.norm());
+            if(maxCandidate>maxDetect) maxDetect=maxCandidate;
+        }
+    }
+    if(maxDetect>minValue){
         filtered=false;
         setFeaturesState();
     }else{

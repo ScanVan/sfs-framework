@@ -42,7 +42,6 @@ public: /* Need to be set back to private */
     Eigen::Vector3d model;
 	double radius;
 	double disparity;
-	uint32_t inliner; /* redundant with selection per features count and deletion trough filtering ? + encapsulation fault */
 	cv::Vec3b color;
 
 public:
@@ -58,7 +57,6 @@ public:
     void setRadius(double newRadius, double newDisparity);
     void setViewpointPtr(Viewpoint * newViewpoint);
     void setStructurePtr(Structure * newStructure);
-    void setDirection(Eigen::Vector3d newDirection); /* only used for synthetic models */
     void reset();
     void computeModel();
     void computeOriented(Eigen::Matrix3d * orientation);

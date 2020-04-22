@@ -1,15 +1,51 @@
+/*
+ *  sfs-framework
+ *
+ *      Nils Hamel - nils.hamel@bluewin.ch
+ *      Charles Papon - charles.papon.90@gmail.com
+ *      Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
+#include "framework-sparsefeature.hpp"
 
-#include <opencv4/opencv2/core.hpp>
-#include <opencv4/opencv2/features2d.hpp>
+//void akazeFeatures(	cv::Mat* image, cv::Mat* mask, std::vector<cv::KeyPoint>* keypoints, cv::Mat* desc) {
 
+	// The following parameters worked for the sequence 1-34 of the Sion Outdoor dataset
+    //cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 4, 4, cv::KAZE::DIFF_PM_G2);
 
+//    double initial(0.01f);
 
+//    while ( keypoints->size() < 4096 ) {
 
-void akazeFeatures(	cv::Mat* image,
-					cv::Mat* mask,
-					std::vector<cv::KeyPoint>* keypoints,
-					cv::Mat* desc) {
+//        desc->release();
+//        keypoints->clear();
+
+//        cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, initial, 4, 4, cv::KAZE::DIFF_PM_G2);
+
+//	    akaze->detectAndCompute(*image, *mask, *keypoints, *desc);
+//
+//        std::cerr << "Feature detection : " << keypoints->size() << std::endl;
+
+//        initial*=0.5;
+
+//    }
+
+//}
+
+void akazeFeatures(	cv::Mat* image, cv::Mat* mask, std::vector<cv::KeyPoint>* keypoints, cv::Mat* desc) {
 
 	// The following parameters worked for the sequence 1-34 of the Sion Outdoor dataset
     //cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 4, 4, cv::KAZE::DIFF_PM_G2);
@@ -18,7 +54,6 @@ void akazeFeatures(	cv::Mat* image,
 	akaze->detectAndCompute(*image, *mask, *keypoints, *desc);
 }
 
-#include "gms_matcher.h"
 void gmsMatcher (	std::vector<cv::KeyPoint>* k1,
 					cv::Mat* d1,
 					cv::Size s1,

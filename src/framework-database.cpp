@@ -88,7 +88,8 @@ bool Database::getError(int loopState, int loopMajor, int loopMinor){
     dError=maxValue;
 
     // Apply error to deduce iterations stop condition
-    if ( (std::fabs(tError-pushtError)<configError) && (std::fabs(dError-pushdError)<configError) ) {
+    //if ( (std::fabs(tError-pushtError)<configError) && (std::fabs(dError-pushdError)<configError) ) {
+    if ( (std::fabs(tError-pushtError)<configError) ) {
     
         // Error is stable enough to stop iterations
         returnValue=false;
@@ -284,7 +285,7 @@ void Database::prepareStructure(){
     }
 
     // Reset active structure radius
-    # pragma omp parallel for schedule(dynamic)
+    //# pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<sortStructTypeA+sortStructTypeB; i++){
         structures[i]->setReset();
     }
@@ -918,47 +919,47 @@ void Database::_displayViewpointStructures(Viewpoint *viewpoint, unsigned int st
     imshow( "miaou", res);
 }
 
-void Database::_sanityCheck(bool inliner){
-    //How many structure have a given size (size is the index)
-    uint32_t *structureSizes = new uint32_t[viewpoints.size()+1];
-    memset(structureSizes, 0, (viewpoints.size()+1)*sizeof(uint32_t));
-
-    //Set<Viewpoint> to identify viewpoint duplication in structures
-    uint32_t *viewpointsUsage = new uint32_t[viewpoints.size()];
-    memset(viewpointsUsage, -1, (viewpoints.size())*sizeof(uint32_t));
-
-    for(uint32_t structureId = 0;structureId < structures.size();structureId++){
-        auto &s = structures[structureId];
-        if(s->features.size() < 2) throw std::runtime_error("Structure with less than two feature");
-        structureSizes[s->features.size()]++;
-        auto inliner = s->features.front()->inliner;
-        for(auto &f : s->features){
-            if(f->structure != s.get()) throw std::runtime_error("Structure with a feature which isn't pointing that structure");
-            if(inliner) if(f->inliner != inliner) throw std::runtime_error("Inliner issue");
-            auto viewpointId = f->viewpoint->index;
-            if(viewpointsUsage[viewpointId] == structureId) throw std::runtime_error("Same view point twice in a structure");
-            viewpointsUsage[viewpointId] = structureId;
-        }
-    }
-    delete []viewpointsUsage;
-
-    std::cout << "Structure family ";
-    for(uint32_t size = 0;size <= viewpoints.size(); size++){
-        auto count = structureSizes[size];
-        if(count) std::cout << size << "=>" << count << " ";
-    }
-    std::cout << std::endl;
-    delete []structureSizes;
-
-    for(auto v : viewpoints){
-        for(auto f : v->features){
-            if(f->structure){
-                auto sf = &(f->structure->features);
-                if(std::find(sf->begin(), sf->end(), f) == sf->end()) throw std::runtime_error("Feature having a structure without that feature");
-            }
-        }
-    }
-}
+//void Database::_sanityCheck(bool inliner){
+//    //How many structure have a given size (size is the index)
+//    uint32_t *structureSizes = new uint32_t[viewpoints.size()+1];
+//    memset(structureSizes, 0, (viewpoints.size()+1)*sizeof(uint32_t));
+//
+//    //Set<Viewpoint> to identify viewpoint duplication in structures
+//    uint32_t *viewpointsUsage = new uint32_t[viewpoints.size()];
+//    memset(viewpointsUsage, -1, (viewpoints.size())*sizeof(uint32_t));
+//
+//    for(uint32_t structureId = 0;structureId < structures.size();structureId++){
+//        auto &s = structures[structureId];
+//        if(s->features.size() < 2) throw std::runtime_error("Structure with less than two feature");
+//        structureSizes[s->features.size()]++;
+//        auto inliner = s->features.front()->inliner;
+//        for(auto &f : s->features){
+//            if(f->structure != s.get()) throw std::runtime_error("Structure with a feature which isn't pointing that structure");
+//            if(inliner) if(f->inliner != inliner) throw std::runtime_error("Inliner issue");
+//            auto viewpointId = f->viewpoint->index;
+//            if(viewpointsUsage[viewpointId] == structureId) throw std::runtime_error("Same view point twice in a structure");
+//            viewpointsUsage[viewpointId] = structureId;
+//        }
+//    }
+//    delete []viewpointsUsage;
+//
+//    std::cout << "Structure family ";
+//    for(uint32_t size = 0;size <= viewpoints.size(); size++){
+//        auto count = structureSizes[size];
+//        if(count) std::cout << size << "=>" << count << " ";
+//    }
+//    std::cout << std::endl;
+//    delete []structureSizes;
+//
+//    for(auto v : viewpoints){
+//        for(auto f : v->features){
+//            if(f->structure){
+//                auto sf = &(f->structure->features);
+//                if(std::find(sf->begin(), sf->end(), f) == sf->end()) throw std::runtime_error("Feature having a structure without that feature");
+//            }
+//        }
+//    }
+//}
 
 void Database::_sanityCheckStructure(){
     unsigned int lastViewpoint(viewpoints.size()-1);
