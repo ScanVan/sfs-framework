@@ -45,8 +45,8 @@ bool Structure::getHasLastViewpoint(int lastViewpointIndex){
     }
 }
 
-bool Structure::getHasScale(){
-    return (features.size()>2) ? true : false;
+bool Structure::getHasScale(unsigned int configGroup){
+    return (features.size()>=configGroup) ? true : false;
 }
 
 void Structure::setReset(){

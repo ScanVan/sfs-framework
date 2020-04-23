@@ -30,12 +30,15 @@ Database::Database(double initialError, double initialErrorDisparity, double ini
     configDenseDisparity=initialDenseDisparity;
     configMatchRange=initialMatchRange;
 
+    // temporary : size of the estimation group
+    configGroup=4;
+
 }
 
 bool Database::getBootstrap(){
     
     // Check bootstrap condition
-    return (viewpoints.size()<DB_LOOP_BOOT_COUNT) ? true : false;
+    return (viewpoints.size()<configGroup) ? true : false;
 
 }
 
@@ -61,6 +64,7 @@ bool Database::getError(int loopState, int loopMajor, int loopMinor){
 
     /* specific condition */
     if(loopMinor>DB_LOOP_MAXITER){
+        std::cerr << "Warning : maximum iterations count reached" << std::endl;
         returnValue=false;
     }
 
@@ -112,6 +116,17 @@ bool Database::getError(int loopState, int loopMajor, int loopMinor){
 
     /* send answser */
     return returnValue;
+
+}
+
+bool Database::getFailure(){
+
+    // Check failure condition (not enough matches for the new viewpoint)
+    if((sortStructTypeA+sortStructTypeB)<64){
+        return true;
+    }else{
+        return false;
+    }
 
 }
 
@@ -361,7 +376,7 @@ void Database::computeCentroids(int loopState){
     // Compute centroid contribution for active structures
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++) {
-        if(structures[i]->getHasScale()){
+        if(structures[i]->getHasScale(configGroup)){
             structures[i]->computeCentroid(transforms);
         }
     }
@@ -408,7 +423,7 @@ void Database::computeCorrelations(int loopState){
     // Compute correlation matrix correlation for active structures
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
-        if(structures[i]->getHasScale()){
+        if(structures[i]->getHasScale(configGroup)){
             structures[i]->computeCorrelation(transforms);
         }
     }
@@ -1033,7 +1048,7 @@ void Database::_exportState(std::string path, int major, int iter){
 
 // Note : this function does not respect encapsulation (development function) - need to be removed
 void Database::_exportMatchDistribution(std::string path, unsigned int major, std::string type){
-    if(viewpoints.size()<DB_LOOP_BOOT_COUNT){
+    if(viewpoints.size()<configGroup){
         return;
     }
     std::fstream stream;
@@ -1053,7 +1068,7 @@ void Database::_exportMatchDistribution(std::string path, unsigned int major, st
 }
 
 void Database::_exportStructureModel(std::string path, unsigned int major){
-    if(viewpoints.size()<DB_LOOP_BOOT_COUNT){
+    if(viewpoints.size()<configGroup){
         return;
     }
     std::fstream stream;

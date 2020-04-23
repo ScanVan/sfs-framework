@@ -39,7 +39,7 @@ using namespace cv;
 
 // changed threshold to have less matches
 //This parameter worked for images 1-34 of the Sion Outdoor dataset
-#define THRESH_FACTOR 6
+#define THRESH_FACTOR 4
 
 // 8 possible rotation and each one is 3 X 3
 const int mRotationPatterns[8][9] = {

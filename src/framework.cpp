@@ -91,7 +91,7 @@ int main(int argc, char ** argv){
     Frontend * frontend(nullptr);
 
     // Pipeline iterations
-    int loopMajor(DB_LOOP_BOOT_COUNT);
+    int loopMajor(4); // need to be assigned with configGroup of database
     int loopMinor(0);
 
     // Algorithm loop
@@ -207,6 +207,12 @@ int main(int argc, char ** argv){
 
         // Prepare structure vector - type-based segment sort
         database.prepareStructure();
+
+        // Check failure condition - enough matches for the new viewpoint
+        if(database.getFailure()==true){
+            std::cerr << "Failure during viewpoint addition : not enough matches" << std::endl;
+            exit(1);
+        }
 
         // Reset algorithm loop
         loopFlag=true;

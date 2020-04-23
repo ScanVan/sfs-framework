@@ -48,7 +48,7 @@ public:
     bool getFiltered();
     int getFeaturesCount();
     bool getHasLastViewpoint(int lastViewpointIndex);
-    bool getHasScale();
+    bool getHasScale(unsigned int configGroup);
     void setReset();
     void setFeaturesState();
     void addFeature(Feature * feature);
