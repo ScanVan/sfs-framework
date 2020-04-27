@@ -300,7 +300,7 @@ void Database::prepareStructure(){
     }
 
     // Reset active structure radius
-    //# pragma omp parallel for schedule(dynamic)
+    # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<sortStructTypeA+sortStructTypeB; i++){
         structures[i]->setReset();
     }
@@ -780,7 +780,7 @@ void Database::exportStructure(std::string path, std::string mode, unsigned int 
     std::fstream exportStream;
     std::stringstream filePath;
     std::stringstream fileCopy;
-    std::string color;
+    cv::Vec3b color;
 
     filePath << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_structure.xyz";
 
@@ -791,17 +791,15 @@ void Database::exportStructure(std::string path, std::string mode, unsigned int 
     }
 
     for(auto & element: structures){
-        if(element->features.size()<=2){
-            color = " 255   0   0";
-        }else
-        if (element->features.size()>=7){
-            color = " 255   0 255";
-        }else{
-            color = " 255 255   0";
-        }
         exportStream << (*element->getPosition())(0) << " ";
         exportStream << (*element->getPosition())(1) << " ";
-        exportStream << (*element->getPosition())(2) << color << std::endl;
+        exportStream << (*element->getPosition())(2) << " ";
+
+        color=element->getColor();
+
+        exportStream << std::to_string( color[2] ) << " ";
+        exportStream << std::to_string( color[1] ) << " ";
+        exportStream << std::to_string( color[0] ) << std::endl;
     }
 
     exportStream.close();
@@ -827,7 +825,7 @@ void Database::exportPosition(std::string path, std::string mode, unsigned int m
     for(auto & element: viewpoints){
         exportStream << (*element->getPosition())(0) << " ";
         exportStream << (*element->getPosition())(1) << " ";
-        exportStream << (*element->getPosition())(2) << "0 0 255" << std::endl;
+        exportStream << (*element->getPosition())(2) << " 255 0 255" << std::endl;
     }
 
     exportStream.close();

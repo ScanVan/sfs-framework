@@ -11,7 +11,7 @@ Required distribution packages installation :
 ```
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install build-essential cmake libeigen3-dev
+sudo apt-get install build-essential cmake libeigen3-dev libomp-dev
 
 ```
 

@@ -53,7 +53,7 @@ public:
     Structure * getStructure();
     cv::Vec3b getColor();
     void setFeature(double x, double y, int imageWidth, int imageHeight);
-    void setColor(cv::Vec3b color);
+    void setColor(cv::Vec3b newColor);
     void setRadius(double newRadius, double newDisparity);
     void setViewpointPtr(Viewpoint * newViewpoint);
     void setStructurePtr(Structure * newStructure);

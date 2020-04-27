@@ -46,7 +46,33 @@ bool Structure::getHasLastViewpoint(int lastViewpointIndex){
 }
 
 bool Structure::getHasScale(unsigned int configGroup){
-    return (features.size()>=configGroup) ? true : false;
+    if(features.size()>=configGroup){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+cv::Vec3b Structure::getColor(){
+
+    Eigen::Vector3d accumColor(Eigen::Vector3d::Zero());
+    cv::Vec3b cvColor;
+
+    for(auto & feature: features){
+        cvColor=feature->getColor();
+        accumColor(0)+=cvColor[0];
+        accumColor(1)+=cvColor[1];
+        accumColor(2)+=cvColor[2];
+    }
+
+    accumColor/=features.size();
+    
+    cvColor[0]=accumColor(0);
+    cvColor[1]=accumColor(1);
+    cvColor[2]=accumColor(2);
+
+    return cvColor;    
+
 }
 
 void Structure::setReset(){

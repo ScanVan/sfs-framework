@@ -49,6 +49,7 @@ public:
     int getFeaturesCount();
     bool getHasLastViewpoint(int lastViewpointIndex);
     bool getHasScale(unsigned int configGroup);
+    cv::Vec3b getColor();
     void setReset();
     void setFeaturesState();
     void addFeature(Feature * feature);
