@@ -21,40 +21,14 @@
 
 #include "framework-sparsefeature.hpp"
 
-//void akazeFeatures(	cv::Mat* image, cv::Mat* mask, std::vector<cv::KeyPoint>* keypoints, cv::Mat* desc) {
-
-	// The following parameters worked for the sequence 1-34 of the Sion Outdoor dataset
-    //cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 4, 4, cv::KAZE::DIFF_PM_G2);
-
-//    double initial(0.01f);
-
-//    while ( ( keypoints->size() < 512 ) || ( keypoints->size() > 2048 ) ) {
-//
-//        desc->release();
-//        keypoints->clear();
-
-//        cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, initial, 4, 4, cv::KAZE::DIFF_PM_G2);
-
-//	    akaze->detectAndCompute(*image, *mask, *keypoints, *desc);
-
-//        std::cerr << "Feature detection : " << keypoints->size() << std::endl;
-
-//        if (keypoints->size()<2048)
-//        initial*=0.5;
-//        else
-//        initial*=2.0;
-
-//    }
-
-//    std::cerr << "Feature detection final : " << keypoints->size() << std::endl;
-
-//}
-
 void akazeFeatures(	cv::Mat* image, cv::Mat* mask, std::vector<cv::KeyPoint>* keypoints, cv::Mat* desc) {
-	// The following parameters worked for the sequence 1-34 of the Sion Outdoor dataset
-    //cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 4, 4, cv::KAZE::DIFF_PM_G2);
+
+    // Instance AKAZE feature detector
     cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 4, 4, cv::KAZE::DIFF_PM_G2);
-	akaze->detectAndCompute(*image, *mask, *keypoints, *desc);
+
+    // Compute feature and their descriptor
+    akaze->detectAndCompute(*image, *mask, *keypoints, *desc);
+
 }
 
 void gmsMatcher (	std::vector<cv::KeyPoint>* k1,

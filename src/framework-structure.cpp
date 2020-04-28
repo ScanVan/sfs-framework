@@ -54,25 +54,18 @@ bool Structure::getHasScale(unsigned int configGroup){
 }
 
 cv::Vec3b Structure::getColor(){
-
-    Eigen::Vector3d accumColor(Eigen::Vector3d::Zero());
-    cv::Vec3b cvColor;
-
-    for(auto & feature: features){
-        cvColor=feature->getColor();
-        accumColor(0)+=cvColor[0];
-        accumColor(1)+=cvColor[1];
-        accumColor(2)+=cvColor[2];
+    Eigen::Vector3f accum(Eigen::Vector3f::Zero());
+    cv::Vec3b color;
+    for(auto feature: features){
+        color=feature->getColor();
+        accum(0)+=color[0];
+        accum(1)+=color[1];
+        accum(2)+=color[2];
     }
-
-    accumColor/=features.size();
-    
-    cvColor[0]=accumColor(0);
-    cvColor[1]=accumColor(1);
-    cvColor[2]=accumColor(2);
-
-    return cvColor;    
-
+    color[0]=round(accum(0)/features.size());
+    color[1]=round(accum(1)/features.size());
+    color[2]=round(accum(2)/features.size());
+    return color;
 }
 
 void Structure::setReset(){
