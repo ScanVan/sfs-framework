@@ -31,6 +31,8 @@
 #include "framework-transform.hpp"
 #include "framework-viewpoint.hpp"
 
+#include "framework-utiles.hpp"
+
 // Module object
 class Structure {
 public: /* Need to be set back to private */

@@ -214,6 +214,10 @@ int main(int argc, char ** argv){
             exit(1);
         }
 
+        // development feature - begin
+        //database._exportMatchDistribution(yamlExport["path"].as<std::string>(),loopMajor,"initial");
+        // development feature - end
+
         // Reset algorithm loop
         loopFlag=true;
         loopMinor=0;
@@ -253,7 +257,7 @@ int main(int argc, char ** argv){
             }
 
             // development feature - begin
-            database._exportStructureModel(yamlExport["path"].as<std::string>(),loopMajor);
+            //database._exportStructureModel(yamlExport["path"].as<std::string>(),loopMajor);
             // development feature - end
 
             // State loop management
@@ -274,6 +278,10 @@ int main(int argc, char ** argv){
             }
 
         }
+
+        // development feature - begin
+        //database._exportMatchDistribution(yamlExport["path"].as<std::string>(),loopMajor,"filter");
+        // development feature - end
 
         // development feature - begin
         if(yamlConfig["debug"].IsDefined()){

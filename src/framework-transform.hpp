@@ -33,10 +33,7 @@ public: /* Need to be set back to private */
     Eigen::Matrix3d correlation;
     Eigen::Matrix3d rotation;
     Eigen::Vector3d translation;
-
-    Eigen::Matrix3d prot;
     Eigen::Vector3d push;
-
     Eigen::Vector3d centerFirst;
     Eigen::Vector3d centerSecond;
     unsigned int centerCount;

@@ -508,8 +508,7 @@ void Database::computeFrames(int loopState){
         // Jump over process
         return;
 
-    }else 
-    {
+    }else{
 
         // Assign identity and zero position to first viewpoint
         viewpoints[0]->resetFrame();
