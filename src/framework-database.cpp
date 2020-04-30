@@ -31,7 +31,7 @@ Database::Database(double initialError, double initialErrorDisparity, double ini
     configMatchRange=initialMatchRange;
 
     // temporary : size of the estimation group
-    configGroup=4;
+    configGroup=3;
 
 }
 

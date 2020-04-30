@@ -138,115 +138,40 @@ void Structure::computeOriented(){
     }
 }
 
-//compute_intersection
-
-//void Structure::computeOptimalPosition(){
-//    Eigen::Vector3d acc(Eigen::Vector3d::Zero());
-//    unsigned int count(0);
-//
-//    for(unsigned int i(0); i<features.size(); i++){
-//        for(unsigned int j(i+1); j<features.size(); j++){
-//
-//            acc+=compute_intersection(
-//                features[i]->getViewpoint()->getPosition(),
-//                features[i]->getModel(),
-//                features[j]->getViewpoint()->getPosition(),
-//                features[j]->getModel()
-//            );
-//            count++;
-//
-//        }
-//    }
-//    position=acc/count;
-//    optimised=true;
-//}
-
 void Structure::computeOptimalPosition(){
     Eigen::Vector3d accum(Eigen::Vector3d::Zero());
-
     Eigen::Vector3d vectorL(Eigen::Vector3d::Zero());
-
     double dotAB(0.);
     double dotAL(0.);
     double dotBL(0.);
-
     double norm(0.);
     double rada(0.);
     double radb(0.);
-
     unsigned int count(0);
-
     for(unsigned int i(0); i<features.size(); i++){
         for(unsigned int j(i+1); j<features.size(); j++){
 
             dotAB=features[i]->getModel()->dot(*features[j]->getModel());
-
             vectorL=(*features[j]->getViewpoint()->getPosition())-(*features[i]->getViewpoint()->getPosition());
-
             dotAL=features[i]->getModel()->dot(vectorL);
             dotBL=features[j]->getModel()->dot(vectorL);
-
             norm=1.-(dotAB*dotAB);
-
             rada=(-dotAB*dotBL+dotAL)/norm;
             radb=(+dotAB*dotAL-dotBL)/norm;
 
-            accum+=0.5*(
-            (*features[i]->getViewpoint()->getPosition())+rada*(*features[i]->getModel())
-            +
-            (*features[j]->getViewpoint()->getPosition())+radb*(*features[j]->getModel())
-            );
-            count++;
-
-            //accum+=compute_intersection(
-            //    features[i]->getViewpoint()->getPosition(),
-            //    features[i]->getModel(),
-            //    features[j]->getViewpoint()->getPosition(),
-            //    features[j]->getModel()
-            //);
-            //count++;
-
+            //if ((1.-fabs(dotAB))>0.087266){
+                accum+=0.5*(
+                (*features[i]->getViewpoint()->getPosition())+rada*(*features[i]->getModel())
+                +
+                (*features[j]->getViewpoint()->getPosition())+radb*(*features[j]->getModel())
+                );
+                count++;
+            //}
         }
     }
     position=accum/count;
     optimised=true;
 }
-
-
-//Eigen::Vector3d compute_intersection(Eigen::Vector3d * p1, Eigen::Vector3d * d1, Eigen::Vector3d * p2, Eigen::Vector3d * d2){
-
-//    Eigen::Vector3d d0( *p2 - *p1 );
-
-//    double aa(d1->dot(*d1));
-//    double bb(d2->dot(*d2));
-//    double ab(d1->dot(*d2));
-
-//    double ac(d1->dot(d0));
-//    double bc(d2->dot(d0));
-
-//    double dn(aa*bb-ab*ab);
-
-//    double r1((- ab * bc + ac * bb )/dn);
-//    double r2((+ ab * ac - bc * aa )/dn);
-
-//    d0 = 0.5 * ( *p1+(*d1*r1) + *p2+(*d2*r2) );
-
-//    return d0;
-//}
-
-
-//void Structure::computeOptimalPosition(){
-//    Eigen::Matrix3d wacc(Eigen::Matrix3d::Zero());
-//    Eigen::Vector3d vacc(Eigen::Vector3d::Zero());
-//    Eigen::Matrix3d weight;
-//    for(auto & element: features){
-//        weight=Eigen::Matrix3d::Identity()-(*element->getModel())*(*element->getModel()).transpose();
-//        vacc+=weight*(*element->getViewpoint()->getPosition());
-//        wacc+=weight;
-//    }
-//    position=wacc.inverse()*vacc;
-//    optimised=true;
-//}
 
 void Structure::computeRadius(){
     Eigen::Vector3d fposition;

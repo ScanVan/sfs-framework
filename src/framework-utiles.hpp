@@ -125,5 +125,3 @@ double bilinear_sample(float *p, double x, double y, int width);
 
 void create_directories( std::string rootPath, std::string modeName );
 
-Eigen::Vector3d compute_intersection(Eigen::Vector3d * p1, Eigen::Vector3d * d1, Eigen::Vector3d * p2, Eigen::Vector3d * d2);
-
