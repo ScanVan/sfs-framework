@@ -76,7 +76,7 @@ public: /* Need to be set back to private */
     double maxValue;
 
 public:
-    Database(double initialError, double initialErrorDisparity, double initialRadius, double initialDenseDisparity, unsigned int initialMatchRange);
+    Database(double initialError, double initialErrorDisparity, double initialRadius, unsigned int initialGroup, unsigned int initialMatchRange, double initialDenseDisparity);
     bool getBootstrap();
     bool getError(int loopState, int loopMajor, int loopMinor);
     bool getFailure();

@@ -21,17 +21,15 @@
 
 #include "framework-database.hpp"
 
-Database::Database(double initialError, double initialErrorDisparity, double initialRadius, double initialDenseDisparity, unsigned int initialMatchRange){
+Database::Database(double initialError, double initialErrorDisparity, double initialRadius, unsigned int initialGroup, unsigned int initialMatchRange, double initialDenseDisparity){
 
     // Assign default parameters
     configError=initialError;
     configErrorDisparity=initialErrorDisparity;
     configRadius=initialRadius;
     configDenseDisparity=initialDenseDisparity;
+    configGroup=initialGroup;
     configMatchRange=initialMatchRange;
-
-    // temporary : size of the estimation group
-    configGroup=3;
 
 }
 
