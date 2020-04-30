@@ -81,8 +81,8 @@ int main(int argc, char ** argv){
         yamlAlgorithm["disparity"].as<double>(),
         yamlAlgorithm["radius"].as<double>(),
         yamlAlgorithm["group"].as<unsigned int>(),
-        yamlDense["disparity"].as<double>(),
-        yamlMatching["range"].as<unsigned int>()
+        yamlMatching["range"].as<unsigned int>(),
+        yamlDense["disparity"].as<double>()
     );
 
     // Thread pool initialisation

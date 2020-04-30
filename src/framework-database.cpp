@@ -27,9 +27,9 @@ Database::Database(double initialError, double initialErrorDisparity, double ini
     configError=initialError;
     configErrorDisparity=initialErrorDisparity;
     configRadius=initialRadius;
-    configDenseDisparity=initialDenseDisparity;
     configGroup=initialGroup;
     configMatchRange=initialMatchRange;
+    configDenseDisparity=initialDenseDisparity;
 
 }
 
