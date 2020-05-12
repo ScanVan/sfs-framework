@@ -87,6 +87,9 @@ public:
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
     void prepareFeature();
     void prepareStructure();
+
+    void prepareStructureDynamic();
+
     void computeModels(int loopState);
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);

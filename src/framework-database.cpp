@@ -306,6 +306,52 @@ void Database::prepareStructure(){
 
 }
 
+void Database::prepareStructureDynamic(){
+
+    // Last viewpoint index
+    unsigned int lastViewpoint(viewpoints.size()-1);
+
+    // Continuous indexation
+    unsigned int index(0);
+
+    // Copy structures vector
+    std::vector<std::shared_ptr<Structure>> unsorted(structures);
+
+    // reset counters
+    sortStructTypeA=0;
+    sortStructTypeB=0;
+
+    // Type-based detection - Type A
+    for(auto & structure: unsorted){
+        //if(structure->getHasLastViewpoint(lastViewpoint)==true){
+        if(structure->getHasHead(configGroup,lastViewpoint)==true){
+        //    if(structure->getOptimised()==true){
+                structures[index++]=structure;
+                sortStructTypeA++;
+        //    }
+
+        }
+    }
+
+    // Type-based detection - Type C
+    for(auto & structure: unsorted){
+        //if(structure->getHasLastViewpoint(lastViewpoint)==false){
+        if(structure->getHasHead(configGroup,lastViewpoint)==false){
+            structures[index++]=structure;
+        }
+    }
+
+    // development feature - begin
+    if(index!=structures.size()){
+        std::cerr << "Fault : " << index << " vs " << structures.size() << std::endl;
+    } else {
+        std::cerr << "Structure distribution by types : " << sortStructTypeA << ", " << sortStructTypeB << ", " << structures.size() - sortStructTypeA - sortStructTypeB << std::endl;
+    }
+    // development feature - end
+
+}
+
+
 void Database::computeModels(int loopState){
 
     // Active structure upper bound

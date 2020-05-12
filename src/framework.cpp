@@ -234,6 +234,8 @@ int main(int argc, char ** argv){
 
             // algorithm optimisation loop
             while ( loopFlag == true ) {
+        
+                database.prepareStructureDynamic();
 
                 // Algorithm core
                 database.computeModels(loopState);

@@ -244,11 +244,14 @@ void Structure::filterRadialRange(double lowClamp, double highClamp,unsigned int
             index ++;
         }
     }
+    filterStatus=0;
     if(index<features.size()){
         features.resize(index);
+        filterStatus=1;
     }
     if(index<2){
         filtered=false;
+        filterStatus=2;
         setFeaturesState();
     }else{
         filtered=true;
@@ -270,11 +273,14 @@ void Structure::filterDisparity(double limitValue,unsigned int headStart){
             index ++;
         }
     }
+    filterStatus=0;
     if(index<features.size()){
         features.resize(index);
+        filterStatus=1;
     }
     if(index<2){
         filtered=false;
+        filterStatus=2;
         setFeaturesState();
     }else{
         filtered=true;

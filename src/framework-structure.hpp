@@ -39,11 +39,12 @@ public: /* Need to be set back to private */
     Eigen::Vector3d position;
     std::vector<Feature*> features;
     Viewpoint *originalViewpoint; /* no more needed */
-    bool optimised;
-    bool filtered;
+    bool optimised; /* no more needed */
+    bool filtered; /* replaced */
+    int filterStatus;
 
 public:
-    Structure() : position(Eigen::Vector3d::Zero()), originalViewpoint(NULL), optimised(false), filtered(true) {}
+    Structure() : position(Eigen::Vector3d::Zero()), originalViewpoint(NULL), optimised(false), filtered(true), filterStatus(0) {}
     Structure(Viewpoint *originalViewpoint) : position(Eigen::Vector3d::Zero()), originalViewpoint(originalViewpoint), optimised(false), filtered(true) {}  /* no more needed - using standard constructor */
     Eigen::Vector3d * getPosition();
     bool getOptimised();
