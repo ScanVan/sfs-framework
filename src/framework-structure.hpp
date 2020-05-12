@@ -51,6 +51,9 @@ public:
     int getFeaturesCount();
     bool getHasLastViewpoint(int lastViewpointIndex);
     bool getHasScale(unsigned int configGroup);
+
+    bool getHasHead(unsigned int configGroup, unsigned int lastViewpoint);
+
     cv::Vec3b getColor();
     void setReset();
     void setFeaturesState();
@@ -59,14 +62,14 @@ public:
     void computeModel();
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
-    void computeOriented();
-    void computeOptimalPosition();
-    void computeRadius();
-    unsigned int computeDisparityMean(double * const meanValue);
-    void computeDisparityStd(double * const stdValue, double const meanValue);
-    void computeDisparityMax(double * const maxValue);
-    void filterRadialRange(double lowClamp, double highClamp);
-    void filterDisparity(double limitValue);
+    void computeOriented(unsigned int headStart);
+    void computeOptimalPosition(unsigned int headStart);
+    void computeRadius(unsigned int headStart);
+    unsigned int computeDisparityMean(double * const meanValue,unsigned int headStart);
+    void computeDisparityStd(double * const stdValue, double const meanValue,unsigned int headStart);
+    void computeDisparityMax(double * const maxValue, unsigned int headStart);
+    void filterRadialRange(double lowClamp, double highClamp,unsigned int headStart);
+    void filterDisparity(double limitValue,unsigned int headStart);
 
     void filterExperimental(double minValue);
 

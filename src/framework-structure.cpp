@@ -53,6 +53,18 @@ bool Structure::getHasScale(unsigned int configGroup){
     }
 }
 
+bool Structure::getHasHead(unsigned int configGroup, unsigned int lastViewpoint){
+    if(features.size()<configGroup){
+        return false;
+    }
+    for(unsigned int i(0); i<configGroup; i++){
+        if(features[features.size()-(i+1)]->getViewpoint()->getIndex()!=(lastViewpoint-i)){
+            return false;
+        }
+    }
+    return true;
+}
+
 cv::Vec3b Structure::getColor(){
     Eigen::Vector3f accum(Eigen::Vector3f::Zero());
     cv::Vec3b color;
@@ -132,13 +144,15 @@ void Structure::computeCorrelation(std::vector<std::shared_ptr<Transform>> & tra
     }
 }
 
-void Structure::computeOriented(){
+void Structure::computeOriented(unsigned int headStart){
     for(auto & feature: features){
-        feature->computeOriented(feature->getViewpoint()->getOrientation());
+        if(feature->getViewpoint()->getIndex()>=headStart){
+            feature->computeOriented(feature->getViewpoint()->getOrientation());
+        }
     }
 }
 
-void Structure::computeOptimalPosition(){
+void Structure::computeOptimalPosition(unsigned int headStart){
     Eigen::Vector3d accum(Eigen::Vector3d::Zero());
     Eigen::Vector3d vectorL(Eigen::Vector3d::Zero());
     double dotAB(0.);
@@ -149,8 +163,9 @@ void Structure::computeOptimalPosition(){
     double radb(0.);
     unsigned int count(0);
     for(unsigned int i(0); i<features.size(); i++){
+        if(features[i]->getViewpoint()->getIndex()<headStart) continue;
         for(unsigned int j(i+1); j<features.size(); j++){
-
+            if(features[j]->getViewpoint()->getIndex()<headStart) continue;
             dotAB=features[i]->getModel()->dot(*features[j]->getModel());
             vectorL=(*features[j]->getViewpoint()->getPosition())-(*features[i]->getViewpoint()->getPosition());
             dotAL=features[i]->getModel()->dot(vectorL);
@@ -173,44 +188,57 @@ void Structure::computeOptimalPosition(){
     optimised=true;
 }
 
-void Structure::computeRadius(){
+void Structure::computeRadius(unsigned int headStart){
     Eigen::Vector3d fposition;
     double radius(0.);
     for(auto & element: features){
-        radius=(*element->getModel()).dot(position-(*element->getViewpoint()->getPosition()));
-        fposition=(*element->getViewpoint()->getPosition())+(*element->getModel())*radius;
-        element->setRadius(radius,(fposition-position).norm());
-    }
-}
-
-unsigned int Structure::computeDisparityMean(double * const meanValue){
-    for(auto & feature: features){
-        (*meanValue)+=feature->getDisparity();
-    }
-    return features.size();
-}
-
-void Structure::computeDisparityStd(double * const stdValue, double const meanValue){
-    double component(0);
-    for(auto & feature: features){
-        component=feature->getDisparity()-meanValue;
-        (*stdValue)+=component*component;
-    }
-}
-
-void Structure::computeDisparityMax(double * const maxValue){
-    for(auto & feature: features){
-        if(feature->getDisparity()>(*maxValue)){
-            (*maxValue)=feature->getDisparity();
+        if(element->getViewpoint()->getIndex()>=headStart){
+            radius=(*element->getModel()).dot(position-(*element->getViewpoint()->getPosition()));
+            fposition=(*element->getViewpoint()->getPosition())+(*element->getModel())*radius;
+            element->setRadius(radius,(fposition-position).norm());
         }
     }
 }
 
-void Structure::filterRadialRange(double lowClamp, double highClamp){
+unsigned int Structure::computeDisparityMean(double * const meanValue,unsigned int headStart){
+    for(auto & feature: features){
+        if(feature->getViewpoint()->getIndex()>=headStart){
+            (*meanValue)+=feature->getDisparity();
+        }
+    }
+    return features.size();
+}
+
+void Structure::computeDisparityStd(double * const stdValue, double const meanValue, unsigned int headStart){
+    double component(0);
+    for(auto & feature: features){
+        if(feature->getViewpoint()->getIndex()>=headStart){
+            component=feature->getDisparity()-meanValue;
+            (*stdValue)+=component*component;
+        }
+    }
+}
+
+void Structure::computeDisparityMax(double * const maxValue, unsigned int headStart){
+    for(auto & feature: features){
+        if(feature->getViewpoint()->getIndex()>=headStart){
+            if(feature->getDisparity()>(*maxValue)){
+                (*maxValue)=feature->getDisparity();
+            }
+        }
+    }
+}
+
+void Structure::filterRadialRange(double lowClamp, double highClamp,unsigned int headStart){
     unsigned int index(0);
     for(unsigned int i(0); i<features.size(); i++){
-        if((features[i]->getRadius()<lowClamp)||(features[i]->getRadius()>highClamp)){
-            features[i]->setStructurePtr(NULL);
+        if(features[i]->getViewpoint()->getIndex()>=headStart){
+            if((features[i]->getRadius()<lowClamp)||(features[i]->getRadius()>highClamp)){
+                features[i]->setStructurePtr(NULL);
+            }else{
+                if(index!=i) features[index]=features[i];
+                index ++;
+            }
         }else{
             if(index!=i) features[index]=features[i];
             index ++;
@@ -227,11 +255,16 @@ void Structure::filterRadialRange(double lowClamp, double highClamp){
     }
 }
 
-void Structure::filterDisparity(double limitValue){
+void Structure::filterDisparity(double limitValue,unsigned int headStart){
     unsigned int index(0);
     for(unsigned int i(0); i<features.size(); i++){
-        if(features[i]->getDisparity()>limitValue){
-            features[i]->setStructurePtr(NULL);
+        if(features[i]->getViewpoint()->getIndex()>=headStart){
+            if(features[i]->getDisparity()>limitValue){
+                features[i]->setStructurePtr(NULL);
+            }else{
+                if(index!=i) features[index]=features[i];
+                index ++;
+            }
         }else{
             if(index!=i) features[index]=features[i];
             index ++;

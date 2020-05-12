@@ -226,6 +226,12 @@ int main(int argc, char ** argv){
         // Algorithm state loop
         while ( loopFlag == true ) {
 
+            double pushCommon(1.);
+
+            if(loopState==DB_MODE_LAST){
+                pushCommon=database.transforms[database.transforms.size()-2]->translation.norm();
+            }
+
             // algorithm optimisation loop
             while ( loopFlag == true ) {
 
@@ -260,6 +266,43 @@ int main(int argc, char ** argv){
             // development feature - begin
             //database._exportStructureModel(yamlExport["path"].as<std::string>(),loopMajor);
             // development feature - end
+
+            if(loopState==DB_MODE_LAST){
+
+                // development feature - begin
+                database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor);
+                // development feature - end
+
+                pushCommon/=database.transforms[database.transforms.size()-2]->translation.norm();
+
+                std::cerr << "Scale factor on head : " << pushCommon << std::endl;
+
+                for(int i=database.transforms.size()-database.configGroup+1; i<database.transforms.size(); i++){
+                    database.transforms[i]->translation*=pushCommon;
+                }
+    
+                //int last(database.viewpoints.size()-database.configGroup);
+                //for(int i=0; i<(database.sortStructTypeA+database.sortStructTypeB); i++){
+                //    for(int j=0; j<database.structures[i]->features.size(); j++){
+                //        if(database.structures[i]->features[j]->getViewpoint()->getIndex()<last) continue;
+                //        database.structures[i]->features[j]->radius*=pushCommon;
+                //    }
+                //}
+
+                loopState=DB_MODE_FULL;
+
+                database.computeFrames(loopState);
+                database.computeOriented(loopState);
+                database.computeOptimals(loopState);
+                database.computeRadii(loopState);
+
+                database.filterRadialRange(loopState);
+
+                // development feature - begin
+                database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor+1);
+                // development feature - end
+
+            }
 
             // State loop management
             if((loopState==DB_MODE_BOOT)||(loopState==DB_MODE_FULL)){

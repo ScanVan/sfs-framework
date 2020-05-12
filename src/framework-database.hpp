@@ -75,6 +75,8 @@ public: /* Need to be set back to private */
     double stdValue;
     double maxValue;
 
+    unsigned int firstActive;
+
 public:
     Database(double initialError, double initialErrorDisparity, double initialRadius, unsigned int initialGroup, unsigned int initialMatchRange, double initialDenseDisparity);
     bool getBootstrap();

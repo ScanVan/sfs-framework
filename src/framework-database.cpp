@@ -31,6 +31,8 @@ Database::Database(double initialError, double initialErrorDisparity, double ini
     configMatchRange=initialMatchRange;
     configDenseDisparity=initialDenseDisparity;
 
+    // Add test to ensure configGroup > 2
+
 }
 
 bool Database::getBootstrap(){
@@ -45,14 +47,8 @@ bool Database::getError(int loopState, int loopMajor, int loopMinor){
     /* memory of error on transformation */
     static double pushtError(-1.);
 
-    /* memory of error on disparity */
-    static double pushdError(-1.);
-
     /* error on transformation */
     double tError(0.);
-
-    /* error on disparity */
-    double dError(0.);
 
     // Active transformation range
     unsigned int transformStart(0);
@@ -75,7 +71,7 @@ bool Database::getError(int loopState, int loopMajor, int loopMinor){
     if(loopState==DB_MODE_LAST){
         
         // Update active transformation start index
-        transformStart=transforms.size()-1;
+        transformStart=transforms.size()-configGroup+1;
 
     }
 
@@ -86,11 +82,7 @@ bool Database::getError(int loopState, int loopMajor, int loopMinor){
         }
     }
 
-    // Assign maximum disparity as error on disparity
-    dError=maxValue;
-
     // Apply error to deduce iterations stop condition
-    //if ( (std::fabs(tError-pushtError)<configError) && (std::fabs(dError-pushdError)<configError) ) {
     if ( (std::fabs(tError-pushtError)<configError) ) {
     
         // Error is stable enough to stop iterations
@@ -105,12 +97,11 @@ bool Database::getError(int loopState, int loopMajor, int loopMinor){
               << " | "
               << "state " << loopState 
               << " | "
-              << "error : (" << tError << ", " << dError << ")" 
+              << "error : " << tError
               << std::endl;
 
     /* pushing errors */
     pushtError=tError;
-    pushdError=dError;
 
     /* send answser */
     return returnValue;
@@ -271,28 +262,30 @@ void Database::prepareStructure(){
 
     // Type-based detection - Type A
     for(auto & structure: unsorted){
-        if(structure->getHasLastViewpoint(lastViewpoint)==true){
-            if(structure->getOptimised()==true){
+        //if(structure->getHasLastViewpoint(lastViewpoint)==true){
+        if(structure->getHasHead(configGroup,lastViewpoint)==true){
+        //    if(structure->getOptimised()==true){
                 structures[index++]=structure;
                 sortStructTypeA++;
-            }
+        //    }
 
         }
     }
 
     // Type-based detection - Type B
-    for(auto & structure: unsorted){
-        if(structure->getHasLastViewpoint(lastViewpoint)==true){
-            if(structure->getOptimised()==false){
-                structures[index++]=structure;
-                sortStructTypeB++;
-            }
-        }
-    }
+    //for(auto & structure: unsorted){
+    //    if(structure->getHasLastViewpoint(lastViewpoint)==true){
+    //        if(structure->getOptimised()==false){
+    //            structures[index++]=structure;
+    //            sortStructTypeB++;
+    //        }
+    //    }
+    //}
 
     // Type-based detection - Type C
     for(auto & structure: unsorted){
-        if(structure->getHasLastViewpoint(lastViewpoint)==false){
+        //if(structure->getHasLastViewpoint(lastViewpoint)==false){
+        if(structure->getHasHead(configGroup,lastViewpoint)==false){
             structures[index++]=structure;
         }
     }
@@ -332,7 +325,7 @@ void Database::computeModels(int loopState){
 
     }
 
-    // Updtae feature model position
+    // Updtae feature model position // Only needed for group viewpoint on LAST mode
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
         structures[i]->computeModel();
@@ -352,7 +345,9 @@ void Database::computeCentroids(int loopState){
     if(loopState==DB_MODE_LAST){
 
         // Update active transformation
-        transformationStart=transforms.size()-1;
+        //transformationStart=transforms.size()-1;
+        // new
+        transformationStart=transforms.size()-configGroup+1;
 
         // Update structure range
         structureRange=sortStructTypeA+sortStructTypeB;
@@ -374,7 +369,7 @@ void Database::computeCentroids(int loopState){
     // Compute centroid contribution for active structures
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++) {
-        if(structures[i]->getHasScale(configGroup)){
+        if(structures[i]->getHasScale(configGroup)){ // No more necessary // Miss-selection of structure : potentially not linking all the last viewpoints in LAST mode
             structures[i]->computeCentroid(transforms);
         }
     }
@@ -399,7 +394,9 @@ void Database::computeCorrelations(int loopState){
     if(loopState==DB_MODE_LAST){
 
         // Update active transformation
-        transformationStart=transforms.size()-1;
+        //transformationStart=transforms.size()-1;
+        // new
+        transformationStart=transforms.size()-configGroup+1;
 
         // Update structure range
         structureRange=sortStructTypeA+sortStructTypeB;
@@ -421,7 +418,7 @@ void Database::computeCorrelations(int loopState){
     // Compute correlation matrix correlation for active structures
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
-        if(structures[i]->getHasScale(configGroup)){
+        if(structures[i]->getHasScale(configGroup)){ // No more necessary // Miss-selection of structure : potentially not linking all the last viewpoints in LAST mode
             structures[i]->computeCorrelation(transforms);
         }
     }
@@ -437,7 +434,9 @@ void Database::computePoses(int loopState){
     if(loopState==DB_MODE_LAST){
 
         // Update active transformation
-        transformationStart=transforms.size()-1;
+        //transformationStart=transforms.size()-1;
+        // new
+        transformationStart=transforms.size()-configGroup+1;
 
     }else
     if(loopState==DB_MODE_MASS){
@@ -460,11 +459,15 @@ void Database::computeNormalisePoses(int loopState){
     // Active transformation range
     unsigned int transformRange(transforms.size());
 
+    // new
+    unsigned int transformStart(0);
+
     // Check pipeline state
     if(loopState==DB_MODE_LAST){
 
         // Update active transformation range
-        transformRange--;
+        //transformRange--;
+        transformStart=transforms.size()-configGroup+1;
 
     }else
     if(loopState==DB_MODE_MASS){
@@ -474,16 +477,23 @@ void Database::computeNormalisePoses(int loopState){
 
     }
 
+    unsigned int count(0);
+
     // Compute translation norm mean
     transformMean=0.;
-    for(unsigned int i(0); i<transformRange; i++){
+    // new
+    //for(unsigned int i(0); i<transformRange; i++){
+    for(unsigned int i(transformStart); i<transforms.size(); i++){
         transformMean+=transforms[i]->getTranslation()->norm();
+        count++;
     }
-    transformMean/=double(transformRange); 
+    transformMean/=count;
 
     // Renormalise translation
     # pragma omp parallel for schedule(dynamic)
-    for(unsigned int i=0; i<transforms.size(); i++){
+    // new
+    //for(unsigned int i=0; i<transforms.size(); i++){
+    for(unsigned int i=transformStart; i<transforms.size(); i++){
         transforms[i]->setTranslationScale(transformMean);
     }
 
@@ -494,11 +504,16 @@ void Database::computeFrames(int loopState){
     // Active transformation index
     unsigned int transformationStart(0);
 
+    // new
+    viewpoints[0]->resetFrame();
+
     // check pipeline state
     if(loopState==DB_MODE_LAST){
 
         // Update active transformation
-        transformationStart=transforms.size()-1;
+        //transformationStart=transforms.size()-1;
+        // new
+        transformationStart=transforms.size()-configGroup+1;
 
     }else
     if(loopState==DB_MODE_MASS){
@@ -506,12 +521,12 @@ void Database::computeFrames(int loopState){
         // Jump over process
         return;
 
-    }else{
+    }//else{
 
         // Assign identity and zero position to first viewpoint
-        viewpoints[0]->resetFrame();
+        //viewpoints[0]->resetFrame();
 
-    }
+    //}
 
     // Compute viewpoint absolute orientation and position
     for(unsigned int i(transformationStart); i<transforms.size(); i++){
@@ -525,18 +540,22 @@ void Database::computeOriented(long loopState){
     // Active structure range
     unsigned int structureRange(structures.size());
 
+    unsigned int headStart(0);
+
     // check pipeline state
-    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){
+    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){ // MASS denormal
 
         // Update active structure
         structureRange=sortStructTypeA+sortStructTypeB;
+    
+        headStart=viewpoints.size()-configGroup;
 
     }
 
     // Compute optimal structure position
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
-        structures[i]->computeOriented();
+        structures[i]->computeOriented(headStart);
     }
 
 }
@@ -546,18 +565,22 @@ void Database::computeOptimals(long loopState){
     // Active structure range
     unsigned int structureRange(structures.size());
 
+    unsigned int headStart(0);
+
     // check pipeline state
-    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){
+    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){ // MASS denormal
 
         // Update active structure
         structureRange=sortStructTypeA+sortStructTypeB;
+
+        headStart=viewpoints.size()-configGroup;
 
     }
 
     // Compute optimal structure position
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
-        structures[i]->computeOptimalPosition();
+        structures[i]->computeOptimalPosition(headStart);
     }
 
 }
@@ -567,18 +590,22 @@ void Database::computeRadii(long loopState){
     // Active structure upper bound
     unsigned int structureRange(structures.size());
 
+    unsigned int headStart(0);
+
     // check pipeline state
     if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){
 
         // Update structure range
         structureRange=sortStructTypeA+sortStructTypeB;
 
+        headStart=viewpoints.size()-configGroup;
+
     }
 
     // Updtae feature model position
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=0; i<structureRange; i++){
-        structures[i]->computeRadius();
+        structures[i]->computeRadius(headStart);
     }
 
 }
@@ -591,11 +618,15 @@ void Database::computeDisparityStatistics(long loopState){
     // Active structure range
     unsigned int structureRange(structures.size());
 
+    unsigned int headStart(0);
+
     // check pipeline state
     if(loopState==DB_MODE_LAST){
 
         // Update structure range
         structureRange=sortStructTypeA+sortStructTypeB;
+
+        headStart=viewpoints.size()-configGroup;
 
     }else
     if(loopState==DB_MODE_MASS){
@@ -609,15 +640,15 @@ void Database::computeDisparityStatistics(long loopState){
     meanValue=0.;
     maxValue=0.;
     for(unsigned int i(0); i<structureRange; i++){
-        countValue+=structures[i]->computeDisparityMean(&meanValue);
-        structures[i]->computeDisparityMax(&maxValue);
+        countValue+=structures[i]->computeDisparityMean(&meanValue,headStart);
+        structures[i]->computeDisparityMax(&maxValue,headStart);
     }
     meanValue/=double(countValue);
 
     // Compute standard deviation
     stdValue=0.;
     for(unsigned int i(0); i<structureRange; i++){
-        structures[i]->computeDisparityStd(&stdValue,meanValue);
+        structures[i]->computeDisparityStd(&stdValue,meanValue,headStart);
     }
     stdValue=std::sqrt(stdValue/(countValue-1));
 
@@ -635,12 +666,16 @@ void Database::filterRadialRange(int loopState){
     // Active structure range
     unsigned int structureRange(structures.size());
 
+    unsigned int headStart(0);
+
     // check pipeline state
-    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){
+    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){ // check MASS mode
 
         // Update structure range
         structureRange=sortStructTypeA+sortStructTypeB;
-        
+     
+        headStart=viewpoints.size()-configGroup;
+   
     }
 
     // Compute filtering condition
@@ -648,7 +683,7 @@ void Database::filterRadialRange(int loopState){
     for(unsigned int i=0; i<structureRange; i++){
 
         // Filter structure
-        structures[i]->filterRadialRange(0.,25.);
+        structures[i]->filterRadialRange(0.,25.,headStart);
 
     }
 
@@ -707,11 +742,15 @@ void Database::filterDisparity(int loopState){
     // Filtering threshold value
     double thresholdValue(stdValue*configErrorDisparity);
 
+    unsigned int headStart(0);
+
     // check pipeline state
     if(loopState==DB_MODE_LAST){
 
         // Update structure range
         structureRange=sortStructTypeA+sortStructTypeB;
+
+        headStart=viewpoints.size()-configGroup;
         
     }else
     if(loopState==DB_MODE_MASS){
@@ -729,7 +768,7 @@ void Database::filterDisparity(int loopState){
     for(unsigned int i=0; i<structureRange; i++){
 
         // Filter structure
-        structures[i]->filterDisparity(thresholdValue);
+        structures[i]->filterDisparity(thresholdValue, headStart);
 
     }
 
