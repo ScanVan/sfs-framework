@@ -30,8 +30,13 @@
 #include "framework-feature.hpp"
 #include "framework-transform.hpp"
 #include "framework-viewpoint.hpp"
-
 #include "framework-utiles.hpp"
+
+// Define structure activity
+#define STRUCTURE_REMOVE ( 0 ) /* Removed by filtering process - no more usable */
+#define STRUCTURE_NORMAL ( 1 ) /* Normal structure, containing two features or more */
+#define STRUCTURE_LASTVP ( 2 ) /* Structure that contains the last viewpoint */
+#define STRUCTURE_FULLVP ( 3 ) /* Structure that contains all the last viewpoints in the pipeline active head (configGroup) */
 
 // Module object
 class Structure {
@@ -41,12 +46,16 @@ public: /* Need to be set back to private */
     Viewpoint *originalViewpoint; /* no more needed */
     bool optimised; /* no more needed */
     bool filtered; /* replaced */
-    int filterStatus;
+    //int filterStatus;
+    unsigned int state;
 
 public:
-    Structure() : position(Eigen::Vector3d::Zero()), originalViewpoint(NULL), optimised(false), filtered(true), filterStatus(0) {}
+    Structure() : position(Eigen::Vector3d::Zero()), originalViewpoint(NULL), optimised(false), filtered(true) {}
     Structure(Viewpoint *originalViewpoint) : position(Eigen::Vector3d::Zero()), originalViewpoint(originalViewpoint), optimised(false), filtered(true) {}  /* no more needed - using standard constructor */
     Eigen::Vector3d * getPosition();
+
+    unsigned int getState();
+
     bool getOptimised();
     bool getFiltered();
     int getFeaturesCount();
@@ -60,6 +69,9 @@ public:
     void setFeaturesState();
     void addFeature(Feature * feature);
     void sortFeatures();
+
+    void computeState(unsigned int configGroup, unsigned int lastViewpointIndex);
+
     void computeModel();
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
@@ -69,8 +81,12 @@ public:
     unsigned int computeDisparityMean(double * const meanValue,unsigned int headStart);
     void computeDisparityStd(double * const stdValue, double const meanValue,unsigned int headStart);
     void computeDisparityMax(double * const maxValue, unsigned int headStart);
-    void filterRadialRange(double lowClamp, double highClamp,unsigned int headStart);
-    void filterDisparity(double limitValue,unsigned int headStart);
+
+
+    //void filterRadialRange(double lowClamp, double highClamp,unsigned int headStart);
+    void filterRadialRange(double lowClamp, double highClamp,unsigned int headStart, unsigned int headStop);
+    //void filterDisparity(double limitValue,unsigned int headStart);
+    void filterDisparity(double limitValue,unsigned int headStart, unsigned int headStop);
 
     void filterExperimental(double minValue);
 

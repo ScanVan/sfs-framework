@@ -204,16 +204,20 @@ int main(int argc, char ** argv){
         // development feature - end
 
         // Perpare structure features - sort by viewpoint index order
-        database.prepareFeature();
+        //database.prepareFeature();
 
         // Prepare structure vector - type-based segment sort
-        database.prepareStructure();
+        //database.prepareStructure();
+
+        database.prepareState(loopState);
+
+        database.prepareStructures();
 
         // Check failure condition - enough matches for the new viewpoint
-        if(database.getFailure()==true){
-            std::cerr << "Failure during viewpoint addition : not enough matches" << std::endl;
-            exit(1);
-        }
+        //if(database.getFailure()==true){
+        //    std::cerr << "Failure during viewpoint addition : not enough matches" << std::endl;
+        //    exit(1);
+        //}
 
         // development feature - begin
         //database._exportMatchDistribution(yamlExport["path"].as<std::string>(),loopMajor,"initial");
@@ -234,8 +238,8 @@ int main(int argc, char ** argv){
 
             // algorithm optimisation loop
             while ( loopFlag == true ) {
-        
-                database.prepareStructureDynamic();
+
+                //database.prepareStructureDynamic();
 
                 // Algorithm core
                 database.computeModels(loopState);
@@ -265,6 +269,8 @@ int main(int argc, char ** argv){
 
             }
 
+            database.expungeStructures();
+
             // development feature - begin
             //database._exportStructureModel(yamlExport["path"].as<std::string>(),loopMajor);
             // development feature - end
@@ -292,6 +298,7 @@ int main(int argc, char ** argv){
                 //}
 
                 loopState=DB_MODE_FULL;
+                database.prepareState(loopState);
 
                 database.computeFrames(loopState);
                 database.computeOriented(loopState);
@@ -299,6 +306,8 @@ int main(int argc, char ** argv){
                 database.computeRadii(loopState);
 
                 database.filterRadialRange(loopState);
+
+                database.expungeStructures();
 
                 // development feature - begin
                 database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor+1);

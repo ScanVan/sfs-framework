@@ -25,6 +25,10 @@ Eigen::Vector3d * Structure::getPosition(){
     return &position;
 }
 
+unsigned int Structure::getState(){
+    return state;
+}
+
 bool Structure::getOptimised(){
     return optimised;
 }
@@ -115,6 +119,24 @@ void Structure::sortFeatures(){
         }
         features[i]=unsorted[pushIndex];
         unsorted[pushIndex]=NULL;
+    }
+}
+
+void Structure::computeState(unsigned int configGroup, unsigned int lastViewpointIndex){
+    if(features.back()->getViewpoint()->getIndex()==lastViewpointIndex){
+        if(features.size()>=configGroup){
+            state=STRUCTURE_FULLVP;
+            for(unsigned int i(0); i<configGroup; i++){
+                if(features[features.size()-(i+1)]->getViewpoint()->getIndex()!=(lastViewpointIndex-i)){
+                    state=STRUCTURE_LASTVP;
+                    return;
+                }
+            }
+        }else{
+            state=STRUCTURE_LASTVP;
+        }
+    }else{
+        state=STRUCTURE_NORMAL;
     }
 }
 
@@ -229,7 +251,7 @@ void Structure::computeDisparityMax(double * const maxValue, unsigned int headSt
     }
 }
 
-void Structure::filterRadialRange(double lowClamp, double highClamp,unsigned int headStart){
+void Structure::filterRadialRange(double lowClamp, double highClamp,unsigned int headStart, unsigned int headStop){
     unsigned int index(0);
     for(unsigned int i(0); i<features.size(); i++){
         if(features[i]->getViewpoint()->getIndex()>=headStart){
@@ -244,21 +266,52 @@ void Structure::filterRadialRange(double lowClamp, double highClamp,unsigned int
             index ++;
         }
     }
-    filterStatus=0;
     if(index<features.size()){
-        features.resize(index);
-        filterStatus=1;
-    }
-    if(index<2){
-        filtered=false;
-        filterStatus=2;
-        setFeaturesState();
-    }else{
-        filtered=true;
+        if(index<2){
+            filtered=false;
+            setFeaturesState();
+            features.clear();
+            state=STRUCTURE_REMOVE;
+        }else{
+            filtered=true;
+            features.resize(index);
+            if(state==STRUCTURE_FULLVP) state=STRUCTURE_LASTVP;
+            if(state==STRUCTURE_LASTVP){
+                if(features.back()->getViewpoint()->getIndex()!=headStop){
+                    state=STRUCTURE_NORMAL;
+                }
+            }
+        }
     }
 }
 
-void Structure::filterDisparity(double limitValue,unsigned int headStart){
+//void Structure::filterRadialRange(double lowClamp, double highClamp,unsigned int headStart){
+//    unsigned int index(0);
+//    for(unsigned int i(0); i<features.size(); i++){
+//        if(features[i]->getViewpoint()->getIndex()>=headStart){
+//            if((features[i]->getRadius()<lowClamp)||(features[i]->getRadius()>highClamp)){
+//                features[i]->setStructurePtr(NULL);
+//            }else{
+//                if(index!=i) features[index]=features[i];
+//                index ++;
+//            }
+//        }else{
+//            if(index!=i) features[index]=features[i];
+//            index ++;
+//        }
+//    }
+//    if(index<features.size()){
+//        features.resize(index);
+//    }
+//    if(index<2){
+//        filtered=false;
+//        setFeaturesState();
+//    }else{
+//        filtered=true;
+//    }
+//}
+
+void Structure::filterDisparity(double limitValue,unsigned int headStart, unsigned int headStop){
     unsigned int index(0);
     for(unsigned int i(0); i<features.size(); i++){
         if(features[i]->getViewpoint()->getIndex()>=headStart){
@@ -273,19 +326,50 @@ void Structure::filterDisparity(double limitValue,unsigned int headStart){
             index ++;
         }
     }
-    filterStatus=0;
     if(index<features.size()){
-        features.resize(index);
-        filterStatus=1;
-    }
-    if(index<2){
-        filtered=false;
-        filterStatus=2;
-        setFeaturesState();
-    }else{
-        filtered=true;
+        if(index<2){
+            filtered=false;
+            setFeaturesState();
+            features.clear();
+            state=STRUCTURE_REMOVE;
+        }else{
+            filtered=true;
+            features.resize(index);
+            if(state==STRUCTURE_FULLVP) state=STRUCTURE_LASTVP;
+            if(state==STRUCTURE_LASTVP){
+                if(features.back()->getViewpoint()->getIndex()!=headStop){
+                    state=STRUCTURE_NORMAL;
+                }
+            }
+        }
     }
 }
+
+//void Structure::filterDisparity(double limitValue,unsigned int headStart){
+//    unsigned int index(0);
+//    for(unsigned int i(0); i<features.size(); i++){
+//        if(features[i]->getViewpoint()->getIndex()>=headStart){
+//            if(features[i]->getDisparity()>limitValue){
+//                features[i]->setStructurePtr(NULL);
+//            }else{
+//                if(index!=i) features[index]=features[i];
+//                index ++;
+//            }
+//        }else{
+//            if(index!=i) features[index]=features[i];
+//            index ++;
+//        }
+//    }
+//    if(index<features.size()){
+//        features.resize(index);
+//    }
+//    if(index<2){
+//        filtered=false;
+//        setFeaturesState();
+//    }else{
+//        filtered=true;
+//    }
+//}
 
 void Structure::filterExperimental(double minValue){
     double maxDetect(0.), maxCandidate(0.);

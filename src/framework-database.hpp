@@ -51,7 +51,7 @@ namespace fs = std::experimental::filesystem;
 #define DB_MODE_BOOT       (  0 ) /* Initial structure */
 #define DB_MODE_LAST       (  1 ) /* Optimising last viewpoint */
 #define DB_MODE_HEAD       (  2 ) /* Optimising active head */
-#define DB_MODE_FULL       (  4 ) /* Optimising all structures */
+#define DB_MODE_FULL       (  4 ) /* Optimising all structures */ /* Need deletion */
 #define DB_MODE_MASS       (  5 ) /* Only compute position of structures and strict filter */
 
 // Module object
@@ -75,7 +75,13 @@ public: /* Need to be set back to private */
     double stdValue;
     double maxValue;
 
-    unsigned int firstActive;
+    unsigned int rangeVlow;  /* Viewpoints range first index */
+    unsigned int rangeVhigh; /* Viewpoints range last index */
+    unsigned int rangeTlow;  /* Transformations range first index */
+    unsigned int rangeThigh; /* Transformations range last index */
+    unsigned int rangeSlow;  /* Structures range first index */
+    unsigned int rangeShigh; /* Structures range last index */
+    unsigned int stateStructure; /* Structure state */
 
 public:
     Database(double initialError, double initialErrorDisparity, double initialRadius, unsigned int initialGroup, unsigned int initialMatchRange, double initialDenseDisparity);
@@ -85,6 +91,11 @@ public:
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
+
+    void prepareState(int pipeState);
+    void prepareStructures();
+    void expungeStructures();
+
     void prepareFeature();
     void prepareStructure();
 
@@ -96,10 +107,10 @@ public:
     void computePoses(int loopState);
     void computeNormalisePoses(int loopState);
     void computeFrames(int loopState);
-    void computeOriented(long loopState);
-    void computeOptimals(long loopState);
-    void computeRadii(long loopState);
-    void computeDisparityStatistics(long loopState);
+    void computeOriented(int loopState);
+    void computeOptimals(int loopState);
+    void computeRadii(int loopState);
+    void computeDisparityStatistics(int loopState);
     void filterRadialRange(int loopState);
     void filterDisparity(int loopState);
     void exportStructure(std::string path, std::string mode, unsigned int major);
