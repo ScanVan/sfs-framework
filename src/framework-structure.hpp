@@ -43,35 +43,17 @@ class Structure {
 public: /* Need to be set back to private */
     Eigen::Vector3d position;
     std::vector<Feature*> features;
-    Viewpoint *originalViewpoint; /* no more needed */
-    bool optimised; /* no more needed */
-    bool filtered; /* replaced */
-    //int filterStatus;
     unsigned int state;
 
 public:
-    Structure() : position(Eigen::Vector3d::Zero()), originalViewpoint(NULL), optimised(false), filtered(true) {}
-    Structure(Viewpoint *originalViewpoint) : position(Eigen::Vector3d::Zero()), originalViewpoint(originalViewpoint), optimised(false), filtered(true) {}  /* no more needed - using standard constructor */
+    Structure() : position(Eigen::Vector3d::Zero()), state(STRUCTURE_REMOVE) {}  
     Eigen::Vector3d * getPosition();
-
     unsigned int getState();
-
-    bool getOptimised();
-    bool getFiltered();
-    int getFeaturesCount();
-    bool getHasLastViewpoint(int lastViewpointIndex);
-    bool getHasScale(unsigned int configGroup);
-
-    bool getHasHead(unsigned int configGroup, unsigned int lastViewpoint);
-
     cv::Vec3b getColor();
     void setReset();
-    void setFeaturesState();
     void addFeature(Feature * feature);
     void sortFeatures();
-
     void computeState(unsigned int configGroup, unsigned int lastViewpointIndex);
-
     void computeModel();
     void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
     void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
@@ -81,16 +63,8 @@ public:
     unsigned int computeDisparityMean(double * const meanValue,unsigned int headStart);
     void computeDisparityStd(double * const stdValue, double const meanValue,unsigned int headStart);
     void computeDisparityMax(double * const maxValue, unsigned int headStart);
-
-
-    //void filterRadialRange(double lowClamp, double highClamp,unsigned int headStart);
     void filterRadialRange(double lowClamp, double highClamp,unsigned int headStart, unsigned int headStop);
-    //void filterDisparity(double limitValue,unsigned int headStart);
     void filterDisparity(double limitValue,unsigned int headStart, unsigned int headStop);
-
-    void filterExperimental(double minValue);
-
-    Viewpoint *getOriginalViewpoint() { return originalViewpoint; }
-    std::vector< Feature* > *getFeatures(){ return &features; } /* do not create methods for development realated function / or specify it clearly - will need to desapear */
+    void filterResize(unsigned int newSize, unsigned int headStop);
 
 };

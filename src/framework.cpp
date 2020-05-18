@@ -44,28 +44,28 @@ int main(int argc, char ** argv){
     // Check yaml format
     if ( yamlConfig["frontend"].IsDefined() != true ) {
         // Display error and exit
-        std::cerr << "Missing section in YAML configuration file" << std::endl;
+        std::cerr << "Missing section in YAML configuration file (frontend)" << std::endl;
         return 1;
     } else
     if ( yamlConfig["matching"].IsDefined() != true ) {
         // Display error and exit
-        std::cerr << "Missing section in YAML configuration file" << std::endl;
+        std::cerr << "Missing section in YAML configuration file (matching)" << std::endl;
         return 1;
     } else
     if ( yamlConfig["algorithm"].IsDefined() != true ) {
         // Display error and exit
-        std::cerr << "Missing section in YAML configuration file" << std::endl;
+        std::cerr << "Missing section in YAML configuration file (algorithm)" << std::endl;
         return 1;
     } else
     if ( yamlConfig["export"].IsDefined() != true ) {
         // Display error and exit
-        std::cerr << "Missing section in YAML configuration file" << std::endl;
+        std::cerr << "Missing section in YAML configuration file (export)" << std::endl;
         return 1;
     }
 
     // Instance of main yaml section
     YAML::Node yamlFrontend  = yamlConfig["frontend"];
-    YAML::Node yamlFeatures  = yamlConfig["features"]; // To add
+    //YAML::Node yamlFeatures  = yamlConfig["features"]; // To add
     YAML::Node yamlMatching  = yamlConfig["matching"];
     YAML::Node yamlAlgorithm = yamlConfig["algorithm"];
     YAML::Node yamlDense     = yamlConfig["dense"];
@@ -92,12 +92,14 @@ int main(int argc, char ** argv){
     Frontend * frontend(nullptr);
 
     // Pipeline iterations
-    int loopMajor(4); // need to be assigned with configGroup of database
+    int loopMajor(database.getGroup());
     int loopMinor(0);
 
-    // Algorithm loop
+    // Loop flag
     bool loopFlag(true);
-    long loopState(DB_MODE_NULL);
+
+    // Algorithm state
+    int loopState(DB_MODE_NULL);
 
     //
     //  Framework exportation
@@ -190,17 +192,17 @@ int main(int argc, char ** argv){
         }
 
         // development feature - begin
-        if(yamlConfig["debug"].IsDefined()){
-            if(yamlConfig["debug"]["structureImageDump"].IsDefined()){
-                for(auto viewpoint : database.viewpoints){
-                    auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
-                    auto folder = yamlExport["path"].as<std::string>() + "/viewpointStructuresImages";
-                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "a.jpg";
-                    fs::create_directories(folder);
-                    cv::imwrite(path, image);
-                }
-            }
-        }
+        //if(yamlConfig["debug"].IsDefined()){
+        //    if(yamlConfig["debug"]["structureImageDump"].IsDefined()){
+        //        for(auto viewpoint : database.viewpoints){
+        //            auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
+        //            auto folder = yamlExport["path"].as<std::string>() + "/viewpointStructuresImages";
+        //            auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "a.jpg";
+        //            fs::create_directories(folder);
+        //            cv::imwrite(path, image);
+        //        }
+        //    }
+        //}
         // development feature - end
 
         // Perpare structure features - sort by viewpoint index order
@@ -208,10 +210,6 @@ int main(int argc, char ** argv){
 
         // Prepare structure vector - type-based segment sort
         //database.prepareStructure();
-
-        database.prepareState(loopState);
-
-        database.prepareStructures();
 
         // Check failure condition - enough matches for the new viewpoint
         //if(database.getFailure()==true){
@@ -223,11 +221,19 @@ int main(int argc, char ** argv){
         //database._exportMatchDistribution(yamlExport["path"].as<std::string>(),loopMajor,"initial");
         // development feature - end
 
-        // Reset algorithm loop
+        // Update pipeline state
+        database.prepareState(loopState);
+
+        // Prepare structures
+        database.prepareStructures();
+
+        // Reset loop flag
         loopFlag=true;
+
+        // Reset iteration
         loopMinor=0;
 
-        // Algorithm state loop
+        // Algorithm loop
         while ( loopFlag == true ) {
 
             double pushCommon(1.);
@@ -236,7 +242,7 @@ int main(int argc, char ** argv){
                 pushCommon=database.transforms[database.transforms.size()-2]->translation.norm();
             }
 
-            // algorithm optimisation loop
+            // Optimisation loop
             while ( loopFlag == true ) {
 
                 //database.prepareStructureDynamic();
@@ -261,7 +267,7 @@ int main(int argc, char ** argv){
                 // Filtering on disparity
                 database.filterDisparity(loopState);
 
-                /* iteration end condition */
+                /* Iteration end condition */
                 loopFlag=database.getError(loopState, loopMajor, loopMinor);
 
                 // Update minor iterator
@@ -269,6 +275,7 @@ int main(int argc, char ** argv){
 
             }
 
+            // Expunge filtered structures
             database.expungeStructures();
 
             // development feature - begin
@@ -278,7 +285,7 @@ int main(int argc, char ** argv){
             if(loopState==DB_MODE_LAST){
 
                 // development feature - begin
-                database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor);
+                //database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor);
                 // development feature - end
 
                 pushCommon/=database.transforms[database.transforms.size()-2]->translation.norm();
@@ -310,7 +317,7 @@ int main(int argc, char ** argv){
                 database.expungeStructures();
 
                 // development feature - begin
-                database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor+1);
+                //database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor+1);
                 // development feature - end
 
             }
@@ -339,17 +346,17 @@ int main(int argc, char ** argv){
         // development feature - end
 
         // development feature - begin
-        if(yamlConfig["debug"].IsDefined()){
-            if(yamlConfig["debug"]["structureImageDump"].IsDefined()){
-                for(auto viewpoint : database.viewpoints){
-                    auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
-                    auto folder = yamlExport["path"].as<std::string>() + "/viewpointStructuresImages";
-                    auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "b.jpg";
-                    fs::create_directories(folder);
-                    cv::imwrite(path, image);
-                }
-            }
-        }
+        //if(yamlConfig["debug"].IsDefined()){
+        //    if(yamlConfig["debug"]["structureImageDump"].IsDefined()){
+        //        for(auto viewpoint : database.viewpoints){
+        //            auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
+        //            auto folder = yamlExport["path"].as<std::string>() + "/viewpointStructuresImages";
+        //            auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "b.jpg";
+        //            fs::create_directories(folder);
+        //            cv::imwrite(path, image);
+        //        }
+        //    }
+        //}
         // development feature - end
 
         // Need to be placed after features extraction, as an image is not needed from there

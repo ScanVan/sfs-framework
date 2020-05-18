@@ -29,46 +29,6 @@ unsigned int Structure::getState(){
     return state;
 }
 
-bool Structure::getOptimised(){
-    return optimised;
-}
-
-bool Structure::getFiltered(){
-    return filtered;
-}
-
-int Structure::getFeaturesCount(){
-    return features.size();
-}
-
-bool Structure::getHasLastViewpoint(int lastViewpointIndex){
-    if(features.back()->getViewpoint()->getIndex()==lastViewpointIndex){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-bool Structure::getHasScale(unsigned int configGroup){
-    if(features.size()>=configGroup){
-        return true;
-    }else{
-        return false;
-    }
-}
-
-bool Structure::getHasHead(unsigned int configGroup, unsigned int lastViewpoint){
-    if(features.size()<configGroup){
-        return false;
-    }
-    for(unsigned int i(0); i<configGroup; i++){
-        if(features[features.size()-(i+1)]->getViewpoint()->getIndex()!=(lastViewpoint-i)){
-            return false;
-        }
-    }
-    return true;
-}
-
 cv::Vec3b Structure::getColor(){
     Eigen::Vector3f accum(Eigen::Vector3f::Zero());
     cv::Vec3b color;
@@ -87,13 +47,6 @@ cv::Vec3b Structure::getColor(){
 void Structure::setReset(){
     for(auto & feature: features){
         feature->reset();
-    }
-    optimised=false;
-}
-
-void Structure::setFeaturesState(){
-    for(auto & element: features){
-        element->setStructurePtr(NULL);
     }
 }
 
@@ -195,19 +148,15 @@ void Structure::computeOptimalPosition(unsigned int headStart){
             norm=1.-(dotAB*dotAB);
             rada=(-dotAB*dotBL+dotAL)/norm;
             radb=(+dotAB*dotAL-dotBL)/norm;
-
-            //if ((1.-fabs(dotAB))>0.087266){
-                accum+=0.5*(
-                (*features[i]->getViewpoint()->getPosition())+rada*(*features[i]->getModel())
-                +
-                (*features[j]->getViewpoint()->getPosition())+radb*(*features[j]->getModel())
-                );
-                count++;
-            //}
+            accum+=0.5*(
+            (*features[i]->getViewpoint()->getPosition())+rada*(*features[i]->getModel())
+            +
+            (*features[j]->getViewpoint()->getPosition())+radb*(*features[j]->getModel())
+            );
+            count++;
         }
     }
     position=accum/count;
-    optimised=true;
 }
 
 void Structure::computeRadius(unsigned int headStart){
@@ -266,50 +215,8 @@ void Structure::filterRadialRange(double lowClamp, double highClamp,unsigned int
             index ++;
         }
     }
-    if(index<features.size()){
-        if(index<2){
-            filtered=false;
-            setFeaturesState();
-            features.clear();
-            state=STRUCTURE_REMOVE;
-        }else{
-            filtered=true;
-            features.resize(index);
-            if(state==STRUCTURE_FULLVP) state=STRUCTURE_LASTVP;
-            if(state==STRUCTURE_LASTVP){
-                if(features.back()->getViewpoint()->getIndex()!=headStop){
-                    state=STRUCTURE_NORMAL;
-                }
-            }
-        }
-    }
+    filterResize(index,headStop);
 }
-
-//void Structure::filterRadialRange(double lowClamp, double highClamp,unsigned int headStart){
-//    unsigned int index(0);
-//    for(unsigned int i(0); i<features.size(); i++){
-//        if(features[i]->getViewpoint()->getIndex()>=headStart){
-//            if((features[i]->getRadius()<lowClamp)||(features[i]->getRadius()>highClamp)){
-//                features[i]->setStructurePtr(NULL);
-//            }else{
-//                if(index!=i) features[index]=features[i];
-//                index ++;
-//            }
-//        }else{
-//            if(index!=i) features[index]=features[i];
-//            index ++;
-//        }
-//    }
-//    if(index<features.size()){
-//        features.resize(index);
-//    }
-//    if(index<2){
-//        filtered=false;
-//        setFeaturesState();
-//    }else{
-//        filtered=true;
-//    }
-//}
 
 void Structure::filterDisparity(double limitValue,unsigned int headStart, unsigned int headStop){
     unsigned int index(0);
@@ -326,15 +233,19 @@ void Structure::filterDisparity(double limitValue,unsigned int headStart, unsign
             index ++;
         }
     }
-    if(index<features.size()){
-        if(index<2){
-            filtered=false;
-            setFeaturesState();
+    filterResize(index,headStop);
+}
+
+void Structure::filterResize(unsigned int newSize, unsigned int headStop){
+    if(newSize<features.size()){
+        if(newSize<2){
+            for(unsigned int i(0); i<newSize; i++){
+                features[i]->setStructurePtr(NULL);
+            }
             features.clear();
             state=STRUCTURE_REMOVE;
         }else{
-            filtered=true;
-            features.resize(index);
+            features.resize(newSize);
             if(state==STRUCTURE_FULLVP) state=STRUCTURE_LASTVP;
             if(state==STRUCTURE_LASTVP){
                 if(features.back()->getViewpoint()->getIndex()!=headStop){
@@ -345,46 +256,3 @@ void Structure::filterDisparity(double limitValue,unsigned int headStart, unsign
     }
 }
 
-//void Structure::filterDisparity(double limitValue,unsigned int headStart){
-//    unsigned int index(0);
-//    for(unsigned int i(0); i<features.size(); i++){
-//        if(features[i]->getViewpoint()->getIndex()>=headStart){
-//            if(features[i]->getDisparity()>limitValue){
-//                features[i]->setStructurePtr(NULL);
-//            }else{
-//                if(index!=i) features[index]=features[i];
-//                index ++;
-//            }
-//        }else{
-//            if(index!=i) features[index]=features[i];
-//            index ++;
-//        }
-//    }
-//    if(index<features.size()){
-//        features.resize(index);
-//    }
-//    if(index<2){
-//        filtered=false;
-//        setFeaturesState();
-//    }else{
-//        filtered=true;
-//    }
-//}
-
-void Structure::filterExperimental(double minValue){
-    double maxDetect(0.), maxCandidate(0.);
-    for(unsigned int i(0); i<features.size(); i++){
-        Eigen::Vector3d iDirection=*features[i]->getModel();
-        for(unsigned int j(i+1); j<features.size(); j++){
-            Eigen::Vector3d jDirection=*features[j]->getModel();
-            maxCandidate=iDirection.dot(jDirection)/(iDirection.norm()*jDirection.norm());
-            if(maxCandidate>maxDetect) maxDetect=maxCandidate;
-        }
-    }
-    if(maxDetect>minValue){
-        filtered=false;
-        setFeaturesState();
-    }else{
-        filtered=true;
-    }
-}

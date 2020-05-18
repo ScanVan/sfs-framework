@@ -62,15 +62,15 @@ public: /* Need to be set back to private */
     std::vector<std::shared_ptr<Transform>> transforms;
     std::vector<std::shared_ptr<Structure>> structures;
 
-    unsigned int sortStructTypeA;
-    unsigned int sortStructTypeB;
-    double transformMean;
     double configError;
     double configErrorDisparity;
     double configRadius;
     double configDenseDisparity;
+
     unsigned int configGroup;
     unsigned int configMatchRange;
+
+    double transformMean;
     double meanValue;
     double stdValue;
     double maxValue;
@@ -86,21 +86,14 @@ public: /* Need to be set back to private */
 public:
     Database(double initialError, double initialErrorDisparity, double initialRadius, unsigned int initialGroup, unsigned int initialMatchRange, double initialDenseDisparity);
     bool getBootstrap();
+    unsigned int getGroup();
     bool getError(int loopState, int loopMajor, int loopMinor);
-    bool getFailure();
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
-
     void prepareState(int pipeState);
     void prepareStructures();
     void expungeStructures();
-
-    void prepareFeature();
-    void prepareStructure();
-
-    void prepareStructureDynamic();
-
     void computeModels(int loopState);
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);
@@ -116,16 +109,12 @@ public:
     void exportStructure(std::string path, std::string mode, unsigned int major);
     void exportPosition(std::string path, std::string mode, unsigned int major);
     void exportTransformation(std::string path, std::string mode, unsigned int major);
-    Structure *newStructure(Viewpoint *originalViewpoint){ auto s = std::make_shared<Structure>(originalViewpoint); structures.push_back(s); return s.get();} /* need deletion */
+    Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();}
 
 public:
-    void _displayViewpointStructures(Viewpoint *viewpoint, unsigned int structSizeMin);
-    cv::Mat viewpointStructuralImage(Viewpoint *viewpoint, unsigned int structSizeMin);
-    void _sanityCheck(bool inliner);
-    void _sanityCheckStructure();
-    void _sanityCheckFeatureOrder();
-    void _exportState(std::string path,int major, int iter); /* need deletion */
-    void _exportMatchDistribution(std::string path, unsigned int major, std::string type); /* need deletion */
+
+    // Devlopment features
+    void _exportState(std::string path,int major, int iter);
     void _exportStructureModel(std::string path, unsigned int major);
 
 };

@@ -21,7 +21,7 @@
 
 #include "framework-viewpoint.hpp"
 
-int Viewpoint::getIndex(){
+unsigned int Viewpoint::getIndex(){
     return index;
 }
 
@@ -38,7 +38,7 @@ void Viewpoint::resetFrame(){
     position=Eigen::Vector3d::Zero();
 }
 
-void Viewpoint::setIndex(int newIndex){
+void Viewpoint::setIndex(unsigned int newIndex){
     index=newIndex;
 }
 

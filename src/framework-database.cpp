@@ -31,14 +31,28 @@ Database::Database(double initialError, double initialErrorDisparity, double ini
     configMatchRange=initialMatchRange;
     configDenseDisparity=initialDenseDisparity;
 
-    // Add test to ensure configGroup > 2
+    // Check consistency
+    if(configGroup<3){
+        std::cerr << "Warning : group value below 3" << std::endl;
+    }
 
 }
 
 bool Database::getBootstrap(){
     
     // Check bootstrap condition
-    return (viewpoints.size()<configGroup) ? true : false;
+    if(viewpoints.size()<configGroup){
+        return true;
+    }else{
+        return false;
+    }
+
+}
+
+unsigned int Database::getGroup(){
+
+    // Return group value
+    return configGroup;
 
 }
 
@@ -54,7 +68,7 @@ bool Database::getError(int pipeState, int loopMajor, int loopMinor){
     bool returnValue(true);
 
     /* Specific condition */
-    if(pipeState>DB_LOOP_MAXITER){
+    if(loopMinor>DB_LOOP_MAXITER){
         std::cerr << "Warning : maximum iterations count reached" << std::endl;
         returnValue=false;
     }
@@ -65,7 +79,7 @@ bool Database::getError(int pipeState, int loopMajor, int loopMinor){
     }
 
     // Detect maximum error on transformation
-    for(int i=rangeTlow; i<=rangeThigh; i++){
+    for(unsigned int i=rangeTlow; i<=rangeThigh; i++){
         if(transforms[i]->getError()>tError){
             tError=transforms[i]->getError();
         }
@@ -94,83 +108,6 @@ bool Database::getError(int pipeState, int loopMajor, int loopMinor){
 
     /* send answser */
     return returnValue;
-
-}
-
-//bool Database::getError(int loopState, int loopMajor, int loopMinor){
-//
-//    /* memory of error on transformation */
-//    static double pushtError(-1.);
-//
-//    /* error on transformation */
-//    double tError(0.);
-//
-//    // Active transformation range
-//    unsigned int transformStart(0);
-//
-//    /* iteration end condition flag */
-//    bool returnValue(true);
-//
-//    /* specific condition */
-//    if(loopMinor>DB_LOOP_MAXITER){
-//        std::cerr << "Warning : maximum iterations count reached" << std::endl;
-//        returnValue=false;
-//    }
-//
-//    /* specific condition */
-//    if(loopState==DB_MODE_MASS){
-//        returnValue=false;
-//    }
-//
-//    // Check pipeline state
-//    if(loopState==DB_MODE_LAST){
-//        
-//        // Update active transformation start index
-//        transformStart=transforms.size()-configGroup+1;
-//
-//    }
-//
-//    // Detect maximum error on transformation
-//    for(int i(transformStart); i< transforms.size(); i++){
-//        if(transforms[i]->getError()>tError){
-//            tError=transforms[i]->getError();
-//        }
-//    }
-//
-//    // Apply error to deduce iterations stop condition
-//    if ( (std::fabs(tError-pushtError)<configError) ) {
-//    
-//        // Error is stable enough to stop iterations
-//        returnValue=false;
-//
-//    }
-//
-//    /* display information on iterations and errors */
-//    std::cout << "step : " << std::setw(6) << loopMajor 
-//              << " | "
-//              << "iter : " << loopMinor
-//              << " | "
-//              << "state " << loopState 
-//              << " | "
-//              << "error : " << tError
-//              << std::endl;
-//
-//    /* pushing errors */
-//    pushtError=tError;
-//
-//    /* send answser */
-//    return returnValue;
-//
-//}
-
-bool Database::getFailure(){
-
-    // Check failure condition (not enough matches for the new viewpoint)
-    if((sortStructTypeA+sortStructTypeB)<64){
-        return true;
-    }else{
-        return false;
-    }
 
 }
 
@@ -235,7 +172,7 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
         switch(structuresCount){
             case 0: {
                 // no more needed - direct access to structure
-                structure = this->newStructure(newViewpoint);
+                structure = this->newStructure();
                 structureNewCount++;
             }break;
             case 1: {
@@ -386,122 +323,6 @@ void Database::expungeStructures(){
 
 }
 
-void Database::prepareFeature(){
-
-    // parsing structures for features sorting based on relative viewpoint index
-    for(auto & structure: structures){
-        structure->sortFeatures();
-    }
-
-}
-
-void Database::prepareStructure(){
-
-    // Last viewpoint index
-    unsigned int lastViewpoint(viewpoints.size()-1);
-
-    // Continuous indexation
-    unsigned int index(0);
-
-    // Copy structures vector
-    std::vector<std::shared_ptr<Structure>> unsorted(structures);
-
-    // reset counters
-    sortStructTypeA=0;
-    sortStructTypeB=0;
-
-    // Type-based detection - Type A
-    for(auto & structure: unsorted){
-        //if(structure->getHasLastViewpoint(lastViewpoint)==true){
-        if(structure->getHasHead(configGroup,lastViewpoint)==true){
-        //    if(structure->getOptimised()==true){
-                structures[index++]=structure;
-                sortStructTypeA++;
-        //    }
-
-        }
-    }
-
-    // Type-based detection - Type B
-    //for(auto & structure: unsorted){
-    //    if(structure->getHasLastViewpoint(lastViewpoint)==true){
-    //        if(structure->getOptimised()==false){
-    //            structures[index++]=structure;
-    //            sortStructTypeB++;
-    //        }
-    //    }
-    //}
-
-    // Type-based detection - Type C
-    for(auto & structure: unsorted){
-        //if(structure->getHasLastViewpoint(lastViewpoint)==false){
-        if(structure->getHasHead(configGroup,lastViewpoint)==false){
-            structures[index++]=structure;
-        }
-    }
-
-    // Reset active structure radius
-    # pragma omp parallel for schedule(dynamic)
-    for(unsigned int i=0; i<sortStructTypeA+sortStructTypeB; i++){
-        structures[i]->setReset();
-    }
-
-    // development feature - begin
-    if(index!=structures.size()){
-        std::cerr << "Fault : " << index << " vs " << structures.size() << std::endl;
-    } else {
-        std::cerr << "Structure distribution by types : " << sortStructTypeA << ", " << sortStructTypeB << ", " << structures.size() - sortStructTypeA - sortStructTypeB << std::endl;
-    }
-    // development feature - end
-
-}
-
-void Database::prepareStructureDynamic(){
-
-    // Last viewpoint index
-    unsigned int lastViewpoint(viewpoints.size()-1);
-
-    // Continuous indexation
-    unsigned int index(0);
-
-    // Copy structures vector
-    std::vector<std::shared_ptr<Structure>> unsorted(structures);
-
-    // reset counters
-    sortStructTypeA=0;
-    sortStructTypeB=0;
-
-    // Type-based detection - Type A
-    for(auto & structure: unsorted){
-        //if(structure->getHasLastViewpoint(lastViewpoint)==true){
-        if(structure->getHasHead(configGroup,lastViewpoint)==true){
-        //    if(structure->getOptimised()==true){
-                structures[index++]=structure;
-                sortStructTypeA++;
-        //    }
-
-        }
-    }
-
-    // Type-based detection - Type C
-    for(auto & structure: unsorted){
-        //if(structure->getHasLastViewpoint(lastViewpoint)==false){
-        if(structure->getHasHead(configGroup,lastViewpoint)==false){
-            structures[index++]=structure;
-        }
-    }
-
-    // development feature - begin
-    if(index!=structures.size()){
-        std::cerr << "Fault : " << index << " vs " << structures.size() << std::endl;
-    } else {
-        std::cerr << "Structure distribution by types : " << sortStructTypeA << ", " << sortStructTypeB << ", " << structures.size() - sortStructTypeA - sortStructTypeB << std::endl;
-    }
-    // development feature - end
-
-}
-
-
 void Database::computeModels(int pipeState){
     
     // Check pipeline state
@@ -521,33 +342,6 @@ void Database::computeModels(int pipeState){
     }
 
 }
-
-//void Database::computeModels(int loopState){
-//
-//    // Active structure upper bound
-//    unsigned int structureRange(structures.size());
-//
-//    // check pipeline state
-//    if(loopState==DB_MODE_LAST){
-//
-//        // Update structure range
-//        structureRange=sortStructTypeA+sortStructTypeB;
-//
-//    }else
-//    if(loopState==DB_MODE_MASS){
-//
-//        // Jump over process
-//        return;
-//
-//    }
-//
-//    // Updtae feature model position // Only needed for group viewpoint on LAST mode
-//    # pragma omp parallel for schedule(dynamic)
-//    for(unsigned int i=0; i<structureRange; i++){
-//        structures[i]->computeModel();
-//    }
-//
-//}
 
 void Database::computeCentroids(int pipeState){
 
@@ -581,55 +375,6 @@ void Database::computeCentroids(int pipeState){
 
 }
 
-//void Database::computeCentroids(int loopState){
-//
-//    // Active transformation start index
-//    unsigned int transformationStart(0);
-//
-//    // Active structure range upper bound
-//    unsigned int structureRange(structures.size());
-//
-//    // Check pipeline state
-//    if(loopState==DB_MODE_LAST){
-//
-//        // Update active transformation
-//        //transformationStart=transforms.size()-1;
-//        // new
-//        transformationStart=transforms.size()-configGroup+1;
-//
-//        // Update structure range
-//        structureRange=sortStructTypeA+sortStructTypeB;
-//
-//    }else
-//    if(loopState==DB_MODE_MASS){
-//
-//        // Jump over process
-//        return;
-//
-//    }
-//
-//    // Reset active transformations centroid
-//    # pragma omp parallel for
-//    for(unsigned int i=transformationStart; i<transforms.size(); i++){
-//        transforms[i]->resetCentroid();
-//    }
-//
-//    // Compute centroid contribution for active structures
-//    # pragma omp parallel for schedule(dynamic)
-//    for(unsigned int i=0; i<structureRange; i++) {
-//        if(structures[i]->getHasScale(configGroup)){ // No more necessary // Miss-selection of structure : potentially not linking all the last viewpoints in LAST mode
-//            structures[i]->computeCentroid(transforms);
-//        }
-//    }
-//
-//    // Compute active transformation centroid
-//    # pragma omp parallel for
-//    for(unsigned int i=transformationStart; i<transforms.size(); i++){
-//        transforms[i]->computeCentroid();
-//    }
-//
-//}
-
 void Database::computeCorrelations(int pipeState){
 
     // Check pipeline state
@@ -656,49 +401,6 @@ void Database::computeCorrelations(int pipeState){
 
 }
 
-//void Database::computeCorrelations(int loopState){
-//
-//    // Active transformation start index
-//    unsigned int transformationStart(0);
-//
-//    // Active structure range upper bound
-//    unsigned int structureRange(structures.size());
-//
-//    // Check pipeline state
-//    if(loopState==DB_MODE_LAST){
-//
-//        // Update active transformation
-//        //transformationStart=transforms.size()-1;
-//        // new
-//        transformationStart=transforms.size()-configGroup+1;
-//
-//        // Update structure range
-//        structureRange=sortStructTypeA+sortStructTypeB;
-//
-//    }else
-//    if(loopState==DB_MODE_MASS){
-//
-//        // Jump over process
-//        return;
-//
-//    }
-//
-//    // Reset active transformation correlation matrix
-//    # pragma omp parallel for
-//    for(unsigned int i=transformationStart; i<transforms.size(); i++){
-//        transforms[i]->resetCorrelation();
-//    }
-//
-//    // Compute correlation matrix correlation for active structures
-//    # pragma omp parallel for schedule(dynamic)
-//    for(unsigned int i=0; i<structureRange; i++){
-//        if(structures[i]->getHasScale(configGroup)){ // No more necessary // Miss-selection of structure : potentially not linking all the last viewpoints in LAST mode
-//            structures[i]->computeCorrelation(transforms);
-//        }
-//    }
-//
-//}
-
 void Database::computePoses(int pipeState){
 
     // Check pipeline state
@@ -716,35 +418,6 @@ void Database::computePoses(int pipeState){
     }
 
 }
-
-//void Database::computePoses(int loopState){
-//
-//    // Active transformation start index
-//    unsigned int transformationStart(0);
-//
-//    // Check pipeline state
-//    if(loopState==DB_MODE_LAST){
-//
-//        // Update active transformation
-//        //transformationStart=transforms.size()-1;
-//        // new
-//        transformationStart=transforms.size()-configGroup+1;
-//
-//    }else
-//    if(loopState==DB_MODE_MASS){
-//
-//        // Jump over process
-//        return;
-//
-//    }
-//
-//    // Compute transformation (orientation and translation)
-//    # pragma omp parallel for schedule(dynamic)
-//    for(unsigned int i=transformationStart; i<transforms.size(); i++){
-//        transforms[i]->computePose();
-//    }
-//
-//}
 
 void Database::computeNormalisePoses(int pipeState){
 
@@ -779,51 +452,6 @@ void Database::computeNormalisePoses(int pipeState){
 
 }
 
-//void Database::computeNormalisePoses(int loopState){
-//
-//    // Active transformation range
-//    unsigned int transformRange(transforms.size());
-//
-//    // new
-//    unsigned int transformStart(0);
-//
-//    // Check pipeline state
-//    if(loopState==DB_MODE_LAST){
-//
-//        // Update active transformation range
-//        //transformRange--;
-//        transformStart=transforms.size()-configGroup+1;
-//
-//    }else
-//    if(loopState==DB_MODE_MASS){
-//
-//        // Jump over process
-//        return;
-//
-//    }
-//
-//    unsigned int count(0);
-//
-//    // Compute translation norm mean
-//    transformMean=0.;
-//    // new
-//    //for(unsigned int i(0); i<transformRange; i++){
-//    for(unsigned int i(transformStart); i<transforms.size(); i++){
-//        transformMean+=transforms[i]->getTranslation()->norm();
-//        count++;
-//    }
-//    transformMean/=count;
-//
-//    // Renormalise translation
-//    # pragma omp parallel for schedule(dynamic)
-//    // new
-//    //for(unsigned int i=0; i<transforms.size(); i++){
-//    for(unsigned int i=transformStart; i<transforms.size(); i++){
-//        transforms[i]->setTranslationScale(transformMean);
-//    }
-//
-//}
-
 void Database::computeFrames(int pipeState){
 
     // Check pipeline state
@@ -844,42 +472,6 @@ void Database::computeFrames(int pipeState){
 
 }
 
-//void Database::computeFrames(int loopState){
-//
-//    // Active transformation index
-//    unsigned int transformationStart(0);
-//
-//    // new
-//    viewpoints[0]->resetFrame();
-//
-//    // check pipeline state
-//    if(loopState==DB_MODE_LAST){
-//
-//        // Update active transformation
-//        //transformationStart=transforms.size()-1;
-//        // new
-//        transformationStart=transforms.size()-configGroup+1;
-//
-//    }else
-//    if(loopState==DB_MODE_MASS){
-//
-//        // Jump over process
-//        return;
-//
-//    }//else{
-//
-//        // Assign identity and zero position to first viewpoint
-//        //viewpoints[0]->resetFrame();
-//
-//    //}
-//
-//    // Compute viewpoint absolute orientation and position
-//    for(unsigned int i(transformationStart); i<transforms.size(); i++){
-//        transforms[i]->computeFrame(viewpoints[i].get(),viewpoints[i+1].get());
-//    }
-//
-//}
-
 void Database::computeOriented(int pipeState){ /* param not needed */
 
     // Compute absolute orientation of features
@@ -891,31 +483,6 @@ void Database::computeOriented(int pipeState){ /* param not needed */
     }
 
 }
-
-//void Database::computeOriented(long loopState){
-//
-//    // Active structure range
-//    unsigned int structureRange(structures.size());
-//
-//    unsigned int headStart(0);
-//
-//    // check pipeline state
-//    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){ // MASS denormal
-//
-//        // Update active structure
-//        structureRange=sortStructTypeA+sortStructTypeB;
-//    
-//        headStart=viewpoints.size()-configGroup;
-//
-//    }
-//
-//    // Compute optimal structure position
-//    # pragma omp parallel for schedule(dynamic)
-//    for(unsigned int i=0; i<structureRange; i++){
-//        structures[i]->computeOriented(headStart);
-//    }
-//
-//}
 
 void Database::computeOptimals(int pipeState){ /* param not needed */
 
@@ -929,31 +496,6 @@ void Database::computeOptimals(int pipeState){ /* param not needed */
 
 }
 
-//void Database::computeOptimals(long loopState){
-//
-//    // Active structure range
-//    unsigned int structureRange(structures.size());
-//
-//    unsigned int headStart(0);
-//
-//    // check pipeline state
-//    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){ // MASS denormal
-//
-//        // Update active structure
-//        structureRange=sortStructTypeA+sortStructTypeB;
-//
-//        headStart=viewpoints.size()-configGroup;
-//
-//    }
-//
-//    // Compute optimal structure position
-//    # pragma omp parallel for schedule(dynamic)
-//    for(unsigned int i=0; i<structureRange; i++){
-//        structures[i]->computeOptimalPosition(headStart);
-//    }
-//
-//}
-
 void Database::computeRadii(int pipeState){ /* param not needed */
 
     // Compute feature radii according to optimal position
@@ -965,31 +507,6 @@ void Database::computeRadii(int pipeState){ /* param not needed */
     }
 
 }
-
-//void Database::computeRadii(long loopState){
-//
-//    // Active structure upper bound
-//    unsigned int structureRange(structures.size());
-//
-//    unsigned int headStart(0);
-//
-//    // check pipeline state
-//    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){
-//
-//        // Update structure range
-//        structureRange=sortStructTypeA+sortStructTypeB;
-//
-//        headStart=viewpoints.size()-configGroup;
-//
-//    }
-//
-//    // Updtae feature model position
-//    # pragma omp parallel for schedule(dynamic)
-//    for(unsigned int i=0; i<structureRange; i++){
-//        structures[i]->computeRadius(headStart);
-//    }
-//
-//}
 
 void Database::computeDisparityStatistics(int pipeState){ /* param not needed */
 
@@ -1024,50 +541,6 @@ void Database::computeDisparityStatistics(int pipeState){ /* param not needed */
 
 }
 
-//void Database::computeDisparityStatistics(long loopState){
-//
-//    // Count increment
-//    unsigned int countValue(0);
-//
-//    // Active structure range
-//    unsigned int structureRange(structures.size());
-//
-//    unsigned int headStart(0);
-//
-//    // check pipeline state
-//    if(loopState==DB_MODE_LAST){
-//
-//        // Update structure range
-//        structureRange=sortStructTypeA+sortStructTypeB;
-//
-//        headStart=viewpoints.size()-configGroup;
-//
-//    }else
-//    if(loopState==DB_MODE_MASS){
-//
-//        // Jump over process
-//        return;
-//
-//    }
-//
-//    // Compute mean value
-//    meanValue=0.;
-//    maxValue=0.;
-//    for(unsigned int i(0); i<structureRange; i++){
-//        countValue+=structures[i]->computeDisparityMean(&meanValue,headStart);
-//        structures[i]->computeDisparityMax(&maxValue,headStart);
-//    }
-//    meanValue/=double(countValue);
-//
-//    // Compute standard deviation
-//    stdValue=0.;
-//    for(unsigned int i(0); i<structureRange; i++){
-//        structures[i]->computeDisparityStd(&stdValue,meanValue,headStart);
-//    }
-//    stdValue=std::sqrt(stdValue/(countValue-1));
-//
-//}
-
 void Database::filterRadialRange(int pipeState){ /* param not needed */
 
     // Apply filtering condition
@@ -1079,79 +552,6 @@ void Database::filterRadialRange(int pipeState){ /* param not needed */
     }
 
 }
-
-//void Database::filterRadialRange(int loopState){
-//
-//    // Differential indexation
-//    unsigned int index(0);
-//
-//    // Type-range tracking
-//    unsigned int trackA(sortStructTypeA);
-//    unsigned int trackB(sortStructTypeB);
-//
-//    // Active structure range
-//    unsigned int structureRange(structures.size());
-//
-//    unsigned int headStart(0);
-//
-//    // check pipeline state
-//    if((loopState==DB_MODE_LAST)||(loopState==DB_MODE_MASS)){ // check MASS mode
-//
-//        // Update structure range
-//        structureRange=sortStructTypeA+sortStructTypeB;
-//     
-//        headStart=viewpoints.size()-configGroup;
-//   
-//    }
-//
-//    // Compute filtering condition
-//    # pragma omp parallel for schedule(dynamic)
-//    for(unsigned int i=0; i<structureRange; i++){
-//
-//        // Filter structure
-//        structures[i]->filterRadialRange(0.,25.,headStart);
-//
-//    }
-//
-//    // Filtering loop
-//    for(unsigned int i(0); i<structures.size(); i++){
-//
-//        // Check filter flag and passthrough range
-//        if((i<structureRange)&&(structures[i]->getFiltered()==false)){
-//
-//            // Track type-range
-//            if(i<sortStructTypeA){
-//                trackA --;
-//            }else if(i<(sortStructTypeA+sortStructTypeB)){
-//                trackB --;
-//            }
-//
-//        } else {
-//
-//            // Check differential index - move structure
-//            if(index!=i) structures[index]=structures[i];
-//
-//            // Update index
-//            index ++;
-//
-//        }
-//
-//    }
-//
-//    // development feature - begin
-//    std::cerr << "F:R : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
-//    // development feature - end
-//
-//    // resize structure vector
-//    if(index<structures.size()){
-//        structures.resize(index);
-//    }
-//
-//    // Update type-range
-//    sortStructTypeA=trackA;
-//    sortStructTypeB=trackB;
-//
-//}
 
 void Database::filterDisparity(int pipeState){
 
@@ -1175,91 +575,6 @@ void Database::filterDisparity(int pipeState){
 
 
 }
-
-//void Database::filterDisparity(int loopState){
-//
-//    // Differential indexation
-//    unsigned int index(0);
-//
-//    // Type-range tracking
-//    unsigned int trackA(sortStructTypeA);
-//    unsigned int trackB(sortStructTypeB);
-//
-//    // Active structure range
-//    unsigned int structureRange(structures.size());
-//
-//    // Filtering threshold value
-//    double thresholdValue(stdValue*configErrorDisparity);
-//
-//    unsigned int headStart(0);
-//
-//    // check pipeline state
-//    if(loopState==DB_MODE_LAST){
-//
-//        // Update structure range
-//        structureRange=sortStructTypeA+sortStructTypeB;
-//
-//        headStart=viewpoints.size()-configGroup;
-//        
-//    }else
-//    if(loopState==DB_MODE_MASS){
-//
-//        // Update structure range
-//        structureRange=sortStructTypeA+sortStructTypeB;
-//
-//        // Compute threshold value
-//        thresholdValue=(2.*M_PI)*configDenseDisparity;
-//
-//    }
-//
-//    // Compute filtering condition
-//    # pragma omp parallel for schedule(dynamic)
-//    for(unsigned int i=0; i<structureRange; i++){
-//
-//        // Filter structure
-//        structures[i]->filterDisparity(thresholdValue, headStart);
-//
-//    }
-//
-//    // Filtering loop
-//    for(unsigned int i(0); i<structures.size(); i++){
-//
-//        // Check filter flag and passthrough range
-//        if((i<structureRange)&&(structures[i]->getFiltered()==false)){
-//
-//            // Track type-range
-//            if(i<sortStructTypeA){
-//                trackA --;
-//            }else if(i<(sortStructTypeA+sortStructTypeB)){
-//                trackB --;
-//            }
-//
-//        } else {
-//
-//            // Check differential index - move structure
-//            if(index!=i) structures[index]=structures[i];
-//
-//            // Update index
-//            index ++;
-//
-//        }
-//
-//    }
-//
-//    // development feature - begin
-//    std::cerr << "F:D : " << index << "/" << structures.size() << " (" << trackA << ", " << trackB << ")" << std::endl;
-//    // development feature - end
-//
-//    // resize structure vector
-//    if(index<structures.size()){
-//        structures.resize(index);
-//    }
-//
-//    // Update type-range
-//    sortStructTypeA=trackA;
-//    sortStructTypeB=trackB;
-//
-//}
 
 void Database::exportStructure(std::string path, std::string mode, unsigned int major){
     std::fstream exportStream;
@@ -1359,146 +674,6 @@ void Database::exportTransformation(std::string path, std::string mode, unsigned
 //  development related features
 //
 
-static cv::Point _f2i(Eigen::Vector2f value){
-    return cv::Point(value[0],value[1]);
-}
-
-struct featureSort
-{
-    inline bool operator() (const Feature* struct1, const Feature* struct2)
-    {
-        return (struct1->viewpoint->index < struct2->viewpoint->index);
-    }
-};
-
-cv::Mat Database::viewpointStructuralImage(Viewpoint *viewpoint, unsigned int structSizeMin){
-    cv::RNG rng(12345);
-    cv::Rect myROI(0, 0, viewpoint->getImage()->cols, viewpoint->getImage()->rows);
-    cv::Mat res(myROI.width,myROI.height, CV_8UC3, cv::Scalar(0,0,0));
-    res = *viewpoint->getImage();
-    for(unsigned int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
-        auto f = (*viewpoint->getFeatures())[featureId];
-        if(!f->structure) continue;
-        if(f->structure->features.size() < structSizeMin) continue;
-        cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
-
-        std::vector<Feature*> features = *(f->structure->getFeatures());
-        std::sort(features.begin(), features.end(), featureSort());
-        for(uint32_t idx = 1;idx < features.size();idx++){
-            cv::line(res, _f2i((features)[idx-1]->position),  _f2i((features)[idx]->position), color, 1);
-        }
-    }
-
-    rng = cv::RNG(12345);
-    for(unsigned int featureId = 0; featureId < viewpoint->getFeatures()->size(); featureId++){
-        auto f = (*viewpoint->getFeatures())[featureId];
-        if(!f->structure) continue;
-        if(f->structure->features.size() < structSizeMin) continue;
-        cv::Scalar color = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
-
-        auto features = f->structure->getFeatures();
-//        cv::putText(
-//            res,
-//            std::to_string(featureId),
-//            _f2i((*features)[0]->position) + cv::Point(-5, -5),
-//            cv::FONT_HERSHEY_SIMPLEX,
-//            0.5,
-//            color
-//        );
-    }
-    return res;
-}
-
-//Do  cv::waitKey(0); if you want to stop after it.
-void Database::_displayViewpointStructures(Viewpoint *viewpoint, unsigned int structSizeMin){
-    auto res = viewpointStructuralImage(viewpoint, structSizeMin);
-
-    cv::namedWindow( "miaou", cv::WINDOW_KEEPRATIO );
-    imshow( "miaou", res);
-}
-
-//void Database::_sanityCheck(bool inliner){
-//    //How many structure have a given size (size is the index)
-//    uint32_t *structureSizes = new uint32_t[viewpoints.size()+1];
-//    memset(structureSizes, 0, (viewpoints.size()+1)*sizeof(uint32_t));
-//
-//    //Set<Viewpoint> to identify viewpoint duplication in structures
-//    uint32_t *viewpointsUsage = new uint32_t[viewpoints.size()];
-//    memset(viewpointsUsage, -1, (viewpoints.size())*sizeof(uint32_t));
-//
-//    for(uint32_t structureId = 0;structureId < structures.size();structureId++){
-//        auto &s = structures[structureId];
-//        if(s->features.size() < 2) throw std::runtime_error("Structure with less than two feature");
-//        structureSizes[s->features.size()]++;
-//        auto inliner = s->features.front()->inliner;
-//        for(auto &f : s->features){
-//            if(f->structure != s.get()) throw std::runtime_error("Structure with a feature which isn't pointing that structure");
-//            if(inliner) if(f->inliner != inliner) throw std::runtime_error("Inliner issue");
-//            auto viewpointId = f->viewpoint->index;
-//            if(viewpointsUsage[viewpointId] == structureId) throw std::runtime_error("Same view point twice in a structure");
-//            viewpointsUsage[viewpointId] = structureId;
-//        }
-//    }
-//    delete []viewpointsUsage;
-//
-//    std::cout << "Structure family ";
-//    for(uint32_t size = 0;size <= viewpoints.size(); size++){
-//        auto count = structureSizes[size];
-//        if(count) std::cout << size << "=>" << count << " ";
-//    }
-//    std::cout << std::endl;
-//    delete []structureSizes;
-//
-//    for(auto v : viewpoints){
-//        for(auto f : v->features){
-//            if(f->structure){
-//                auto sf = &(f->structure->features);
-//                if(std::find(sf->begin(), sf->end(), f) == sf->end()) throw std::runtime_error("Feature having a structure without that feature");
-//            }
-//        }
-//    }
-//}
-
-void Database::_sanityCheckStructure(){
-    unsigned int lastViewpoint(viewpoints.size()-1);
-    for(unsigned int i(0); i<structures.size(); i++){
-        if(structures[i]->getFeaturesCount()==2){
-            if(structures[i]->getHasLastViewpoint(lastViewpoint)==true){
-                if(i>=sortStructTypeA){
-                    std::cerr << "Sanity check on structure : fault on type A : " << i << "/" << sortStructTypeA << std::endl;
-                }
-            }
-        }
-    }
-    for(unsigned int i(0); i<structures.size(); i++){
-        if(structures[i]->getFeaturesCount()>2){
-            if(structures[i]->getHasLastViewpoint(lastViewpoint)==true){
-                if(i>=sortStructTypeA+sortStructTypeB){
-                    std::cerr << "Sanity check on structure : fault on type B : " << i << "/" << sortStructTypeA+sortStructTypeB << std::endl;
-                }
-            }
-        }
-    }
-    for(unsigned int i(0); i<structures.size(); i++){
-        if(structures[i]->getHasLastViewpoint(lastViewpoint)==false){
-            if(i<sortStructTypeA+sortStructTypeB){
-                std::cerr << "Sanity check on structure : fault on type C : " << i << "/" << sortStructTypeA+sortStructTypeB << std::endl;
-            }
-        }
-    }
-}
-
-void Database::_sanityCheckFeatureOrder(){
-    for(auto & structure: structures){
-        for(unsigned int i(1); i<structure->features.size(); i++){
-            if(structure->features[i]->getViewpoint()->getIndex()<=structure->features[i-1]->getViewpoint()->getIndex()){
-                std::cerr << "Sanity check on feature order" << std::endl;
-            }
-        }
-
-    }
-}
-
 // Note : this function does not respect encapsulation (development function) - need to be removed
 void Database::_exportState(std::string path, int major, int iter){
     int vpcount(255/viewpoints.size());
@@ -1530,26 +705,6 @@ void Database::_exportState(std::string path, int major, int iter){
 }
 
 // Note : this function does not respect encapsulation (development function) - need to be removed
-void Database::_exportMatchDistribution(std::string path, unsigned int major, std::string type){
-    if(viewpoints.size()<configGroup){
-        return;
-    }
-    std::fstream stream;
-    stream.open( path + "/debug/" + std::to_string(major) + "_" + type + ".mat", std::ios::out );
-    if(stream.is_open()==false){
-        std::cerr << "unable to create match distribution exportation file" << std::endl;
-    }
-    stream << viewpoints.size() << " -1" << std::endl;
-    for(auto & element: structures){
-        for(unsigned int i(0); i<element->features.size(); i++){
-            for(unsigned int j(0); j<element->features.size(); j++){
-                stream << element->features[i]->viewpoint->index+1 << " " << element->features[j]->viewpoint->index+1 << std::endl;
-            }
-        }
-    }
-    stream.close();
-}
-
 void Database::_exportStructureModel(std::string path, unsigned int major){
     if(viewpoints.size()<configGroup){
         return;
@@ -1565,9 +720,9 @@ void Database::_exportStructureModel(std::string path, unsigned int major){
     char * posp= (char *)pos;
     char * colp= (char *)col;
 
-    for(int i(0); i<structures.size(); i++){
+    for(unsigned int i(0); i<structures.size(); i++){
 
-        for(int j(0); j<structures[i]->features.size(); j++){
+        for(unsigned int j(0); j<structures[i]->features.size(); j++){
 
             Eigen::Vector3d dir((structures[i]->features[j]->viewpoint->position)-(structures[i]->position));
 
