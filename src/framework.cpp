@@ -191,36 +191,6 @@ int main(int argc, char ** argv){
             continue;
         }
 
-        // development feature - begin
-        //if(yamlConfig["debug"].IsDefined()){
-        //    if(yamlConfig["debug"]["structureImageDump"].IsDefined()){
-        //        for(auto viewpoint : database.viewpoints){
-        //            auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
-        //            auto folder = yamlExport["path"].as<std::string>() + "/viewpointStructuresImages";
-        //            auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "a.jpg";
-        //            fs::create_directories(folder);
-        //            cv::imwrite(path, image);
-        //        }
-        //    }
-        //}
-        // development feature - end
-
-        // Perpare structure features - sort by viewpoint index order
-        //database.prepareFeature();
-
-        // Prepare structure vector - type-based segment sort
-        //database.prepareStructure();
-
-        // Check failure condition - enough matches for the new viewpoint
-        //if(database.getFailure()==true){
-        //    std::cerr << "Failure during viewpoint addition : not enough matches" << std::endl;
-        //    exit(1);
-        //}
-
-        // development feature - begin
-        //database._exportMatchDistribution(yamlExport["path"].as<std::string>(),loopMajor,"initial");
-        // development feature - end
-
         // Update pipeline state
         database.prepareState(loopState);
 
@@ -236,16 +206,11 @@ int main(int argc, char ** argv){
         // Algorithm loop
         while ( loopFlag == true ) {
 
-            double pushCommon(1.);
-
-            if(loopState==DB_MODE_LAST){
-                pushCommon=database.transforms[database.transforms.size()-2]->translation.norm();
-            }
+            // Push scale information
+            database.prepareTransforms();
 
             // Optimisation loop
             while ( loopFlag == true ) {
-
-                //database.prepareStructureDynamic();
 
                 // Algorithm core
                 database.computeModels(loopState);
@@ -278,86 +243,53 @@ int main(int argc, char ** argv){
             // Expunge filtered structures
             database.expungeStructures();
 
-            // development feature - begin
-            //database._exportStructureModel(yamlExport["path"].as<std::string>(),loopMajor);
-            // development feature - end
-
+            // State loop management
             if(loopState==DB_MODE_LAST){
 
-                // development feature - begin
-                //database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor);
-                // development feature - end
+                // DEBUG //
+                database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor);
 
-                pushCommon/=database.transforms[database.transforms.size()-2]->translation.norm();
+                // Broacast scale information
+                database.broadcastScale();
 
-                std::cerr << "Scale factor on head : " << pushCommon << std::endl;
+                // Update mode for algorithm pseudo-iteration
+                loopState = database.prepareState(DB_MODE_FULL);
 
-                for(int i=database.transforms.size()-database.configGroup+1; i<database.transforms.size(); i++){
-                    database.transforms[i]->translation*=pushCommon;
-                }
-    
-                //int last(database.viewpoints.size()-database.configGroup);
-                //for(int i=0; i<(database.sortStructTypeA+database.sortStructTypeB); i++){
-                //    for(int j=0; j<database.structures[i]->features.size(); j++){
-                //        if(database.structures[i]->features[j]->getViewpoint()->getIndex()<last) continue;
-                //        database.structures[i]->features[j]->radius*=pushCommon;
-                //    }
-                //}
-
-                loopState=DB_MODE_FULL;
-                database.prepareState(loopState);
-
+                // Algorithm pseudo-core
                 database.computeFrames(loopState);
                 database.computeOriented(loopState);
                 database.computeOptimals(loopState);
                 database.computeRadii(loopState);
 
+                // Stability filtering - radial limitation
                 database.filterRadialRange(loopState);
 
+                // Expunge filtered structures
                 database.expungeStructures();
 
-                // development feature - begin
-                //database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor+1);
-                // development feature - end
+                // Continue optimisation
+                //loopFlag=true;
+                loopState=DB_MODE_LAST;
 
-            }
+                // DEBUG //
+                database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor+1);
 
-            // State loop management
-            if((loopState==DB_MODE_BOOT)||(loopState==DB_MODE_FULL)){
+            }else if(loopState==DB_MODE_BOOT){
 
                 // Update loop mode
                 loopState=DB_MODE_LAST;
 
-            } else
-            if (loopState==DB_MODE_LAST){
+            }else if(loopState==DB_MODE_FULL){
+
+                // DEBUG //
+                database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor);
 
                 // Update loop mode
-                loopState=DB_MODE_FULL;
-
-                // Continue optimisation
-                loopFlag=true;
+                loopState=DB_MODE_LAST;
 
             }
 
         }
-
-        // development feature - begin
-        //database._exportMatchDistribution(yamlExport["path"].as<std::string>(),loopMajor,"filter");
-        // development feature - end
-
-        // development feature - begin
-        //if(yamlConfig["debug"].IsDefined()){
-        //    if(yamlConfig["debug"]["structureImageDump"].IsDefined()){
-        //        for(auto viewpoint : database.viewpoints){
-        //            auto image = database.viewpointStructuralImage(viewpoint.get(), 0);
-        //            auto folder = yamlExport["path"].as<std::string>() + "/viewpointStructuresImages";
-        //            auto path = folder + "/" + std::to_string(viewpoint->index) + "_" + std::to_string(loopMajor) + "b.jpg";
-        //            fs::create_directories(folder);
-        //            cv::imwrite(path, image);
-        //        }
-        //    }
-        //}
-        // development feature - end
 
         // Need to be placed after features extraction, as an image is not needed from there
         if ( database.viewpoints.size() > database.configMatchRange ) {

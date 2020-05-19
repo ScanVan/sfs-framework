@@ -37,15 +37,21 @@ public: /* Need to be set back to private */
     Eigen::Vector3d centerFirst;
     Eigen::Vector3d centerSecond;
     unsigned int centerCount;
+    
+    double scale;
 
 public:
     Transform() : rotation(Eigen::Matrix3d::Zero()), translation(Eigen::Vector3d::Zero()) {}
-
     double getError();
-
     Eigen::Matrix3d * getRotation();
     Eigen::Vector3d * getTranslation();
+
+    double getScale();
+
     void setTranslationScale(double scaleFactor);
+
+    void setScale();
+
     void pushCorrelation(Eigen::Vector3d * firstComponent, Eigen::Vector3d * secondComponent);
     void pushCentroid(Eigen::Vector3d * pushFirst, Eigen::Vector3d * pushSecond);
     void resetCorrelation();

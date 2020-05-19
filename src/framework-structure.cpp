@@ -75,18 +75,36 @@ void Structure::sortFeatures(){
     }
 }
 
+//void Structure::computeState(unsigned int configGroup, unsigned int lastViewpointIndex){
+//    if(features.back()->getViewpoint()->getIndex()==lastViewpointIndex){
+//        if(features.size()>=configGroup){
+//            state=STRUCTURE_FULLVP;
+//            for(unsigned int i(0); i<configGroup; i++){
+//                if(features[features.size()-(i+1)]->getViewpoint()->getIndex()!=(lastViewpointIndex-i)){
+//                    state=STRUCTURE_LASTVP;
+//                    return;
+//                }
+//            }
+//        }else{
+//            state=STRUCTURE_LASTVP;
+//        }
+//    }else{
+//        state=STRUCTURE_NORMAL;
+//    }
+//}
+
 void Structure::computeState(unsigned int configGroup, unsigned int lastViewpointIndex){
     if(features.back()->getViewpoint()->getIndex()==lastViewpointIndex){
         if(features.size()>=configGroup){
             state=STRUCTURE_FULLVP;
             for(unsigned int i(0); i<configGroup; i++){
                 if(features[features.size()-(i+1)]->getViewpoint()->getIndex()!=(lastViewpointIndex-i)){
-                    state=STRUCTURE_LASTVP;
+                    state=STRUCTURE_NORMAL;
                     return;
                 }
             }
         }else{
-            state=STRUCTURE_LASTVP;
+            state=STRUCTURE_NORMAL;
         }
     }else{
         state=STRUCTURE_NORMAL;
@@ -246,12 +264,13 @@ void Structure::filterResize(unsigned int newSize, unsigned int headStop){
             state=STRUCTURE_REMOVE;
         }else{
             features.resize(newSize);
-            if(state==STRUCTURE_FULLVP) state=STRUCTURE_LASTVP;
-            if(state==STRUCTURE_LASTVP){
-                if(features.back()->getViewpoint()->getIndex()!=headStop){
-                    state=STRUCTURE_NORMAL;
-                }
-            }
+            if(state==STRUCTURE_FULLVP) state=STRUCTURE_NORMAL;
+            //if(state==STRUCTURE_LASTVP){
+            //    if(features.back()->getViewpoint()->getIndex()!=headStop){
+            //        state=STRUCTURE_NORMAL;
+            //    }
+            //}
+            //if((state==STRUCTURE_NORMAL)&&(newSize<3)) state=STRUCTURE_NSCALE;
         }
     }
 }

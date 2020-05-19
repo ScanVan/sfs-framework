@@ -228,7 +228,7 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
 
 }
 
-void Database::prepareState(int pipeState){
+int Database::prepareState(int pipeState){
 
     // Check pipeline state
     if(pipeState==DB_MODE_LAST){
@@ -267,6 +267,9 @@ void Database::prepareState(int pipeState){
 
     }
 
+    // Return state
+    return pipeState;
+
 }
 
 void Database::prepareStructures(){
@@ -287,6 +290,18 @@ void Database::prepareStructures(){
             structure->setReset();
 
         }
+
+    }
+
+}
+
+void Database::prepareTransforms(){
+
+    // Parsing transforms
+    for(unsigned int i=rangeTlow; i<rangeThigh; i++){
+
+        // Push transform scale
+        transforms[i]->setScale();
 
     }
 
@@ -318,6 +333,38 @@ void Database::expungeStructures(){
 
         // Resize structures array
         structures.resize(index);
+
+    }
+
+}
+
+void Database::broadcastScale(){
+
+    // Scale factor
+    double factor(0.);
+
+    // Count variable
+    int count(0);
+
+    // Parsing transforms
+    for(unsigned int i=rangeTlow; i<rangeThigh; i++){
+
+        // Compute factor component
+        factor+=transforms[i]->getScale();
+
+        // Update counter
+        count++;
+
+    }
+
+    // Compute scale factor
+    factor/=double(count);
+
+    // Parsing transforms
+    for(unsigned int i=rangeTlow; i<=rangeThigh; i++){
+
+        // Apply scale factor
+        transforms[i]->setTranslationScale(factor);
 
     }
 
@@ -510,6 +557,14 @@ void Database::computeRadii(int pipeState){ /* param not needed */
 
 void Database::computeDisparityStatistics(int pipeState){ /* param not needed */
 
+    // Check pipeline state
+    if(pipeState==DB_MODE_FULL){
+
+        // Avoid process
+        return;
+
+    }
+
     // Count increment
     unsigned int countValue(0);
 
@@ -554,6 +609,14 @@ void Database::filterRadialRange(int pipeState){ /* param not needed */
 }
 
 void Database::filterDisparity(int pipeState){
+
+    // Check pipeline state
+    if(pipeState==DB_MODE_FULL){
+
+        // Avoid process
+        return;
+
+    }
 
     // Filtering threshold value
     double thresholdValue(0.);
@@ -700,6 +763,7 @@ void Database::_exportState(std::string path, int major, int iter){
                    << Position(1) << " "
                    << Position(2) << " 255 " << j*vpcount << " 0" << std::endl;
         }
+
     }
     stream.close();
 }

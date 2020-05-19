@@ -43,9 +43,6 @@ namespace fs = std::experimental::filesystem;
 // Optimisation algorithm maximum iteration per cycle
 #define DB_LOOP_MAXITER    ( 512 )
 
-// Minimal number of viewpoints required to start optimisation algorithm
-//#define DB_LOOP_BOOT_COUNT ( 3 )
-
 // Optimisation algorithm states
 #define DB_MODE_NULL       ( -1 ) /* Null mode */
 #define DB_MODE_BOOT       (  0 ) /* Initial structure */
@@ -91,9 +88,11 @@ public:
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
-    void prepareState(int pipeState);
+    int prepareState(int pipeState);
     void prepareStructures();
+    void prepareTransforms();
     void expungeStructures();
+    void broadcastScale();
     void computeModels(int loopState);
     void computeCentroids(int loopState);
     void computeCorrelations(int loopState);
