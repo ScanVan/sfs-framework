@@ -243,7 +243,7 @@ int Database::prepareState(int pipeState){
         rangeShigh = structures.size()-1;
 
         // Set structure minimal activity
-        stateStructure = STRUCTURE_FULLVP;
+        stateStructure = STRUCTURE_PIONER;
 
     }else{
 
@@ -281,7 +281,7 @@ void Database::prepareStructures(){
         structure->computeState(configGroup, rangeVhigh);
 
         // Check structure state
-        if(structure->getState()==STRUCTURE_FULLVP){
+        if(structure->getState()==STRUCTURE_PIONER){
 
             // Reset structure
             structure->setReset();

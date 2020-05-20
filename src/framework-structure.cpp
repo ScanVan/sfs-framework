@@ -128,7 +128,7 @@ void Structure::computeState(unsigned int scaleGroup, unsigned int highViewpoint
         if(features.size()>=scaleGroup){
 
             // Assume state
-            state=STRUCTURE_FULLVP;
+            state=STRUCTURE_PIONER;
 
             // Check if structure has continuous sequence of feature from last viewpoint
             for(unsigned int i(0); i<scaleGroup; i++){

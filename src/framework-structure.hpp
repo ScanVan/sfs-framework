@@ -35,7 +35,7 @@
 // Define structure activity
 #define STRUCTURE_REMOVE ( 0 ) /* Removed by filtering process - no more usable */
 #define STRUCTURE_NORMAL ( 1 ) /* Normal structure, containing two features or more */
-#define STRUCTURE_FULLVP ( 2 ) /* Structure that contains all the last viewpoints in the pipeline active head (configGroup) */
+#define STRUCTURE_PIONER ( 2 ) /* Structure that contains all the last viewpoints in the pipeline active head (configGroup) */
 
 // Module object
 class Structure {

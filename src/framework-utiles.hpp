@@ -114,7 +114,8 @@ template<typename T> std::pair<bool, int> findInVector(
     return result;
 }
 
-Eigen::Vector3d convertCartesian2Spherical (double x, double y, int width, int height);
+Eigen::Vector3d utiles_direction(double x, double y, int width, int height);
+
 void profile(std::string msg);
 
 void exitRetain();
@@ -123,5 +124,5 @@ void exitRelease();
 double bilinear_sample(double *p, double x, double y, int width);
 double bilinear_sample(float *p, double x, double y, int width);
 
-void create_directories( std::string rootPath, std::string modeName );
+void utiles_directories( std::string rootPath, std::string modeName );
 

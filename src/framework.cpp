@@ -106,7 +106,7 @@ int main(int argc, char ** argv){
     //
 
     // Create exportation directories
-    create_directories(yamlExport["path"].as<std::string>(), yamlFrontend["type"].as<std::string>());
+    utiles_directories(yamlExport["path"].as<std::string>(), yamlFrontend["type"].as<std::string>());
 
     //
     //  Framework front-end

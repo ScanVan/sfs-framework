@@ -76,7 +76,7 @@ void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
     position=Eigen::Vector2f(x,y);
 
     // Compute direction vector
-    direction=convertCartesian2Spherical(x,y,imageWidth,imageHeight);
+    direction=utiles_direction(x,y,imageWidth,imageHeight);
 
 }
 

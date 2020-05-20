@@ -21,13 +21,18 @@
 
 #include "framework-utiles.hpp"
 
-Eigen::Vector3d convertCartesian2Spherical(double x, double y, int width, int height){
-	double lam( (x / width) * 2. * M_PI );
-	double phi( ((y / (height-1)) - 0.5) * M_PI );
-    Eigen::Vector3d pos3d( cos(phi)*cos(lam), cos(phi)*sin(lam), sin(phi) );
-	return pos3d;
+Eigen::Vector3d utiles_direction(double x, double y, int width, int height){
+
+    // Convert pixel coordinates to geographic mapping coordinates
+    double lamda( (x/width) * 2.* M_PI );
+    double phi  ( ((y/(height-1)) - 0.5) * M_PI );
+
+    // Compute and return direction vector
+    return Eigen::Vector3d(cos(phi)*cos(lamda), cos(phi)*sin(lamda), sin(phi));
+
 }
 
+/* delete */
 void profile(std::string msg){
 	static struct timespec specOld;
 	static std::string msgLast = "";
@@ -95,7 +100,7 @@ float bilinear_sample(float *p, float x, float y, int width){
     return  (p[i00]*(1.0f-fx) + p[i01]*fx)*(1.0f-fy) + (p[i10]*(1.0f-fx) + p[i11]*fx)*fy;
 }
 
-void create_directories( std::string rootPath, std::string modeName ) {
+void utiles_directories( std::string rootPath, std::string modeName ) {
 
     // Sub-sequent path variable
     std::string modePath( rootPath + "/" + modeName );
@@ -114,9 +119,6 @@ void create_directories( std::string rootPath, std::string modeName ) {
         fs::create_directory( modePath.c_str() );
 
     }
-
-    // Create debug
-    fs::create_directory( rootPath + "/debug" );
 
 }
 
