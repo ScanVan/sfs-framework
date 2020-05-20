@@ -50,26 +50,25 @@ public: /* Need to be set back to private */
     int microsecond; /* delete */
 
 public:
-	void setImage(cv::Mat &image){this->image = image;}
+    /* To be moved in cpp */
 	cv::Mat* getImage(){return &this->image;}
     void releaseImage(){image.deallocate();}
 	void setCvFeatures(std::vector<cv::KeyPoint> &image){this->cvFeatures = cvFeatures;}
-	std::vector<cv::KeyPoint>* getCvFeatures(){return &this->cvFeatures;}
+    std::vector<cv::KeyPoint>* getCvFeatures(){return &this->cvFeatures;}
 	void setCvDescriptor(cv::Mat &image){this->cvDescriptor = cvDescriptor;}
 	cv::Mat* getCvDescriptor(){return &this->cvDescriptor;}
 	void setPosition(Eigen::Vector3d position){this->position = position;}
 	std::vector<Feature*> *getFeatures() { return &features; }
+    void addFeature(Feature *f){ features.push_back(f);  }
+    Feature *getFeatureFromCvIndex(uint32_t i){ return features[i]; }
+
     unsigned int getIndex();
     Eigen::Matrix3d * getOrientation();
     Eigen::Vector3d * getPosition();
-    double getDisparity(int featID);
     void resetFrame();
     void setIndex(unsigned int newIndex);
     bool setImage(std::string imagePath, double imageScale);
-    void setImageDimension(int newWidth, int newHeight);
     void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
-    void allocateFeaturesFromCvFeatures();
-    void addFeature(Feature *f){ features.push_back(f);  }
-    double getSecondFrom(Viewpoint *ref);
-    Feature *getFeatureFromCvIndex(uint32_t i){ return features[i]; }
+    void allocateFeaturesFromCvFeatures();  
+
 };

@@ -34,10 +34,8 @@
 
 // Define structure activity
 #define STRUCTURE_REMOVE ( 0 ) /* Removed by filtering process - no more usable */
-//#define STRUCTURE_NSCALE ( 1 )
-#define STRUCTURE_NORMAL ( 2 ) /* Normal structure, containing two features or more */
-//#define STRUCTURE_LASTVP ( 3 ) /* Structure that contains the last viewpoint */
-#define STRUCTURE_FULLVP ( 4 ) /* Structure that contains all the last viewpoints in the pipeline active head (configGroup) */
+#define STRUCTURE_NORMAL ( 1 ) /* Normal structure, containing two features or more */
+#define STRUCTURE_FULLVP ( 2 ) /* Structure that contains all the last viewpoints in the pipeline active head (configGroup) */
 
 // Module object
 class Structure {
@@ -45,8 +43,10 @@ public: /* Need to be set back to private */
     Eigen::Vector3d position;
     std::vector<Feature*> features;
     unsigned int state;
+    unsigned int start;
 
 public:
+    bool getHasScale(unsigned int scaleGroup);
     Structure() : position(Eigen::Vector3d::Zero()), state(STRUCTURE_REMOVE) {}  
     Eigen::Vector3d * getPosition();
     unsigned int getState();
@@ -54,18 +54,17 @@ public:
     void setReset();
     void addFeature(Feature * feature);
     void sortFeatures();
-    void computeState(unsigned int configGroup, unsigned int lastViewpointIndex);
+    void computeState(unsigned int scaleGroup, unsigned int highViewpoint);
     void computeModel();
-    void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms);
-    void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms);
-    void computeOriented(unsigned int headStart);
-    void computeOptimalPosition(unsigned int headStart);
-    void computeRadius(unsigned int headStart);
-    unsigned int computeDisparityMean(double * const meanValue,unsigned int headStart);
-    void computeDisparityStd(double * const stdValue, double const meanValue,unsigned int headStart);
-    void computeDisparityMax(double * const maxValue, unsigned int headStart);
-    void filterRadialRange(double lowClamp, double highClamp,unsigned int headStart, unsigned int headStop);
-    void filterDisparity(double limitValue,unsigned int headStart, unsigned int headStop);
-    void filterResize(unsigned int newSize, unsigned int headStop);
+    void computeCentroid(std::vector<std::shared_ptr<Transform>> & transforms, unsigned int lowViewpoint);
+    void computeCorrelation(std::vector<std::shared_ptr<Transform>> & transforms, unsigned int lowViewpoint);
+    void computeOriented(unsigned int lowViewpoint);
+    void computeOptimalPosition(unsigned int lowViewpoint);
+    void computeRadius(unsigned int lowViewpoint);
+    unsigned int computeDisparityMean(double * const meanValue,unsigned int lowViewpoint);
+    void computeDisparityStd(double * const stdValue, double const meanValue,unsigned int lowViewpoint);
+    void filterRadialRange(double lowClamp, double highClamp,unsigned int lowViewpoint);
+    void filterDisparity(double limitValue,unsigned int headStart);
+    void filterResize(unsigned int resize);
 
 };

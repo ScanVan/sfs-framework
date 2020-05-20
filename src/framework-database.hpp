@@ -70,7 +70,7 @@ public: /* Need to be set back to private */
     double transformMean;
     double meanValue;
     double stdValue;
-    double maxValue;
+    //double maxValue;
 
     unsigned int rangeVlow;  /* Viewpoints range first index */
     unsigned int rangeVhigh; /* Viewpoints range last index */

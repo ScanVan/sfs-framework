@@ -22,63 +22,100 @@
 #include "framework-transform.hpp"
 
 double Transform::getError(){
+
+    // Return error between translation and pushed translation
     return (push-translation).norm();
+
 }
 
 Eigen::Matrix3d * Transform::getRotation(){
+
+    // Return rotation pointer
     return &rotation;
+
 }
 
 Eigen::Vector3d * Transform::getTranslation(){
+
+    // Return translation pointer
     return &translation;
+
 }
 
 double Transform::getScale(){
+
+    // Return scale factor between translation and its previous computation
     return translation.norm()/scale;
+
 }
 
 void Transform::setTranslationScale(double scaleFactor){
+
+    // Apply scale factor on translation
     translation/=scaleFactor;
+
 }
 
 void Transform::setScale(){
+
+    // Push translation norm
     scale=translation.norm();
+
 }
 
 void Transform::pushCorrelation(Eigen::Vector3d * firstComponent, Eigen::Vector3d * secondComponent){
+
+    // Compute correlation component
     # pragma omp critical
-    {
     correlation+=((*firstComponent)-centerFirst)*((*secondComponent)-centerSecond).transpose();
-    }
+
 }
 
 void Transform::pushCentroid(Eigen::Vector3d * pushFirst, Eigen::Vector3d * pushSecond){
+
+    // Push centroid component
     # pragma omp critical
     {
     centerFirst +=*pushFirst;
     centerSecond+=*pushSecond;
-    centerCount++;
+    count++;
     }
+
 }
 
 void Transform::resetCorrelation(){
+
+    // Reset correlation matrix
     correlation=Eigen::Matrix3d::Zero();
+
 }
 
 void Transform::resetCentroid(){
+
+    // Reset centroids
     centerFirst =Eigen::Vector3d::Zero();
     centerSecond=Eigen::Vector3d::Zero();
-    centerCount=0;
+    count=0;
+
 }
 
 void Transform::computeCentroid(){
-    centerFirst /=double(centerCount);
-    centerSecond/=double(centerCount);
+
+    // Compute centroids
+    centerFirst /=double(count);
+    centerSecond/=double(count);
+
 }
 
 void Transform::computePose(){
-    Eigen::JacobiSVD<Eigen::Matrix3d> svd(correlation, Eigen::ComputeFullU | Eigen::ComputeFullV);
+
+    // Compute SVD decomposition
+    Eigen::JacobiSVD<Eigen::Matrix3d> svd(correlation,Eigen::ComputeFullU|Eigen::ComputeFullV);
+
+    // Compute rotation
     rotation=svd.matrixV()*svd.matrixU().transpose();
+
+    // Stability mechanism - In some cases, the rotation matrix has an inversion that has to be removed
     if (rotation.determinant()<0){
         std::cerr << "SVD fault" << std::endl;
         Eigen::Matrix3d correctV(svd.matrixV());
@@ -87,11 +124,22 @@ void Transform::computePose(){
         correctV(2,2)=-correctV(2,2);
         rotation=correctV*svd.matrixU().transpose();
     }
+
+    // Push translation - Needed to track error
     push=translation;
+
+    // Compute translation
     translation=centerSecond-rotation*centerFirst;
+
 }
 
 void Transform::computeFrame(Viewpoint * first, Viewpoint * second){
-    Eigen::Matrix3d trotation((*first->getOrientation())*rotation.transpose());
-    second->setPose(trotation,(*first->getPosition())-trotation*translation);
+
+    // Compute oriented rotation according to first viewpoint (already in absolute frame)
+    Eigen::Matrix3d oriented((*first->getOrientation())*rotation.transpose());
+
+    // Compute position and orientation of second viewpoint in absolute frame
+    second->setPose(oriented,(*first->getPosition())-oriented*translation);
+
 }
+

@@ -22,63 +22,92 @@
 #include "framework-viewpoint.hpp"
 
 unsigned int Viewpoint::getIndex(){
+
+    // Return viewpoint index
     return index;
+
 }
 
 Eigen::Matrix3d * Viewpoint::getOrientation(){
+
+    // Return orientation matrix pointer
     return &orientation;
+
 }
 
 Eigen::Vector3d * Viewpoint::getPosition(){
+
+    // Return position vector pointer
     return &position;
+
 }
 
 void Viewpoint::resetFrame(){
+
+    // Reset orientation and position
     orientation=Eigen::Matrix3d::Identity();
     position=Eigen::Vector3d::Zero();
+
 }
 
 void Viewpoint::setIndex(unsigned int newIndex){
+
+    // Assign viewpoint index
     index=newIndex;
+
 }
 
 bool Viewpoint::setImage(std::string imagePath, double imageScale){
+
+    // Import viewpoint image
     image = cv::imread(imagePath, cv::IMREAD_COLOR);
+
+    // Check status
     if(image.empty()==false){
+
+        // Apply image scale factor
         cv::resize(image, image, cv::Size(), imageScale, imageScale, cv::INTER_AREA);
+
+        // Assign image size
         width=image.cols;
         height=image.rows;
+
         return true;
-    }else{
+
+    } else {
         return false;
     }
 }
 
-void Viewpoint::setImageDimension(int newWidth, int newHeight){
-    width=newWidth;
-    height=newHeight;
-}
-
 void Viewpoint::setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition){
+
+    // Assign orientation and position
     orientation=newOrientation;
     position=newPosition;
+
 }
 
 void Viewpoint::allocateFeaturesFromCvFeatures(){
+    
+    // Allocate features
 	for(uint32_t i = 0;i < cvFeatures.size();i++){
+    
+        // Instance feature
 	    auto feature = new Feature();
+
+        // Initialise feature
         feature->setFeature(cvFeatures[i].pt.x, cvFeatures[i].pt.y, width, height);
         feature->setRadius(1., 0.);
         feature->setViewpointPtr(this);
         feature->setStructurePtr(NULL);
-        auto color = image.empty() ? cv::Vec3b(255,255,255) : image.at<cv::Vec3b>(cvFeatures[i].pt.y, cvFeatures[i].pt.x);
-        feature->setColor(color);
+        feature->setColor(image.at<cv::Vec3b>(cvFeatures[i].pt.y, cvFeatures[i].pt.x));
+
+        // Push feature
         features.push_back(feature);
+
 	}
+
+    /* Release image mat here ? */
+
 }
 
-double Viewpoint::getSecondFrom(Viewpoint *ref){
-	double s = this->time - ref->time;
-	s += 1e-6*(this->microsecond - ref->microsecond);
-	return s;
-}

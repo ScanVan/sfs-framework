@@ -175,7 +175,7 @@ int main(int argc, char ** argv){
     //  Framework optimisation algorithm
     //
 
-    // framework loop
+    // Framework main loop
     while(true){
 
         // Query image from source
@@ -240,14 +240,8 @@ int main(int argc, char ** argv){
 
             }
 
-            // Expunge filtered structures
-            //database.expungeStructures();
-
             // State loop management
             if(loopState==DB_MODE_LAST){
-
-                // DEBUG //
-                database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor);
 
                 // Broacast scale information
                 database.broadcastScale();
@@ -264,15 +258,8 @@ int main(int argc, char ** argv){
                 // Stability filtering - radial limitation
                 database.filterRadialRange(loopState);
 
-                // Expunge filtered structures
-                //database.expungeStructures();
-
                 // Continue optimisation
                 loopFlag=true;
-                //loopState=DB_MODE_LAST;
-
-                // DEBUG //
-                database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor+1);
 
             }else if(loopState==DB_MODE_BOOT){
 
@@ -281,9 +268,6 @@ int main(int argc, char ** argv){
 
             }else if(loopState==DB_MODE_FULL){
 
-                // DEBUG //
-                database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor);
-
                 // Update loop mode
                 loopState=DB_MODE_LAST;
 
@@ -291,6 +275,7 @@ int main(int argc, char ** argv){
 
         }
 
+        // Expunge filtered structures
         database.expungeStructures();
 
         // Need to be placed after features extraction, as an image is not needed from there

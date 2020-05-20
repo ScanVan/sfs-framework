@@ -30,28 +30,22 @@
 // Module object
 class Transform {
 public: /* Need to be set back to private */
-    Eigen::Matrix3d correlation;
     Eigen::Matrix3d rotation;
     Eigen::Vector3d translation;
     Eigen::Vector3d push;
     Eigen::Vector3d centerFirst;
     Eigen::Vector3d centerSecond;
-    unsigned int centerCount;
-    
+    Eigen::Matrix3d correlation;
+    unsigned int count;
     double scale;
 
 public:
-    Transform() : rotation(Eigen::Matrix3d::Zero()), translation(Eigen::Vector3d::Zero()) {}
     double getError();
     Eigen::Matrix3d * getRotation();
     Eigen::Vector3d * getTranslation();
-
     double getScale();
-
     void setTranslationScale(double scaleFactor);
-
     void setScale();
-
     void pushCorrelation(Eigen::Vector3d * firstComponent, Eigen::Vector3d * secondComponent);
     void pushCentroid(Eigen::Vector3d * pushFirst, Eigen::Vector3d * pushSecond);
     void resetCorrelation();
@@ -59,5 +53,6 @@ public:
     void computeCentroid();
     void computePose();
     void computeFrame(Viewpoint * first, Viewpoint * second);
+
 };
 

@@ -60,4 +60,5 @@ public:
     void reset();
     void computeModel();
     void computeOriented(Eigen::Matrix3d * orientation);
+
 };

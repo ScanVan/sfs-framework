@@ -58,22 +58,22 @@ unsigned int Database::getGroup(){
 
 bool Database::getError(int pipeState, int loopMajor, int loopMinor){
 
-    /* Memory of error on transformation */
+    // Memory of error on transformation
     static double pushtError(-1.);
 
-    /* Error on transformation */
+    // Error on transformation
     double tError(0.);
     
-    /* Iteration end condition flag */
+    // Iteration end condition flag
     bool returnValue(true);
 
-    /* Specific condition */
+    // Specific condition
     if(loopMinor>DB_LOOP_MAXITER){
         std::cerr << "Warning : maximum iterations count reached" << std::endl;
         returnValue=false;
     }
 
-    /* Specific condition */
+    // Specific condition
     if(pipeState==DB_MODE_MASS){
         returnValue=false;
     }
@@ -87,13 +87,10 @@ bool Database::getError(int pipeState, int loopMajor, int loopMinor){
 
     // Apply error to deduce iterations stop condition
     if ( (std::fabs(tError-pushtError)<configError) ) {
-    
-        // Error is stable enough to stop iterations
         returnValue=false;
-
     }
 
-    /* display information on iterations and errors */
+    // Display information on iterations and errors
     std::cout << "step : " << std::setw(6) << loopMajor 
               << " | "
               << "iter : " << std::setw(6) << loopMinor
@@ -103,10 +100,10 @@ bool Database::getError(int pipeState, int loopMajor, int loopMinor){
               << "error : " << tError
               << std::endl;
 
-    /* pushing errors */
+    // Pushing error
     pushtError=tError;
 
-    /* send answser */
+    // Send answser
     return returnValue;
 
 }
@@ -410,8 +407,9 @@ void Database::computeCentroids(int pipeState){
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=rangeSlow; i<=rangeShigh; i++){
         if(structures[i]->getState()>=stateStructure){
-            if(structures[i]->features.size()>=configGroup)
-            structures[i]->computeCentroid(transforms);
+            if(structures[i]->getHasScale(configGroup)){
+                structures[i]->computeCentroid(transforms,rangeVlow);
+            }
         }
     }
 
@@ -443,8 +441,9 @@ void Database::computeCorrelations(int pipeState){
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=rangeSlow; i<=rangeShigh; i++){
         if(structures[i]->getState()>=stateStructure){
-            if(structures[i]->features.size()>=configGroup)
-            structures[i]->computeCorrelation(transforms);
+            if(structures[i]->getHasScale(configGroup)){
+                structures[i]->computeCorrelation(transforms,rangeVlow);
+            }
         }
     }
 
@@ -564,14 +563,12 @@ void Database::computeDisparityStatistics(int pipeState){ /* param not needed */
 
     // Reset values
     meanValue=0.;
-    maxValue=0.;
     stdValue=0.;
 
     // Compute mean value and detect max value
     for(unsigned int i=rangeSlow; i<=rangeShigh; i++){
         if(structures[i]->getState()>=stateStructure){
             countValue+=structures[i]->computeDisparityMean(&meanValue,rangeVlow);
-            structures[i]->computeDisparityMax(&maxValue,rangeVlow);
         }
     }
 
@@ -596,7 +593,7 @@ void Database::filterRadialRange(int pipeState){ /* param not needed */
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=rangeSlow; i<=rangeShigh; i++){
         if(structures[i]->getState()>=stateStructure){
-            structures[i]->filterRadialRange(0.,25.,rangeVlow,rangeVhigh);
+            structures[i]->filterRadialRange(0.,25.,rangeVlow);
         }
     }
 
@@ -618,7 +615,7 @@ void Database::filterDisparity(int pipeState){
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=rangeSlow; i<=rangeShigh; i++){
         if(structures[i]->getState()>=stateStructure){
-            structures[i]->filterDisparity(thresholdValue,rangeVlow,rangeVhigh);
+            structures[i]->filterDisparity(thresholdValue,rangeVlow);
         }
     }
 

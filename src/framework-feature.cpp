@@ -22,63 +22,113 @@
 #include "framework-feature.hpp"
 
 Eigen::Vector3d * Feature::getDirection(){
+
+    // Return feature direction vector pointer
     return &direction;
+
 }
 
 Eigen::Vector3d * Feature::getModel(){
+
+    // Return feature model vector pointer
     return &model;
+
 }
 
 double Feature::getRadius(){
+
+    // Return feature radius
     return radius;
+
 }
 
 double Feature::getDisparity(){
+
+    // Return feature disparity
     return disparity;
+
 }
 
 Viewpoint * Feature::getViewpoint(){
+    
+    // Return feature assigned viewpoint pointer
     return viewpoint;
+
 }
 
 Structure * Feature::getStructure(){
+
+    // Return feature assigned structure pointer
     return structure;
+
 }
 
 cv::Vec3b Feature::getColor(){
+
+    // Return feature color
     return color;
+
 }
 
 void Feature::setFeature(double x, double y, int imageWidth, int imageHeight){
+
+    // Assign position on image
     position=Eigen::Vector2f(x,y);
+
+    // Compute direction vector
     direction=convertCartesian2Spherical(x,y,imageWidth,imageHeight);
+
 }
 
 void Feature::setColor(cv::Vec3b newColor){
+    
+    // Assign feature color
     color=newColor;
+
 }
 
 void Feature::setRadius(double newRadius, double newDisparity){
+
+    // Assign radius
     radius=newRadius;
+
+    // Compute and assign normalised disparity
     disparity=newDisparity/newRadius;
+
 }
 
 void Feature::setViewpointPtr(Viewpoint * newViewpoint){
+
+    // Update feature assigned viewpoint
     viewpoint=newViewpoint;
+
 }
 
 void Feature::setStructurePtr(Structure * newStructure){
+
+    // Update feature assigned viewpoint
     structure=newStructure;
+
 }
 
 void Feature::reset(){
+
+    // Reset feature
     setRadius(1., 0.);
+
 }
 
 void Feature::computeModel(){
+
+    // Compute feature model
     model=direction*radius;
+
 }
 
 void Feature::computeOriented(Eigen::Matrix3d * orientation){
+
+    // Compute feature direction in absolute frame
     model=(*orientation)*direction;
+
 }
+
