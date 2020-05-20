@@ -260,7 +260,7 @@ void Structure::filterResize(unsigned int newSize, unsigned int headStop){
             for(unsigned int i(0); i<newSize; i++){
                 features[i]->setStructurePtr(NULL);
             }
-            features.clear();
+            features.resize(newSize);
             state=STRUCTURE_REMOVE;
         }else{
             features.resize(newSize);

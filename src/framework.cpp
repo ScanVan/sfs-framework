@@ -241,7 +241,7 @@ int main(int argc, char ** argv){
             }
 
             // Expunge filtered structures
-            database.expungeStructures();
+            //database.expungeStructures();
 
             // State loop management
             if(loopState==DB_MODE_LAST){
@@ -265,11 +265,11 @@ int main(int argc, char ** argv){
                 database.filterRadialRange(loopState);
 
                 // Expunge filtered structures
-                database.expungeStructures();
+                //database.expungeStructures();
 
                 // Continue optimisation
-                //loopFlag=true;
-                loopState=DB_MODE_LAST;
+                loopFlag=true;
+                //loopState=DB_MODE_LAST;
 
                 // DEBUG //
                 database._exportState(yamlExport["path"].as<std::string>(),loopMajor,loopMinor+1);
@@ -290,6 +290,8 @@ int main(int argc, char ** argv){
             }
 
         }
+
+        database.expungeStructures();
 
         // Need to be placed after features extraction, as an image is not needed from there
         if ( database.viewpoints.size() > database.configMatchRange ) {

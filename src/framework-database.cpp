@@ -410,6 +410,7 @@ void Database::computeCentroids(int pipeState){
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=rangeSlow; i<=rangeShigh; i++){
         if(structures[i]->getState()>=stateStructure){
+            if(structures[i]->features.size()>=configGroup)
             structures[i]->computeCentroid(transforms);
         }
     }
@@ -442,6 +443,7 @@ void Database::computeCorrelations(int pipeState){
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=rangeSlow; i<=rangeShigh; i++){
         if(structures[i]->getState()>=stateStructure){
+            if(structures[i]->features.size()>=configGroup)
             structures[i]->computeCorrelation(transforms);
         }
     }
@@ -557,14 +559,6 @@ void Database::computeRadii(int pipeState){ /* param not needed */
 
 void Database::computeDisparityStatistics(int pipeState){ /* param not needed */
 
-    // Check pipeline state
-    if(pipeState==DB_MODE_FULL){
-
-        // Avoid process
-        return;
-
-    }
-
     // Count increment
     unsigned int countValue(0);
 
@@ -609,14 +603,6 @@ void Database::filterRadialRange(int pipeState){ /* param not needed */
 }
 
 void Database::filterDisparity(int pipeState){
-
-    // Check pipeline state
-    if(pipeState==DB_MODE_FULL){
-
-        // Avoid process
-        return;
-
-    }
 
     // Filtering threshold value
     double thresholdValue(0.);
@@ -752,6 +738,7 @@ void Database::_exportState(std::string path, int major, int iter){
                << element->position(2) << " 0 0 255" << std::endl;
     }
     for(auto & element: structures){
+        if(element->state==STRUCTURE_REMOVE)continue;
         stream << element->position(0) << " "
                << element->position(1) << " "
                << element->position(2) << " 255 0 255" << std::endl;
@@ -763,7 +750,6 @@ void Database::_exportState(std::string path, int major, int iter){
                    << Position(1) << " "
                    << Position(2) << " 255 " << j*vpcount << " 0" << std::endl;
         }
-
     }
     stream.close();
 }
