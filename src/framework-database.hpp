@@ -105,7 +105,7 @@ public:
     void computeDisparityStatistics(int loopState);
     void filterRadialRange(int loopState);
     void filterDisparity(int loopState);
-    void exportStructure(std::string path, std::string mode, unsigned int major);
+    void exportStructure(std::string path, std::string mode, unsigned int major, unsigned int group);
     void exportPosition(std::string path, std::string mode, unsigned int major);
     void exportTransformation(std::string path, std::string mode, unsigned int major);
     Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();}

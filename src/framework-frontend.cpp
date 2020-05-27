@@ -1,6 +1,4 @@
 #include "framework-frontend.hpp"
-
-#include "framework-stillcompute.hpp"
 #include "framework-sparsefeature.hpp"
 #include "framework-utiles.hpp"
 
@@ -45,7 +43,7 @@ bool FrontendPicture::next() {
 			lastViewpoint->getImage()->size(),
 			&lastViewpointMatches
 		);
-		double score = computeStillDistance(
+		double score = utilesDetectMotion(
 			newViewpoint->getCvFeatures(),
 			lastViewpoint->getCvFeatures(),
 			&lastViewpointMatches,

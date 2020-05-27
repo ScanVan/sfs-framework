@@ -23,6 +23,7 @@
 
 // External includes
 #include <Eigen/Core>
+#include <cmath>
 #include <string>
 #include <time.h>
 #include <iostream>
@@ -33,6 +34,8 @@
 #include <experimental/filesystem>
 #include <sstream>
 #include <iomanip>
+#include <opencv4/opencv2/core.hpp>
+#include <opencv4/opencv2/core/types.hpp>
 
 // Namespaces
 namespace fs = std::experimental::filesystem;
@@ -125,4 +128,6 @@ double bilinear_sample(double *p, double x, double y, int width);
 double bilinear_sample(float *p, double x, double y, int width);
 
 void utiles_directories( std::string rootPath, std::string modeName );
+
+double utilesDetectMotion(std::vector<cv::KeyPoint> *kp1, std::vector<cv::KeyPoint> *kp2, std::vector<cv::DMatch> *matches, cv::Size size);
 

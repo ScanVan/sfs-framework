@@ -622,7 +622,11 @@ void Database::filterDisparity(int pipeState){
 
 }
 
-void Database::exportStructure(std::string path, std::string mode, unsigned int major){
+//
+//  Section - Exportation methods
+//
+
+void Database::exportStructure(std::string path, std::string mode, unsigned int major, unsigned int group){
     std::fstream exportStream;
     std::stringstream filePath;
     std::stringstream fileCopy;
@@ -636,16 +640,20 @@ void Database::exportStructure(std::string path, std::string mode, unsigned int 
         return;
     }
 
-    for(auto & element: structures){
-        exportStream << (*element->getPosition())(0) << " ";
-        exportStream << (*element->getPosition())(1) << " ";
-        exportStream << (*element->getPosition())(2) << " ";
+    for(auto & structure: structures){
+        if(structure->getHasScale(group)){
 
-        color=element->getColor();
+            exportStream << (*structure->getPosition())(0) << " ";
+            exportStream << (*structure->getPosition())(1) << " ";
+            exportStream << (*structure->getPosition())(2) << " ";
 
-        exportStream << std::to_string( color[2] ) << " ";
-        exportStream << std::to_string( color[1] ) << " ";
-        exportStream << std::to_string( color[0] ) << std::endl;
+            color=structure->getColor();
+
+            exportStream << std::to_string( color[2] ) << " ";
+            exportStream << std::to_string( color[1] ) << " ";
+            exportStream << std::to_string( color[0] ) << std::endl;
+
+        }
     }
 
     exportStream.close();
@@ -717,7 +725,7 @@ void Database::exportTransformation(std::string path, std::string mode, unsigned
 }
 
 //
-//  development related features
+//  Section - Development features - Will be removed
 //
 
 // Note : this function does not respect encapsulation (development function) - need to be removed
