@@ -593,7 +593,8 @@ void Database::filterRadialRange(int pipeState){ /* param not needed */
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=rangeSlow; i<=rangeShigh; i++){
         if(structures[i]->getState()>=stateStructure){
-            structures[i]->filterRadialRange(0.,25.,rangeVlow);
+            //structures[i]->filterRadialRange(0.,25.,rangeVlow);
+            structures[i]->filterRadialRange(0.,50.,rangeVlow);
         }
     }
 
@@ -722,6 +723,58 @@ void Database::exportTransformation(std::string path, std::string mode, unsigned
     fileCopy << path << "/" << mode << "_transformation.dat";
     fs::copy(filePath.str(), fileCopy.str(),fs::copy_options::overwrite_existing);
 
+}
+
+void Database::exportConstraint(std::string path, std::string mode, unsigned int major, unsigned int group){
+    std::fstream exportStream;
+    std::stringstream filePath;
+    std::stringstream fileCopy;
+    cv::Vec3b color;
+
+    filePath << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_constraint.dat";
+
+    exportStream.open(filePath.str(),std::ios::out);
+    if (exportStream.is_open() == false){
+        std::cerr << "unable to create odometry exportation file" << std::endl;
+        return;
+    }
+
+    for(auto & structure: structures){
+        if(structure->getHasScale(group)){
+
+            // Export scene point position in the 3D space : x y z
+            exportStream << (*structure->getPosition())(0) << " ";
+            exportStream << (*structure->getPosition())(1) << " ";
+            exportStream << (*structure->getPosition())(2) << " ";
+
+            color=structure->getColor();
+
+            // Export scene point color - [0-255] : red green blue
+            exportStream << std::to_string( color[2] ) << " ";
+            exportStream << std::to_string( color[1] ) << " ";
+            exportStream << std::to_string( color[0] ) << " ";
+
+            // Export amount of viewpoints that sees this point : value
+            exportStream << structure->getFeatureCount() << " ";
+
+            // Export the index of the viewpoints that sees this point : index
+            for(unsigned int i(0); i<structure->getFeatureCount(); i++){
+
+                // Export viewpoint index
+                exportStream << structure->getFeatureViewpointIndex(i) << " ";
+
+            }
+
+            // Terminate line
+            exportStream << std::endl;
+
+        }
+    }
+
+    exportStream.close();
+
+    fileCopy << path << "/" << mode << "_constraint.dat";
+    fs::copy(filePath.str(), fileCopy.str(),fs::copy_options::overwrite_existing);
 }
 
 //

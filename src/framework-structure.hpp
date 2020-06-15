@@ -46,6 +46,8 @@ public: /* Need to be set back to private */
     unsigned int start;
 
 public:
+    unsigned int getFeatureCount();
+    unsigned int getFeatureViewpointIndex(unsigned int featureIndex);
     bool getHasScale(unsigned int scaleGroup);
     Structure() : position(Eigen::Vector3d::Zero()), state(STRUCTURE_REMOVE) {}  
     Eigen::Vector3d * getPosition();

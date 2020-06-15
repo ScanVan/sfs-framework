@@ -21,6 +21,20 @@
 
 #include "framework-structure.hpp"
 
+unsigned int Structure::getFeatureCount(){
+
+    // Return the amount of features
+    return features.size();
+
+}
+
+unsigned int Structure::getFeatureViewpointIndex(unsigned int featureIndex){
+
+    // Return viewpoint index
+    return features[featureIndex]->getViewpoint()->getIndex();
+
+}
+
 bool Structure::getHasScale(unsigned int scaleGroup){
 
     // Check if structure broadcast the scale information

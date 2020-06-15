@@ -260,6 +260,7 @@ int main(int argc, char ** argv){
 
                 // Continue optimisation
                 loopFlag=true;
+                //loopState=DB_MODE_LAST;
 
             }else if(loopState==DB_MODE_BOOT){
 
