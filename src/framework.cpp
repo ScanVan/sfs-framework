@@ -291,6 +291,7 @@ int main(int argc, char ** argv){
         database.exportStructure     (yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor,yamlExport["group"].as<unsigned int>());
         database.exportPosition      (yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor);
         database.exportTransformation(yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor);
+        database.exportConstraint    (yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor,yamlExport["group"].as<unsigned int>());
 
         // update major iterator
         loopMajor ++;
