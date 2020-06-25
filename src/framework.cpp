@@ -88,6 +88,9 @@ int main(int argc, char ** argv){
     // Framework front-end
     Frontend * frontend(nullptr);
 
+    // Framework data source
+    ViewPointSource * viewpointsource(nullptr);
+
     // Pipeline iterations
     int loopMajor(database.getGroup());
     int loopMinor(0);
@@ -118,7 +121,7 @@ int main(int argc, char ** argv){
         std::string lastFile  = yamlFrontend["last" ].IsDefined() ? yamlFrontend["last" ].as<std::string>() : "";
 
         // Front-end source
-        ViewPointSource * viewpointsource = new ViewPointSourceFs(
+        viewpointsource = new ViewPointSourceFs(
             yamlFrontend["image"].as<std::string>(), 
             firstFile,
             lastFile, 
@@ -146,7 +149,7 @@ int main(int argc, char ** argv){
         std::string lastFile  = yamlFrontend["last" ].IsDefined() ? yamlFrontend["last" ].as<std::string>() : "";
 
         // Front-end source
-        ViewPointSource * viewpointsource = new ViewPointSourceWithOdometry(
+        viewpointsource = new ViewPointSourceWithOdometry(
             yamlFrontend["image"].as<std::string>(),
             yamlExport["path"].as<std::string>() + "/sparse_transformation.dat",
             firstFile,
@@ -186,9 +189,8 @@ int main(int argc, char ** argv){
             }
         }
 
-        // Wait bootstrap image count
+        // Start optimisation only if sufficient amount of view are pushed
         if(database.getBootstrap()){
-            // avoid optimisation
             continue;
         }
 
@@ -299,9 +301,11 @@ int main(int argc, char ** argv){
 
     }
 
-    // Need release of : 
-    //     ViewPointSource * source = NULL;
-    //     Frontend * frontend(nullptr);
+    // Delete frontend object
+    delete frontend;
+
+    // Delete viewpointsource object
+    delete viewpointsource;
 
     // system message
     return 0;
