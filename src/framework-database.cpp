@@ -593,8 +593,7 @@ void Database::filterRadialRange(int pipeState){ /* param not needed */
     # pragma omp parallel for schedule(dynamic)
     for(unsigned int i=rangeSlow; i<=rangeShigh; i++){
         if(structures[i]->getState()>=stateStructure){
-            //structures[i]->filterRadialRange(0.,25.,rangeVlow);
-            structures[i]->filterRadialRange(0.,50.,rangeVlow);
+            structures[i]->filterRadialRange(0.,configRadius,rangeVlow);
         }
     }
 

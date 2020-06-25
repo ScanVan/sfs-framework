@@ -287,7 +287,7 @@ int main(int argc, char ** argv){
 
         }
 
-        // Major iteration exportation : model, odometry and transformation
+        // Major iteration exportation : model, odometry, transformation and constraint
         database.exportStructure     (yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor,yamlExport["group"].as<unsigned int>());
         database.exportPosition      (yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor);
         database.exportTransformation(yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor);
