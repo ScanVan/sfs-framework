@@ -34,7 +34,6 @@
 #include "framework-sparsefeature.hpp"
 #include "framework-frontend.hpp"
 #include "framework-utiles.hpp"
-#include "ThreadPool.h"
 
 // Namespaces
 namespace fs = std::experimental::filesystem;

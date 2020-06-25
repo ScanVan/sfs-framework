@@ -86,7 +86,7 @@ bool Database::getError(int pipeState, int loopMajor, int loopMinor){
     }
 
     // Apply error to deduce iterations stop condition
-    if ( (std::fabs(tError-pushtError)<configError) ) {
+    if ( (std::fabs(tError-pushtError)<configError) || ((tError-pushtError)<0.) ) {
         returnValue=false;
     }
 

@@ -2,60 +2,61 @@
 #include "framework-sparsefeature.hpp"
 #include "framework-utiles.hpp"
 
-FrontendPicture::FrontendPicture(ViewPointSource * source, cv::Mat mask, ThreadPool *threadpool, Database *database) :
+FrontendPicture::FrontendPicture(ViewPointSource * source, cv::Mat mask, Database *database) :
 	source(source),
-	threadpool(threadpool),
 	mask(mask),
-	featureExtractionQueue(2),
 	database(database){
-	featureExtractionThread = std::thread([this]{featureExtraction();});
 }
-
-
-void FrontendPicture::featureExtraction(){
-    exitRetain();
-	while(this->source->hasNext()){
-		//Collect the next view point and add it into the database
-		auto newViewpoint = source->next();
-		auto m = threadpool->enqueue([this, newViewpoint] {
-			akazeFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor());
-			return newViewpoint;
-		});
-	    exitRetain();
-		featureExtractionQueue.push(m);
-	}
-	exitRelease();
-}
-
 
 bool FrontendPicture::next() {
-	auto newViewpoint = featureExtractionQueue.pop();
 
-	//Check if the image is moving enough using features
-	std::vector<cv::DMatch> lastViewpointMatches;
-	if(lastViewpoint){
-		gmsMatcher (
-			newViewpoint->getCvFeatures(),
-			newViewpoint->getCvDescriptor(),
-			newViewpoint->getImage()->size(),
-			lastViewpoint->getCvFeatures(),
-			lastViewpoint->getCvDescriptor(),
-			lastViewpoint->getImage()->size(),
-			&lastViewpointMatches
-		);
-		double score = utilesDetectMotion(
-			newViewpoint->getCvFeatures(),
-			lastViewpoint->getCvFeatures(),
-			&lastViewpointMatches,
-			lastViewpoint->getImage()->size()
-		);
-//			std::cout << score << std::endl;
-//		if(score < 0.0005){
-        if(score < 0.002){
-		    exitRelease();
-			return false;
-		}
-	}
+    std::shared_ptr<Viewpoint> newViewpoint;
+
+    bool hasViewpoint(false);
+
+    std::vector<cv::DMatch> lastViewpointMatches;
+
+    // Search source image
+    while (hasViewpoint==false) {
+
+        // Check image list exhaust
+        if(source->hasNext()==false){
+            return false;
+        }
+
+        // Create viewpoint from source
+        newViewpoint = source->next();
+
+        // Compute image features and descriptors
+        akazeFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor());
+
+        std::cerr << "Computing features ..." << std::endl;
+
+	    //Check if the image is moving enough using features
+	    if(lastViewpoint){
+		    gmsMatcher (
+			    newViewpoint->getCvFeatures(),
+			    newViewpoint->getCvDescriptor(),
+			    newViewpoint->getImage()->size(),
+			    lastViewpoint->getCvFeatures(),
+			    lastViewpoint->getCvDescriptor(),
+			    lastViewpoint->getImage()->size(),
+			    &lastViewpointMatches
+		    );
+		    double score = utilesDetectMotion(
+			    newViewpoint->getCvFeatures(),
+			    lastViewpoint->getCvFeatures(),
+			    &lastViewpointMatches,
+			    lastViewpoint->getImage()->size()
+		    );
+            if(score >= 0.002){ // Old value : 0.0005
+                hasViewpoint=true;
+		    }
+	    }else{
+            hasViewpoint=true;
+        }
+
+    }
 
 	newViewpoint->allocateFeaturesFromCvFeatures();
 
@@ -113,10 +114,8 @@ FrontendDense::FrontendDense(ViewPointSource * source, cv::Mat mask,Database *da
     source(source),
     mask(mask),
     database(database),
-    ofCacheFolder(ofCacheFolder){
-
-    exitRetain();
-}
+    ofCacheFolder(ofCacheFolder)
+{ }
 
 
 #include "../lib/libflow/src/Cache.h"
@@ -204,7 +203,5 @@ bool FrontendDense::next() {
 
     newViewpoint->setIndex(database->viewpoints.size());
     database->addViewpoint(newViewpoint);
-    exitRetain();
-    if(!source->hasNext()) exitRelease();
     return true;
 }

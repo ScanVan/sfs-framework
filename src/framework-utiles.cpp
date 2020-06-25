@@ -35,44 +35,6 @@ Eigen::Vector3d utiles_direction(double x, double y, int width, int height){
 
 }
 
-/* delete */
-void profile(std::string msg){
-	static struct timespec specOld;
-	static std::string msgLast = "";
-    struct timespec specNew;
-    double t;
-
-    clock_gettime(CLOCK_REALTIME, &specNew);
-
-    if (specNew.tv_nsec >= 1000000000) {
-    	specNew.tv_nsec -= 1000000000;
-    	specNew.tv_sec++;
-    }
-    t = specNew.tv_sec - specOld.tv_sec + (specNew.tv_nsec - specOld.tv_nsec)*1e-9;
-    std::cout << msgLast << " : " << t << std::endl;
-    specOld = specNew;
-    msgLast = msg;
-}
-
-/* delete */
-std::mutex exitMutex;
-int exitCounter = 0;
-
-/* delete */
-void exitRetain(){
-    exitMutex.lock();
-    exitCounter++;
-    exitMutex.unlock();
-}
-
-/* delete */
-void exitRelease(){
-    exitMutex.lock();
-    exitCounter--;
-    if(exitCounter <= 0) exit(0);
-    exitMutex.unlock();
-}
-
 double bilinear_sample(double *p, double x, double y, int width){
     int ix = x;
     int iy = y;

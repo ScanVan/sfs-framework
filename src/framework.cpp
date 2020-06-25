@@ -85,9 +85,6 @@ int main(int argc, char ** argv){
         yamlDense["disparity"].as<double>()
     );
 
-    // Thread pool initialisation
-    ThreadPool threadpool(2);
-
     // Framework front-end
     Frontend * frontend(nullptr);
 
@@ -96,6 +93,7 @@ int main(int argc, char ** argv){
     int loopMinor(0);
 
     // Loop flag
+    bool pipeFlag(true);
     bool loopFlag(true);
 
     // Algorithm state
@@ -135,7 +133,7 @@ int main(int argc, char ** argv){
         cv::resize(mask, mask, cv::Size(), yamlFrontend["scale"].as<double>(), yamlFrontend["scale"].as<double>(), cv::INTER_NEAREST );
 
         // Create front-end instance
-        frontend = new FrontendPicture(viewpointsource, mask, &threadpool, &database);
+        frontend = new FrontendPicture(viewpointsource, mask, &database);
 
         // Initialise algorithm state
         loopState = DB_MODE_BOOT;
@@ -176,18 +174,21 @@ int main(int argc, char ** argv){
     //
 
     // Framework main loop
-    while(true){
+    while( pipeFlag == true ){
 
         // Query image from source
-        if(!frontend->next()){
-            // drop the pushed image
-            continue;
+        if(frontend->next()==false){
+            pipeFlag=false;
+            if(loopState==DB_MODE_MASS){
+                break;
+            }else{
+                loopState=DB_MODE_FULL;
+            }
         }
 
         // Wait bootstrap image count
         if(database.getBootstrap()){
             // avoid optimisation
-            exitRelease();
             continue;
         }
 
@@ -259,8 +260,8 @@ int main(int argc, char ** argv){
                 database.filterRadialRange(loopState);
 
                 // Continue optimisation
-                loopFlag=true;
-                //loopState=DB_MODE_LAST;
+                //loopFlag=true;
+                loopState=DB_MODE_LAST;
 
             }else if(loopState==DB_MODE_BOOT){
 
@@ -295,8 +296,6 @@ int main(int argc, char ** argv){
 
         // update major iterator
         loopMajor ++;
-
-        exitRelease();
 
     }
 
