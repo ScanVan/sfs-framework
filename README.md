@@ -1,6 +1,6 @@
 # Overview
 
-_Note : This framework is under active developments_
+_Note : This framework is under active developments. The master branch contains the current state of the framework._
 
 This framework implements an experimental structure from motion pipeline designed for _true_ spherical image. From an sequence of _true_ spherical images, the pipeline is designed to take advantage of the specificity of such images to compute the 3D structure of the environment captured on the images. It implement a novel optimization algorithm that is able to deduce the pose of the image based on the matching features.
 
