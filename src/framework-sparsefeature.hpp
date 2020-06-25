@@ -28,7 +28,7 @@
 // Internal includes
 #include "gms_matcher.hpp"
 
-void akazeFeatures(	cv::Mat* image, cv::Mat* mask, std::vector<cv::KeyPoint>* keypoints, cv::Mat* desc);
+void akazeFeatures(cv::Mat* image, cv::Mat* mask, std::vector<cv::KeyPoint>* keypoints, cv::Mat* desc, float const threshold);
 
 extern void gmsMatcher (	std::vector<cv::KeyPoint>* k1,
 					        cv::Mat* d1,

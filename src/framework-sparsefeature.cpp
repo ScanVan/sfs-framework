@@ -21,10 +21,10 @@
 
 #include "framework-sparsefeature.hpp"
 
-void akazeFeatures(	cv::Mat* image, cv::Mat* mask, std::vector<cv::KeyPoint>* keypoints, cv::Mat* desc) {
+void akazeFeatures(cv::Mat* image, cv::Mat* mask, std::vector<cv::KeyPoint>* keypoints, cv::Mat* desc, float const threshold) {
 
     // Instance AKAZE feature detector
-    cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, 0.001f, 4, 4, cv::KAZE::DIFF_PM_G2);
+    cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, threshold, 4, 4, cv::KAZE::DIFF_PM_G2);
 
     // Compute feature and their descriptor
     akaze->detectAndCompute(*image, *mask, *keypoints, *desc);

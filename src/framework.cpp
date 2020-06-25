@@ -65,7 +65,7 @@ int main(int argc, char ** argv){
 
     // Instance of main yaml section
     YAML::Node yamlFrontend  = yamlConfig["frontend"];
-    //YAML::Node yamlFeatures  = yamlConfig["features"]; // To add
+    YAML::Node yamlFeatures  = yamlConfig["features"];
     YAML::Node yamlMatching  = yamlConfig["matching"];
     YAML::Node yamlAlgorithm = yamlConfig["algorithm"];
     YAML::Node yamlDense     = yamlConfig["dense"];
@@ -113,7 +113,7 @@ int main(int argc, char ** argv){
     //  Framework front-end
     //
 
-    // Switch on front-end : odometry (IMAGE), densification (DENSE)
+    // Switch on front-end : odometry (sparse), densification (dense)
     if(yamlFrontend["type"].as<std::string>() == "sparse"){
 
         // Detect image list boundary
@@ -136,7 +136,7 @@ int main(int argc, char ** argv){
         cv::resize(mask, mask, cv::Size(), yamlFrontend["scale"].as<double>(), yamlFrontend["scale"].as<double>(), cv::INTER_NEAREST );
 
         // Create front-end instance
-        frontend = new FrontendPicture(viewpointsource, mask, &database);
+        frontend = new FrontendPicture(viewpointsource, mask, &database, yamlFeatures["threshold"].as<float>());
 
         // Initialise algorithm state
         loopState = DB_MODE_BOOT;

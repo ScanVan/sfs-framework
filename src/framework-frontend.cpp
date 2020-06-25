@@ -1,12 +1,32 @@
-#include "framework-frontend.hpp"
-#include "framework-sparsefeature.hpp"
-#include "framework-utiles.hpp"
+/*
+ *  sfs-framework
+ *
+ *      Nils Hamel - nils.hamel@bluewin.ch
+ *      Charles Papon - charles.papon.90@gmail.com
+ *      Copyright (c) 2019-2020 DHLAB, EPFL & HES-SO Valais-Wallis
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-FrontendPicture::FrontendPicture(ViewPointSource * source, cv::Mat mask, Database *database) :
+#include "framework-frontend.hpp"
+
+FrontendPicture::FrontendPicture(ViewPointSource * source, cv::Mat mask, Database *database, float const threshold) :
 	source(source),
 	mask(mask),
-	database(database){
-}
+	database(database),
+    sparseThreshold(threshold)
+{ }
 
 bool FrontendPicture::next() {
 
@@ -28,7 +48,7 @@ bool FrontendPicture::next() {
         newViewpoint = source->next();
 
         // Compute image features and descriptors
-        akazeFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor());
+        akazeFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor(), sparseThreshold);
 
         std::cerr << "Computing features ..." << std::endl;
 
@@ -118,7 +138,7 @@ FrontendDense::FrontendDense(ViewPointSource * source, cv::Mat mask,Database *da
 { }
 
 
-#include "../lib/libflow/src/Cache.h"
+
 bool FrontendDense::next() {
     if(!source->hasNext()) return false;
     auto newViewpoint = source->next();
