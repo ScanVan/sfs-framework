@@ -282,14 +282,6 @@ int main(int argc, char ** argv){
         // Expunge filtered structures
         database.expungeStructures();
 
-        // Need to be placed after features extraction, as an image is not needed from there
-        if ( database.viewpoints.size() > database.configMatchRange ) {
-
-            // release viewpoint image memory
-            database.viewpoints[database.viewpoints.size()-database.configMatchRange]->releaseImage();
-
-        }
-
         // Major iteration exportation : model, odometry, transformation and constraint
         database.exportStructure     (yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor,yamlExport["group"].as<unsigned int>());
         database.exportPosition      (yamlExport["path"].as<std::string>(),yamlFrontend["type"].as<std::string>(),loopMajor);

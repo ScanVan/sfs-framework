@@ -50,7 +50,8 @@ bool FrontendPicture::next() {
         // Compute image features and descriptors
         akazeFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor(), sparseThreshold);
 
-        std::cerr << "Computing features ..." << std::endl;
+        // Release viewpoint image
+        newViewpoint->releaseImage();
 
 	    //Check if the image is moving enough using features
 	    if(lastViewpoint){
