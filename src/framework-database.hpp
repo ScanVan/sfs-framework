@@ -86,6 +86,7 @@ public:
     bool getError(int loopState, int loopMajor, int loopMinor);
     void getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints);
 	void addViewpoint(std::shared_ptr<Viewpoint> viewpoint);
+    Structure * addStructure();
     void aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations);
     int prepareState(int pipeState);
     void prepareStructures();
@@ -108,7 +109,6 @@ public:
     void exportPosition(std::string path, std::string mode, unsigned int major);
     void exportTransformation(std::string path, std::string mode, unsigned int major);
     void exportConstraint(std::string path, std::string mode, unsigned int major, unsigned int group);
-    Structure *newStructure(){ auto s = std::make_shared<Structure>(); structures.push_back(s); return s.get();}
 
 public:
 

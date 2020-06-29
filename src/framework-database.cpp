@@ -109,15 +109,40 @@ bool Database::getError(int pipeState, int loopMajor, int loopMinor){
 }
 
 void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::shared_ptr<Viewpoint>> *localViewpoints){
+
+    // Detect amout of available last viewpoints
     int localCount = MIN(configMatchRange, viewpoints.size());
-    for(auto i = viewpoints.end()-localCount;i != viewpoints.end(); ++i){
-        localViewpoints->push_back(*i);
+
+    // Add available to stack for matching
+    for(auto availableViewpoint(viewpoints.end()-localCount); availableViewpoint != viewpoints.end(); availableViewpoint++){
+        localViewpoints->push_back(*availableViewpoint);
     }
+
 }
 
 void Database::addViewpoint(std::shared_ptr<Viewpoint> viewpoint){
-    if(viewpoint->getIndex() > 0) transforms.push_back(std::make_shared<Transform>());
+
+    // Add new viewpoint to the stack
     viewpoints.push_back(viewpoint);
+
+    // Add new transformation only if at least two viewpoints are in the stack
+    if(viewpoint->getIndex() > 0){
+        transforms.push_back(std::make_shared<Transform>());
+    }
+
+}
+
+Structure * Database::addStructure(){
+
+    // Create structure memory allocation
+    auto newStructure = std::make_shared<Structure>(); 
+
+    // Push new structure on the stack
+    structures.push_back(newStructure); 
+
+    // Return pointer to created structure
+    return newStructure.get();
+
 }
 
 void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoints, Viewpoint *newViewpoint, uint32_t *correlations){
@@ -169,7 +194,7 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
         switch(structuresCount){
             case 0: {
                 // no more needed - direct access to structure
-                structure = this->newStructure();
+                structure = this->addStructure();
                 structureNewCount++;
             }break;
             case 1: {
@@ -627,85 +652,119 @@ void Database::filterDisparity(int pipeState){
 //
 
 void Database::exportStructure(std::string path, std::string mode, unsigned int major, unsigned int group){
+
+    // Exportation variables
     std::fstream exportStream;
     std::stringstream filePath;
     std::stringstream fileCopy;
     cv::Vec3b color;
 
+    // Create exportation path
     filePath << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_structure.xyz";
 
+    // Create exportation stream
     exportStream.open(filePath.str(),std::ios::out);
     if (exportStream.is_open() == false){
         std::cerr << "unable to create model exportation file" << std::endl;
         return;
     }
 
+    // Structures exportation
     for(auto & structure: structures){
+
+        // Export only structures with sufficiant viewpoints
         if(structure->getHasScale(group)){
 
+            // Export structure position
             exportStream << (*structure->getPosition())(0) << " ";
             exportStream << (*structure->getPosition())(1) << " ";
             exportStream << (*structure->getPosition())(2) << " ";
 
+            // Get structure mean color
             color=structure->getColor();
 
+            // Export structure color - RGB888
             exportStream << std::to_string( color[2] ) << " ";
             exportStream << std::to_string( color[1] ) << " ";
             exportStream << std::to_string( color[0] ) << std::endl;
 
         }
+
     }
 
+    // Delete exportation stream
     exportStream.close();
 
+    // Copy structure file to main folder
     fileCopy << path << "/" << mode << "_structure.xyz";
     fs::copy(filePath.str(), fileCopy.str(),fs::copy_options::overwrite_existing);
 
 }
 
 void Database::exportPosition(std::string path, std::string mode, unsigned int major){
+
+    // Exportation variables
     std::fstream exportStream;
     std::stringstream filePath;
     std::stringstream fileCopy;
 
+    // Create exportation path
     filePath << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_position.xyz";
 
+    // Create exportation stream
     exportStream.open(filePath.str(),std::ios::out);
     if (exportStream.is_open() == false){
         std::cerr << "unable to create odometry exportation file" << std::endl;
         return;
     }
 
+    // Viewpoints exportation
     for(auto & element: viewpoints){
+
+        // Export viewpoint position with ad-hoc color
         exportStream << (*element->getPosition())(0) << " ";
         exportStream << (*element->getPosition())(1) << " ";
         exportStream << (*element->getPosition())(2) << " 255 0 255" << std::endl;
+
     }
 
+    // Delete exportation stream
     exportStream.close();
 
+    // Copy viewpoint file to main folder
     fileCopy << path << "/" << mode << "_position.xyz";
     fs::copy(filePath.str(), fileCopy.str(),fs::copy_options::overwrite_existing);
 
 }
 
 void Database::exportTransformation(std::string path, std::string mode, unsigned int major){
+
+    // Exportation variables
     std::fstream exportStream;
     std::stringstream filePath;
     std::stringstream fileCopy;
 
+    // Create exportation path
     filePath << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_transformation.dat";
 
+    // Create exportation stream
     exportStream.open(filePath.str(),std::ios::out);
     if (exportStream.is_open() == false ){
         std::cerr << "unable to create transformation file" << std::endl;
     }
 
+    // Export transformations
     for(auto & viewpoint: viewpoints){
+
+        // Export viewpoint image UID
         exportStream << viewpoint->uid << " ";
+
+        // Export viewpoint position - 3-vector
         exportStream << (*viewpoint->getPosition())(0) << " ";
         exportStream << (*viewpoint->getPosition())(1) << " ";
         exportStream << (*viewpoint->getPosition())(2) << " ";
+
+        // Export viewpoint orientation - 3x3-matrix
         exportStream << (*viewpoint->getOrientation())(0,0) << " "; 
         exportStream << (*viewpoint->getOrientation())(0,1) << " ";
         exportStream << (*viewpoint->getOrientation())(0,2) << " ";
@@ -715,48 +774,61 @@ void Database::exportTransformation(std::string path, std::string mode, unsigned
         exportStream << (*viewpoint->getOrientation())(2,0) << " "; 
         exportStream << (*viewpoint->getOrientation())(2,1) << " ";
         exportStream << (*viewpoint->getOrientation())(2,2) << std::endl;
+
     }
 
+    // Delete exportation stream
     exportStream.close();
 
+    // Copy transformation file to main folder
     fileCopy << path << "/" << mode << "_transformation.dat";
     fs::copy(filePath.str(), fileCopy.str(),fs::copy_options::overwrite_existing);
 
 }
 
 void Database::exportConstraint(std::string path, std::string mode, unsigned int major, unsigned int group){
+
+    // Exportation variables
     std::fstream exportStream;
     std::stringstream filePath;
     std::stringstream fileCopy;
     cv::Vec3b color;
 
+    // Create exportation path
     filePath << path << "/" << mode << "/" << std::setfill('0') << std::setw(4) << major << "_constraint.dat";
 
+    // Create exportation stream
     exportStream.open(filePath.str(),std::ios::out);
     if (exportStream.is_open() == false){
         std::cerr << "unable to create odometry exportation file" << std::endl;
         return;
     }
 
+    // Export constaints
     for(auto & structure: structures){
+
+        // Export only structures with sufficiant viewpoints
         if(structure->getHasScale(group)){
 
-            // Export scene point position in the 3D space : x y z
+            // Export structure position
             exportStream << (*structure->getPosition())(0) << " ";
             exportStream << (*structure->getPosition())(1) << " ";
             exportStream << (*structure->getPosition())(2) << " ";
 
+            // Get structure mean color
             color=structure->getColor();
 
-            // Export scene point color - [0-255] : red green blue
+            // Export structure color - RGB888
             exportStream << std::to_string( color[2] ) << " ";
             exportStream << std::to_string( color[1] ) << " ";
             exportStream << std::to_string( color[0] ) << " ";
 
-            // Export amount of viewpoints that sees this point : value
+            // Export amount of viewpoint seen by the structure
             exportStream << structure->getFeatureCount() << " ";
 
-            // Export the index of the viewpoints that sees this point : index
+            // Export index of viewpoints seen by the structure
+            // These index corresponds, zero-based to the index in the viewpoint    
+            // stack exported in the *_transformation.dat files
             for(unsigned int i(0); i<structure->getFeatureCount(); i++){
 
                 // Export viewpoint index
@@ -764,16 +836,20 @@ void Database::exportConstraint(std::string path, std::string mode, unsigned int
 
             }
 
-            // Terminate line
+            // Exportation line termination
             exportStream << std::endl;
 
         }
+
     }
 
+    // Delete exportation stream
     exportStream.close();
 
+    // Copy transformation file to main folder
     fileCopy << path << "/" << mode << "_constraint.dat";
     fs::copy(filePath.str(), fileCopy.str(),fs::copy_options::overwrite_existing);
+
 }
 
 //

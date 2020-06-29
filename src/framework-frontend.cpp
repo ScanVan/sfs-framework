@@ -202,7 +202,7 @@ bool FrontendDense::next() {
                     if(!mask.at<uint8_t>(y, x)) continue;
                     if(!mask.at<uint8_t>(newPosition.y(), newPosition.x())) continue;
 
-                    auto newStructure = database->newStructure();
+                    auto newStructure = database->addStructure();
 
                     auto lastFeature = new Feature();
                     lastFeature->setFeature(x, y, lastViewpoint->image.cols, lastViewpoint->image.rows);
