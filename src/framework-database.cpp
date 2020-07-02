@@ -114,7 +114,7 @@ void Database::getLocalViewpoints(Eigen::Vector3d position, std::vector<std::sha
     int localCount = MIN(configMatchRange, viewpoints.size());
 
     // Add available to stack for matching
-    for(auto availableViewpoint(viewpoints.end()-localCount); availableViewpoint != viewpoints.end(); availableViewpoint++){
+    for(auto availableViewpoint(viewpoints.end()-localCount); availableViewpoint != viewpoints.end(); ++availableViewpoint){
         localViewpoints->push_back(*availableViewpoint);
     }
 
