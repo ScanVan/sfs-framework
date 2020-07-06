@@ -27,45 +27,51 @@
 // Internal includes
 #include "framework-database.hpp"
 #include "framework-utiles.hpp"
-#include "framework-viewpointsource.hpp"
+#include "framework-source.hpp"
 #include "framework-utiles.hpp"
 
 // Module object
 class Frontend{
+
 public:
 	Frontend(){}
 	virtual ~Frontend(){}
 	virtual bool next() = 0;
+
 };
 
 // Module derived object
 class FrontendPicture : public Frontend{
+
 private:
-	ViewPointSource * source;
+	Source * source;
 	std::shared_ptr<Viewpoint> lastViewpoint;
 	cv::Mat mask;
 	Database *database;
 	double scale;
     float sparseThreshold;
-public:
 
+public:
 	void featureExtraction();
-    FrontendPicture(ViewPointSource * source, cv::Mat mask, Database *database, float const threshold);
+    FrontendPicture(Source * source, cv::Mat mask, Database *database, float const threshold);
 	virtual ~FrontendPicture(){}
 	virtual bool next();
+
 };
 
 // Module derived object
 class FrontendDense : public Frontend{
+
 private:
-    ViewPointSource * source;
+    Source * source;
     cv::Mat mask;
     Database *database;
     std::string ofCacheFolder;
 
 public:
-    FrontendDense(ViewPointSource * source, cv::Mat mask, Database *database, std::string ofCacheFolder);
+    FrontendDense(Source * source, cv::Mat mask, Database *database, std::string ofCacheFolder);
     virtual ~FrontendDense(){}
     virtual bool next();
+
 };
 

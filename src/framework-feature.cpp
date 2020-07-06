@@ -21,13 +21,6 @@
 
 #include "framework-feature.hpp"
 
-Eigen::Vector3d * Feature::getDirection(){
-
-    // Return feature direction vector pointer
-    return &direction;
-
-}
-
 Eigen::Vector3d * Feature::getModel(){
 
     // Return feature model vector pointer

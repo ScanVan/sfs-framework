@@ -34,6 +34,7 @@ class Structure;
 
 // Module object
 class Feature{
+
 public: /* Need to be set back to private */
 	Viewpoint *viewpoint;
 	Structure *structure;
@@ -45,7 +46,6 @@ public: /* Need to be set back to private */
 	cv::Vec3b color;
 
 public:
-    Eigen::Vector3d * getDirection();
     Eigen::Vector3d * getModel();
     double getRadius();
     double getDisparity();

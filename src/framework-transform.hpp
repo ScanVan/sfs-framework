@@ -30,6 +30,7 @@
 
 // Module object
 class Transform {
+
 public: /* Need to be set back to private */
     Eigen::Matrix3d rotation;
     Eigen::Vector3d translation;

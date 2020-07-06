@@ -21,7 +21,7 @@
 
 #include "framework-frontend.hpp"
 
-FrontendPicture::FrontendPicture(ViewPointSource * source, cv::Mat mask, Database *database, float const threshold) :
+FrontendPicture::FrontendPicture(Source * source, cv::Mat mask, Database *database, float const threshold) :
 	source(source),
 	mask(mask),
 	database(database),
@@ -131,7 +131,7 @@ bool FrontendPicture::next() {
 	return true;
 }
 
-FrontendDense::FrontendDense(ViewPointSource * source, cv::Mat mask,Database *database, std::string ofCacheFolder) :
+FrontendDense::FrontendDense(Source * source, cv::Mat mask,Database *database, std::string ofCacheFolder) :
     source(source),
     mask(mask),
     database(database),

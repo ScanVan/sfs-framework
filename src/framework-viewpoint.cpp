@@ -28,6 +28,13 @@ unsigned int Viewpoint::getIndex(){
 
 }
 
+cv::Mat * Viewpoint::getImage(){
+
+    // Return viewpoint associated image
+    return &image;
+
+}
+
 Eigen::Matrix3d * Viewpoint::getOrientation(){
 
     // Return orientation matrix pointer
@@ -39,6 +46,13 @@ Eigen::Vector3d * Viewpoint::getPosition(){
 
     // Return position vector pointer
     return &position;
+
+}
+
+void Viewpoint::releaseImage(){
+
+    // Release image memory
+    image.deallocate();
 
 }
 
@@ -72,10 +86,14 @@ bool Viewpoint::setImage(std::string imagePath, double imageScale){
         width=image.cols;
         height=image.rows;
 
+        // Return status
         return true;
 
     } else {
+
+        // Return status
         return false;
+
     }
 }
 
@@ -84,6 +102,13 @@ void Viewpoint::setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosit
     // Assign orientation and position
     orientation=newOrientation;
     position=newPosition;
+
+}
+
+void Viewpoint::setPosition(Eigen::Vector3d newPosition){
+
+    // Assign position
+    position = newPosition;
 
 }
 

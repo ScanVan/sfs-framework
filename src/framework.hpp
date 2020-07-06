@@ -27,6 +27,6 @@
 
 // Internal includes
 #include "framework-database.hpp"
-#include "framework-viewpointsource.hpp"
+#include "framework-source.hpp"
 #include "framework-frontend.hpp"
 #include "framework-utiles.hpp"

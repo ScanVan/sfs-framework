@@ -93,7 +93,7 @@ int main(int argc, char ** argv){
     Frontend * frontend(nullptr);
 
     // Framework data source
-    ViewPointSource * viewpointsource(nullptr);
+    Source * source(nullptr);
 
     // Pipeline iterations
     int loopMajor(database.getGroup());
@@ -125,7 +125,7 @@ int main(int argc, char ** argv){
         std::string lastFile  = yamlFrontend["last" ].IsDefined() ? yamlFrontend["last" ].as<std::string>() : "";
 
         // Front-end source
-        viewpointsource = new ViewPointSourceFs(
+        source = new SourceSparse(
             yamlFrontend["image"].as<std::string>(), 
             firstFile,
             lastFile, 
@@ -140,7 +140,7 @@ int main(int argc, char ** argv){
         cv::resize(mask, mask, cv::Size(), yamlFrontend["scale"].as<double>(), yamlFrontend["scale"].as<double>(), cv::INTER_NEAREST );
 
         // Create front-end instance
-        frontend = new FrontendPicture(viewpointsource, mask, &database, yamlFeatures["threshold"].as<float>());
+        frontend = new FrontendPicture(source, mask, &database, yamlFeatures["threshold"].as<float>());
 
         // Initialise algorithm state
         loopState = DB_MODE_BOOT;
@@ -153,7 +153,7 @@ int main(int argc, char ** argv){
         std::string lastFile  = yamlFrontend["last" ].IsDefined() ? yamlFrontend["last" ].as<std::string>() : "";
 
         // Front-end source
-        viewpointsource = new ViewPointSourceWithOdometry(
+        source = new SourceDense(
             yamlFrontend["image"].as<std::string>(),
             yamlExport["path"].as<std::string>() + "/sparse_transformation.dat",
             firstFile,
@@ -169,7 +169,7 @@ int main(int argc, char ** argv){
         cv::resize(mask, mask, cv::Size(), yamlFrontend["scale"].as<double>(), yamlFrontend["scale"].as<double>(), cv::INTER_NEAREST );
 
         // Create front-end instance
-        frontend = new FrontendDense(viewpointsource, mask, &database, yamlExport["path"].as<std::string>() + "/cache" );
+        frontend = new FrontendDense(source, mask, &database, yamlExport["path"].as<std::string>() + "/cache" );
 
         // Initialise algorithm state
         loopState = DB_MODE_MASS;
@@ -300,8 +300,8 @@ int main(int argc, char ** argv){
     // Delete frontend object
     delete frontend;
 
-    // Delete viewpointsource object
-    delete viewpointsource;
+    // Delete source object
+    delete source;
 
     // system message
     return 0;

@@ -35,7 +35,7 @@
 namespace fs = std::experimental::filesystem;
 
 // Module object
-class ViewPointSource{
+class Source{
 
 protected:
     int fileIndex;
@@ -44,30 +44,30 @@ protected:
     double imageScale;
 
 public:
-	ViewPointSource() {}
-    ViewPointSource(int increment, double scale) : fileIndex(-1), fileLastIndex(-1), fileIncrement(increment), imageScale(scale) {}
-	virtual ~ViewPointSource() {}
+	Source() {}
+    Source(int increment, double scale) : fileIndex(-1), fileLastIndex(-1), fileIncrement(increment), imageScale(scale) {}
+	virtual ~Source() {}
 	virtual std::shared_ptr<Viewpoint> next() = 0;
 	virtual bool hasNext() = 0;
 
 };
 
 // Module derived object
-class ViewPointSourceFs : public ViewPointSource{
+class SourceSparse : public Source{
 
 private:
 	std::vector<std::string> files;
 
 public:
-    ViewPointSourceFs(std::string imageFolder, std::string firstImage, std::string lastImage, uint32_t increment, double scale);
-	~ViewPointSourceFs() {}
+    SourceSparse(std::string imageFolder, std::string firstImage, std::string lastImage, uint32_t increment, double scale);
+	~SourceSparse() {}
 	std::shared_ptr<Viewpoint> next();
 	bool hasNext();
 
 };
 
 // Module derived object
-class ViewPointSourceWithOdometry : public ViewPointSource{
+class SourceDense : public Source{
 
 private:
     class ViewPointInfo{
@@ -80,8 +80,8 @@ private:
     std::string pictureFolder;
 
 public:
-    ViewPointSourceWithOdometry(std::string imageFolder, std::string transformationFile, std::string firstFile, std::string lastFile, int increment, double scale);
-    ~ViewPointSourceWithOdometry() {}
+    SourceDense(std::string imageFolder, std::string transformationFile, std::string firstFile, std::string lastFile, int increment, double scale);
+    ~SourceDense() {}
     std::shared_ptr<Viewpoint> next();
     bool hasNext();
 

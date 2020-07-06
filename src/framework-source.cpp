@@ -19,11 +19,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "framework-viewpointsource.hpp"
+#include "framework-source.hpp"
 
-ViewPointSourceFs::ViewPointSourceFs(std::string imageFolder, std::string firstImage, std::string lastImage, uint32_t increment, double scale) :
+//
+//  Sparse source
+//
 
-    ViewPointSource(
+SourceSparse::SourceSparse(std::string imageFolder, std::string firstImage, std::string lastImage, uint32_t increment, double scale) :
+
+    Source(
         increment, 
         scale
     )
@@ -102,7 +106,7 @@ ViewPointSourceFs::ViewPointSourceFs(std::string imageFolder, std::string firstI
 
 }
 
-std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
+std::shared_ptr<Viewpoint> SourceSparse::next(){
 
     /* Create new viewpoint instance */
     std::shared_ptr<Viewpoint> pushViewpoint = std::make_shared<Viewpoint>();
@@ -126,16 +130,20 @@ std::shared_ptr<Viewpoint> ViewPointSourceFs::next(){
 
 }
 
-bool ViewPointSourceFs::hasNext(){
+bool SourceSparse::hasNext(){
 
     /* Detect end of image list */
 	return fileIndex < fileLastIndex;
 
 }
 
-ViewPointSourceWithOdometry::ViewPointSourceWithOdometry(std::string imageFolder, std::string transformationFile, std::string firstImage, std::string lastImage, int increment, double scale) : 
+//
+//  Dense source
+//
 
-    ViewPointSource(
+SourceDense::SourceDense(std::string imageFolder, std::string transformationFile, std::string firstImage, std::string lastImage, int increment, double scale) : 
+
+    Source(
         increment, 
         scale
     ), 
@@ -246,7 +254,7 @@ ViewPointSourceWithOdometry::ViewPointSourceWithOdometry(std::string imageFolder
 
 }
 
-std::shared_ptr<Viewpoint> ViewPointSourceWithOdometry::next(){
+std::shared_ptr<Viewpoint> SourceDense::next(){
 
     /* Create new viewpoint instance */
     std::shared_ptr<Viewpoint> pushViewpoint = std::make_shared<Viewpoint>();
@@ -276,7 +284,7 @@ std::shared_ptr<Viewpoint> ViewPointSourceWithOdometry::next(){
 
 }
 
-bool ViewPointSourceWithOdometry::hasNext(){
+bool SourceDense::hasNext(){
 
     /* Detect end of image list */
     return fileIndex < fileLastIndex;

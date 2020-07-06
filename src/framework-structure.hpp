@@ -38,6 +38,7 @@
 
 // Module object
 class Structure {
+
 public: /* Need to be set back to private */
     Eigen::Vector3d position;
     std::vector<Feature*> features;
@@ -45,10 +46,10 @@ public: /* Need to be set back to private */
     unsigned int start;
 
 public:
+    Structure() : position(Eigen::Vector3d::Zero()), state(STRUCTURE_REMOVE) {}
     unsigned int getFeatureCount();
     unsigned int getFeatureViewpointIndex(unsigned int featureIndex);
     bool getHasScale(unsigned int scaleGroup);
-    Structure() : position(Eigen::Vector3d::Zero()), state(STRUCTURE_REMOVE) {}  
     Eigen::Vector3d * getPosition();
     unsigned int getState();
     cv::Vec3b getColor();
