@@ -22,9 +22,8 @@
 #pragma once
 
 // External includes
-#include <Eigen/Dense>
 #include <vector>
-#include <limits>
+#include <Eigen/Dense>
 
 // Internal includes
 #include "framework-feature.hpp"

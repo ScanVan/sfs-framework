@@ -22,16 +22,11 @@
 #pragma once
 
 // External include
-#include <stdint.h>
-#include <vector>
-#include <ctime>
-#include <fstream>
 #include <iostream>
+#include <fstream>
+#include <vector>
 #include <experimental/filesystem>
-#include <opencv4/opencv2/core/types.hpp>
 #include <opencv4/opencv2/core.hpp>
-#include <opencv4/opencv2/imgcodecs.hpp>
-#include <opencv4/opencv2/highgui.hpp>
 
 // Internal includes
 #include "framework-viewpoint.hpp"

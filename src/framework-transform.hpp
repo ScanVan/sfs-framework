@@ -22,6 +22,7 @@
 #pragma once
 
 // External includes
+#include <iostream>
 #include <Eigen/Dense>
 
 // Internal includes

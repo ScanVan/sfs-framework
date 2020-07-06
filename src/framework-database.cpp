@@ -21,6 +21,10 @@
 
 #include "framework-database.hpp"
 
+//
+//  Framework core functions
+//
+
 Database::Database(double initialError, double initialErrorDisparity, double initialRadius, unsigned int initialGroup, unsigned int initialMatchRange, double initialDenseDisparity){
 
     // Assign default parameters
@@ -648,7 +652,7 @@ void Database::filterDisparity(int pipeState){
 }
 
 //
-//  Section - Exportation methods
+//  Framework exportation
 //
 
 void Database::exportStructure(std::string path, std::string mode, unsigned int major, unsigned int group){
@@ -853,7 +857,7 @@ void Database::exportConstraint(std::string path, std::string mode, unsigned int
 }
 
 //
-//  Section - Development features - Will be removed
+//  Framework development features - Will be removed
 //
 
 // Note : this function does not respect encapsulation (development function) - need to be removed

@@ -48,14 +48,14 @@ bool FrontendPicture::next() {
         newViewpoint = source->next();
 
         // Compute image features and descriptors
-        akazeFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor(), sparseThreshold);
+        utilesAKAZEFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor(), sparseThreshold);
 
         // Release viewpoint image
         newViewpoint->releaseImage();
 
 	    //Check if the image is moving enough using features
 	    if(lastViewpoint){
-		    gmsMatcher (
+		    utilesGMSMatcher(
 			    newViewpoint->getCvFeatures(),
 			    newViewpoint->getCvDescriptor(),
 			    newViewpoint->getImage()->size(),
@@ -105,7 +105,7 @@ bool FrontendPicture::next() {
 			}
 		} else {
 			std::vector<cv::DMatch> matches;
-			gmsMatcher (
+			utilesGMSMatcher(
 				newViewpoint->getCvFeatures(),
 				newViewpoint->getCvDescriptor(),
 				newViewpoint->getImage()->size(),

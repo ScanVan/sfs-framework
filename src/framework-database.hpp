@@ -26,11 +26,11 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
-#include <opencv4/opencv2/core.hpp>
 #include <omp.h>
-#include <experimental/filesystem>
 #include <sstream>
 #include <iomanip>
+#include <experimental/filesystem>
+#include <opencv4/opencv2/core.hpp>
 
 // Internal includes
 #include "framework-viewpoint.hpp"

@@ -24,11 +24,7 @@
 // External includes
 #include <string>
 #include <Eigen/Dense>
-#include <opencv4/opencv2/core/types.hpp>
 #include <opencv4/opencv2/core.hpp>
-#include <opencv4/opencv2/features2d.hpp>
-#include <opencv4/opencv2/imgcodecs.hpp>
-#include <opencv4/opencv2/opencv.hpp>
 
 // Internal includes
 #include "framework-feature.hpp"

@@ -115,7 +115,11 @@ void Transform::computePose(){
     // Compute rotation
     rotation=svd.matrixV()*svd.matrixU().transpose();
 
-    // Stability mechanism - In some cases, the rotation matrix has an inversion that has to be removed
+    // Stability mechanism - In some cases, the rotation matrix has an inversion
+    // which appears as a minus one determinant. This procedure is there to
+    // remove the inversion and to obtain a rotation matrix with determinant to
+    // plus one. Most of the time, having a SVD fault message is not a very good
+    // sign for the reconstruction (need to be formally confirmed).
     if (rotation.determinant()<0){
         std::cerr << "SVD fault" << std::endl;
         Eigen::Matrix3d correctV(svd.matrixV());

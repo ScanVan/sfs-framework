@@ -22,85 +22,21 @@
 #pragma once
 
 // External includes
-#include <Eigen/Core>
+#include <iostream>
 #include <cmath>
 #include <string>
-#include <time.h>
-#include <iostream>
-#include <mutex>
-#include <queue>
-#include <condition_variable>
-#include <future>
 #include <experimental/filesystem>
-#include <sstream>
-#include <iomanip>
+#include <Eigen/Core>
 #include <opencv4/opencv2/core.hpp>
-#include <opencv4/opencv2/core/types.hpp>
+
+// Internal includes
+#include "gms_matcher.hpp"
 
 // Namespaces
 namespace fs = std::experimental::filesystem;
 
-// Module object
-template <typename T> class BlockingQueue{
-	std::mutex pushMutex, popMutex, queueMutex;
-	std::condition_variable pushCond, popCond;
-	uint32_t sizeMax, occupancy;
-	std::queue<std::future<T>> queue;
-public:
-	BlockingQueue(){
-		this->sizeMax = -1;
-		this->occupancy = 0;
-	}
-	BlockingQueue(int sizeMax){
-		this->sizeMax = sizeMax;
-		this->occupancy = 0;
-	}
+template<typename T> std::pair<bool, int> findInVector(const std::vector<T> &vecOfElements, const T &element) {
 
-	void push(std::future<T>& e){
-		queueMutex.lock();
-		queue.push(std::move(e));
-		occupancy++;
-		popCond.notify_one();
-		queueMutex.unlock();
-
-		while(true){
-			queueMutex.lock();
-			if(occupancy < sizeMax) break;
-			queueMutex.unlock();
-			std::unique_lock<std::mutex> lk(pushMutex);
-			pushCond.wait(lk);
-		}
-
-		queueMutex.unlock();
-	}
-
-	T pop(){
-		while(true){
-			queueMutex.lock();
-			if(occupancy != 0) break;
-			queueMutex.unlock();
-			std::unique_lock<std::mutex> lk(popMutex);
-			popCond.wait(lk);
-		}
-
-		std::future<T> f = std::move(queue.front());
-		queueMutex.unlock();
-
-		T e = std::move(f.get());
-
-		queueMutex.lock();
-		queue.pop();
-		occupancy--;
-		pushCond.notify_one();
-		queueMutex.unlock();
-
-		return std::move(e);
-	}
-};
-
-// Module object
-template<typename T> std::pair<bool, int> findInVector(
-        const std::vector<T> &vecOfElements, const T &element) {
     std::pair<bool, int> result;
 
     // Find given element in vector
@@ -115,14 +51,20 @@ template<typename T> std::pair<bool, int> findInVector(
     }
 
     return result;
+
 }
 
-Eigen::Vector3d utiles_direction(double x, double y, int width, int height);
+void utilesDirectories(std::string rootPath, std::string modeName);
 
-double bilinear_sample(double *p, double x, double y, int width);
-double bilinear_sample(float *p, double x, double y, int width);
+Eigen::Vector3d utilesDirection(double x, double y, int width, int height);
 
-void utiles_directories( std::string rootPath, std::string modeName );
+void utilesAKAZEFeatures(cv::Mat* image, cv::Mat* mask, std::vector<cv::KeyPoint>* keypoints, cv::Mat* desc, float const threshold);
+
+void utilesGMSMatcher(std::vector<cv::KeyPoint>* k1, cv::Mat* d1, cv::Size s1, std::vector<cv::KeyPoint>* k2, cv::Mat* d2, cv::Size s2, std::vector<cv::DMatch> *matches);
 
 double utilesDetectMotion(std::vector<cv::KeyPoint> *kp1, std::vector<cv::KeyPoint> *kp2, std::vector<cv::DMatch> *matches, cv::Size size);
+
+double bilinear_sample(double *p, double x, double y, int width);
+
+float bilinear_sample(float *p, float x, float y, int width);
 

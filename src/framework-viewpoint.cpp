@@ -107,7 +107,5 @@ void Viewpoint::allocateFeaturesFromCvFeatures(){
 
 	}
 
-    /* Release image mat here ? */
-
 }
 

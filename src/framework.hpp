@@ -23,17 +23,10 @@
 
 // External includes
 #include <iostream>
-#include <cmath>
 #include <yaml-cpp/yaml.h>
-#include <unistd.h>
-#include <experimental/filesystem>
 
 // Internal includes
 #include "framework-database.hpp"
 #include "framework-viewpointsource.hpp"
-#include "framework-sparsefeature.hpp"
 #include "framework-frontend.hpp"
 #include "framework-utiles.hpp"
-
-// Namespaces
-namespace fs = std::experimental::filesystem;

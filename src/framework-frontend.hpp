@@ -28,7 +28,6 @@
 #include "framework-database.hpp"
 #include "framework-utiles.hpp"
 #include "framework-viewpointsource.hpp"
-#include "framework-sparsefeature.hpp"
 #include "framework-utiles.hpp"
 
 // Module object

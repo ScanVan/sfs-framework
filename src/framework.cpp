@@ -21,6 +21,10 @@
 
 #include "framework.hpp"
 
+//
+//  Main function - Framework front-end
+//
+
 int main(int argc, char ** argv){
 
     //
@@ -107,7 +111,7 @@ int main(int argc, char ** argv){
     //
 
     // Create exportation directories
-    utiles_directories(yamlExport["path"].as<std::string>(), yamlFrontend["type"].as<std::string>());
+    utilesDirectories(yamlExport["path"].as<std::string>(), yamlFrontend["type"].as<std::string>());
 
     //
     //  Framework front-end

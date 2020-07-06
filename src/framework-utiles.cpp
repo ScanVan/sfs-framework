@@ -21,7 +21,37 @@
 
 #include "framework-utiles.hpp"
 
-Eigen::Vector3d utiles_direction(double x, double y, int width, int height){
+//
+//  File system and directories
+//
+
+void utilesDirectories(std::string rootPath, std::string modeName) {
+
+    // Sub-sequent path variable
+    std::string modePath( rootPath + "/" + modeName );
+
+    // Create directories
+    fs::create_directories( rootPath.c_str() );
+    fs::create_directory  ( modePath.c_str() );
+
+    // Specific directory
+    if (modeName == "dense" ){
+
+        // Create path
+        modePath = rootPath + "/cache";
+
+        // Create directory
+        fs::create_directory( modePath.c_str() );
+
+    }
+
+}
+
+//
+//  Generic features
+//
+
+Eigen::Vector3d utilesDirection(double x, double y, int width, int height){
 
     // Convert pixel coordinates to geographic mapping coordinates
     double lamda((x/width)*2.*M_PI);
@@ -34,6 +64,119 @@ Eigen::Vector3d utiles_direction(double x, double y, int width, int height){
     return Eigen::Vector3d(cosine*cos(lamda),cosine*sin(lamda),sin(phi));
 
 }
+
+//
+//  Sparse features
+//
+
+void utilesAKAZEFeatures(cv::Mat* image, cv::Mat* mask, std::vector<cv::KeyPoint>* keypoints, cv::Mat* desc, float const threshold) {
+
+    // Instance AKAZE feature detector
+    cv::Ptr<cv::AKAZE> akaze = cv::AKAZE::create(cv::AKAZE::DESCRIPTOR_MLDB, 0, 3, threshold, 4, 4, cv::KAZE::DIFF_PM_G2);
+
+    // Compute feature and their descriptor
+    akaze->detectAndCompute(*image, *mask, *keypoints, *desc);
+
+}
+
+void utilesGMSMatcher(std::vector<cv::KeyPoint>* k1, cv::Mat* d1, cv::Size s1, std::vector<cv::KeyPoint>* k2, cv::Mat* d2, cv::Size s2, std::vector<cv::DMatch> *matches) {
+
+    // Raw matches
+    std::vector<cv::DMatch> matches_all;
+
+    // Instance brute-force matcher
+    cv::BFMatcher matcher(cv::NORM_HAMMING, true);
+
+    // GMS matcher inliers
+	std::vector<bool> vbInliers;
+
+    // Clear previous matches
+    matches->clear();
+
+    // Features matching
+    //
+    // Second param is boolean variable, crossCheck which is false by default.
+    // If it is true, Matcher returns only those matches with value (i,j) such
+    // that i-th descriptor in set A has j-th descriptor in set B as the best
+    // match and vice-versa. That is, the two features in both sets should match
+    // each other. It provides consistent result, and is a good alternative to
+    // ratio test proposed by D.Lowe in SIFT paper.
+	matcher.match(*d1, *d2, matches_all);
+
+    // Display matching summary
+    std::cerr << "Feat 1 : " << k1->size() << " | Feat 2 : " << k2->size() << " | Match : " << matches_all.size();
+
+	// GMS filtering on matches
+	gms_matcher gms(*k1, s1, *k2, s2, matches_all);
+
+    // Retrieve inliers flags
+	gms.GetInlierMask(vbInliers, true, true);
+
+    // Filter matches based on GMS filter
+	for (size_t i = 0; i < vbInliers.size(); ++i) {
+
+        // Detect inlier and push to the filtered match array
+		if (vbInliers[i] == true) matches->push_back(matches_all[i]);
+
+	}
+
+    // Display matches filtering summary
+    std::cerr << " | Filter : " << matches->size() << std::endl;
+
+}
+
+double utilesDetectMotion(std::vector<cv::KeyPoint> *kp1, std::vector<cv::KeyPoint> *kp2, std::vector<cv::DMatch> *matches, cv::Size size) {
+
+	// Vector containing the distances for each pair of features
+	std::vector<double> vec_dist {};
+
+	// loop over the vector of matches
+	for (const auto &m : *matches) {
+
+		auto width = size.width;
+		auto height = size.height;
+
+		// m.queryIdx is the index of the Keypoints on the first image
+		// m.trainIdx is the index of the Keypoints on the second image
+
+		// Convert cartesian to spherical
+		// Spherical coordinate of the feature on the first image
+		Eigen::Vector3d  p1 = utilesDirection(static_cast<double>((*kp1)[m.queryIdx].pt.x), static_cast<double>((*kp1)[m.queryIdx].pt.y), width, height);
+		// Spherical coordinate of the feature on the second image
+		Eigen::Vector3d  p2 = utilesDirection(static_cast<double>((*kp2)[m.trainIdx].pt.x), static_cast<double>((*kp2)[m.trainIdx].pt.y), width, height);
+
+		// p1*p2 computes the dot product between p1 and p2
+		// push it to vector of distances
+		vec_dist.push_back(acos(p1.dot(p2)));
+
+	}
+
+	// calculation of the mean value
+	double m { std::accumulate(vec_dist.begin(), vec_dist.end(), 0.0) / vec_dist.size() };
+
+	// calculation of variance
+	double var { 0.0 };
+	for (const auto & val : vec_dist) {
+		var += pow(val - m, 2);
+	}
+
+	// check error to avoid division by 0
+	if (vec_dist.size() <= 1) {
+		throw(std::runtime_error("Number of features is less or equal to 1"));
+	}
+	var /= (vec_dist.size() - 1);
+
+	// calculation of std
+	double vec_std = sqrt(var);
+
+	// return mean * std
+	return m * vec_std;
+
+}
+
+//
+//  Dense features
+//
 
 double bilinear_sample(double *p, double x, double y, int width){
     int ix = x;
@@ -64,76 +207,5 @@ float bilinear_sample(float *p, float x, float y, int width){
     float fy = y-iy;
 
     return  (p[i00]*(1.0f-fx) + p[i01]*fx)*(1.0f-fy) + (p[i10]*(1.0f-fx) + p[i11]*fx)*fy;
-}
-
-void utiles_directories( std::string rootPath, std::string modeName ) {
-
-    // Sub-sequent path variable
-    std::string modePath( rootPath + "/" + modeName );
-
-    // Create directories
-    fs::create_directories( rootPath.c_str() );
-    fs::create_directory  ( modePath.c_str() );
-
-    // Specific directory
-    if (modeName == "dense" ){
-
-        // Create path
-        modePath = rootPath + "/cache";
-
-        // Create directory
-        fs::create_directory( modePath.c_str() );
-
-    }
-
-}
-
-double utilesDetectMotion(std::vector<cv::KeyPoint> *kp1, std::vector<cv::KeyPoint> *kp2, std::vector<cv::DMatch> *matches, cv::Size size) {
-
-	// Vector containing the distances for each pair of features
-	std::vector<double> vec_dist {};
-
-	// loop over the vector of matches
-	for (const auto &m : *matches) {
-
-		auto width = size.width;
-		auto height = size.height;
-
-		// m.queryIdx is the index of the Keypoints on the first image
-		// m.trainIdx is the index of the Keypoints on the second image
-
-		// Convert cartesian to spherical
-		// Spherical coordinate of the feature on the first image
-		Eigen::Vector3d  p1 = utiles_direction(static_cast<double>((*kp1)[m.queryIdx].pt.x), static_cast<double>((*kp1)[m.queryIdx].pt.y), width, height);
-		// Spherical coordinate of the feature on the second image
-		Eigen::Vector3d  p2 = utiles_direction(static_cast<double>((*kp2)[m.trainIdx].pt.x), static_cast<double>((*kp2)[m.trainIdx].pt.y), width, height);
-
-		// p1*p2 computes the dot product between p1 and p2
-		// push it to vector of distances
-		vec_dist.push_back(acos(p1.dot(p2)));
-
-	}
-
-	// calculation of the mean value
-	double m { std::accumulate(vec_dist.begin(), vec_dist.end(), 0.0) / vec_dist.size() };
-
-	// calculation of variance
-	double var { 0.0 };
-	for (const auto & val : vec_dist) {
-		var += pow(val - m, 2);
-	}
-
-	// check error to avoid division by 0
-	if (vec_dist.size() <= 1) {
-		throw(std::runtime_error("Number of features is less or equal to 1"));
-	}
-	var /= (vec_dist.size() - 1);
-
-	// calculation of std
-	double vec_std = sqrt(var);
-
-	// return mean * std
-	return m * vec_std;
-
 }
 
