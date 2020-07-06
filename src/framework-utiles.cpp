@@ -94,13 +94,6 @@ void utilesGMSMatcher(std::vector<cv::KeyPoint>* k1, cv::Mat* d1, cv::Size s1, s
     matches->clear();
 
     // Features matching
-    //
-    // Second param is boolean variable, crossCheck which is false by default.
-    // If it is true, Matcher returns only those matches with value (i,j) such
-    // that i-th descriptor in set A has j-th descriptor in set B as the best
-    // match and vice-versa. That is, the two features in both sets should match
-    // each other. It provides consistent result, and is a good alternative to
-    // ratio test proposed by D.Lowe in SIFT paper.
 	matcher.match(*d1, *d2, matches_all);
 
     // Display matching summary

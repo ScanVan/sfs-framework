@@ -35,6 +35,27 @@ cv::Mat * Viewpoint::getImage(){
 
 }
 
+std::vector<cv::KeyPoint> * Viewpoint::getCvFeatures(){
+
+    // Return features array
+    return &cvFeatures;
+
+}
+
+Feature * Viewpoint::getFeatureFromCvIndex(int index){
+
+    // Return feature by index
+    return features[index];
+
+}
+
+cv::Mat * Viewpoint::getCvDescriptor(){
+
+    // Return descriptor array
+    return &cvDescriptor;
+
+}
+
 Eigen::Matrix3d * Viewpoint::getOrientation(){
 
     // Return orientation matrix pointer
@@ -61,6 +82,13 @@ void Viewpoint::resetFrame(){
     // Reset orientation and position
     orientation=Eigen::Matrix3d::Identity();
     position=Eigen::Vector3d::Zero();
+
+}
+
+void Viewpoint::addFeature(Feature * newFeature){
+
+    // Push features
+    features.push_back(newFeature);
 
 }
 

@@ -48,21 +48,25 @@ public:
     /* To be moved in cpp */
 	//cv::Mat* getImage(){return &this->image;}
     //void releaseImage(){image.deallocate();}
-	void setCvFeatures(std::vector<cv::KeyPoint> &image){this->cvFeatures = cvFeatures;}
-    std::vector<cv::KeyPoint>* getCvFeatures(){return &this->cvFeatures;}
-	void setCvDescriptor(cv::Mat &image){this->cvDescriptor = cvDescriptor;}
-	cv::Mat* getCvDescriptor(){return &this->cvDescriptor;}
+	//void setCvFeatures(std::vector<cv::KeyPoint> &image){this->cvFeatures = cvFeatures;}
+    //std::vector<cv::KeyPoint>* getCvFeatures(){return &this->cvFeatures;}
+	//void setCvDescriptor(cv::Mat &image){this->cvDescriptor = cvDescriptor;}
+	//cv::Mat* getCvDescriptor(){return &this->cvDescriptor;}
 	//void setPosition(Eigen::Vector3d position){this->position = position;}
-	std::vector<Feature*> *getFeatures() { return &features; }
-    void addFeature(Feature *f){ features.push_back(f);  }
-    Feature *getFeatureFromCvIndex(uint32_t i){ return features[i]; }
+	//std::vector<Feature*> *getFeatures() { return &features; }
+    //void addFeature(Feature *f){ features.push_back(f);  }
+    //Feature *getFeatureFromCvIndex(uint32_t i){ return features[i]; }
 
     unsigned int getIndex();
     cv::Mat * getImage();
+    std::vector<cv::KeyPoint> * getCvFeatures();
+    Feature * getFeatureFromCvIndex(int index);
+    cv::Mat * getCvDescriptor();
     Eigen::Matrix3d * getOrientation();
     Eigen::Vector3d * getPosition();
     void releaseImage();
     void resetFrame();
+    void addFeature(Feature * newFeature);
     void setIndex(unsigned int newIndex);
     bool setImage(std::string imagePath, double imageScale);
     void setPose(Eigen::Matrix3d newOrientation, Eigen::Vector3d newPosition);
