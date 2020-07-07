@@ -158,7 +158,6 @@ void Database::aggregate(std::vector<std::shared_ptr<Viewpoint>> *localViewpoint
     uint32_t structureFusionCount = 0;
     uint32_t *viewpointsUsage = new uint32_t[viewpoints.size() + 1];
     memset(viewpointsUsage, -1, (viewpoints.size() + 1)*sizeof(uint32_t));
-    newViewpoint->setIndex(viewpoints.size());
 
     // loop on new viewpoint feature
     for(uint32_t queryIdx = 0;queryIdx < newViewpoint->features.size(); queryIdx++){

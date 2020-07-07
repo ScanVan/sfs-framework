@@ -47,6 +47,9 @@ bool FrontendPicture::next() {
         // Create viewpoint from source
         newViewpoint = source->next();
 
+        // Assign viewpoint index
+        newViewpoint->setIndex(database->viewpoints.size());
+
         // Compute image features and descriptors
         utilesAKAZEFeatures(newViewpoint->getImage(), &mask, newViewpoint->getCvFeatures(), newViewpoint->getCvDescriptor(), sparseThreshold);
 
@@ -70,7 +73,7 @@ bool FrontendPicture::next() {
 			    &lastViewpointMatches,
 			    lastViewpoint->getImage()->size()
 		    );
-            if(score >= 0.002){ // Old value : 0.0005
+            if(score >= 0.005){ // Old value : 0.0005, 0.002
                 hasViewpoint=true;
 		    }
 	    }else{
