@@ -279,27 +279,6 @@ void Structure::computeOptimalPosition(unsigned int lowViewpoint){
 
 }
 
-//void Structure::computeOptimalPosition(){
-//    Eigen::Vector3d acc(Eigen::Vector3d::Zero());
-//    unsigned int count(0);
-//
-//    for(unsigned int i(0); i<features.size(); i++){
-//        for(unsigned int j(i+1); j<features.size(); j++){
-//
-//            acc+=compute_intersection(
-//                features[i]->getViewpoint()->getPosition(),
-//                features[i]->getModel(),
-//                features[j]->getViewpoint()->getPosition(),
-//                features[j]->getModel()
-//            );
-//            count++;
-//
-//        }
-//    }
-//    position=acc/count;
-//    optimised=true;
-//}
-
 void Structure::computeRadius(unsigned int lowViewpoint){
     
     // Feature position in absolute frame

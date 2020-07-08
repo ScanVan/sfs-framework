@@ -73,7 +73,7 @@ bool FrontendPicture::next() {
 			    &lastViewpointMatches,
 			    lastViewpoint->getImage()->size()
 		    );
-            if(score >= 0.005){ // Old value : 0.0005, 0.002
+            if(score >= 0.002){ // Old value : 0.0005, 0.002
                 hasViewpoint=true;
 		    }
 	    }else{
