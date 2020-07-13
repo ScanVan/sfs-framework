@@ -596,7 +596,9 @@ void Database::computeDisparityStatistics(int pipeState){ /* param not needed */
     // Compute mean value and detect max value
     for(unsigned int i=rangeSlow; i<=rangeShigh; i++){
         if(structures[i]->getState()>=stateStructure){
-            countValue+=structures[i]->computeDisparityMean(&meanValue,rangeVlow);
+            if(structures[i]->getHasScale(configGroup)){
+                countValue+=structures[i]->computeDisparityMean(&meanValue,rangeVlow);
+            }
         }
     }
 
@@ -606,7 +608,9 @@ void Database::computeDisparityStatistics(int pipeState){ /* param not needed */
     // Compute standard deviation value
     for(unsigned int i=rangeSlow; i<=rangeShigh; i++){
         if(structures[i]->getState()>=stateStructure){
-            structures[i]->computeDisparityStd(&stdValue,meanValue,rangeVlow);
+            if(structures[i]->getHasScale(configGroup)){
+                structures[i]->computeDisparityStd(&stdValue,meanValue,rangeVlow);
+            }
         }
     }
 

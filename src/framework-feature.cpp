@@ -86,7 +86,7 @@ void Feature::setRadius(double newRadius, double newDisparity){
     radius=newRadius;
 
     // Compute and assign normalised disparity
-    disparity=newDisparity/newRadius;
+    disparity=newDisparity;
 
 }
 

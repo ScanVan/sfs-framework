@@ -292,7 +292,9 @@ void Structure::computeRadius(unsigned int lowViewpoint){
         if(feature->getViewpoint()->getIndex()>=lowViewpoint){
             vector=position-(*feature->getViewpoint()->getPosition());
             radius=(*feature->getModel()).dot(vector);
-            feature->setRadius(radius,(vector-(*feature->getModel())*radius).norm());
+            vector/=vector.norm();
+            feature->setRadius(radius,acos(vector.dot(*feature->getModel())));
+
         }
     }
 
