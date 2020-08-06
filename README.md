@@ -69,6 +69,26 @@ At the end of the odometry computation process, the following sparse model shoul
 </p>
 <br />
 
+As the images odometry is computed, the dense model can be computed. The densification consists to take advantage of the odometry to place as many images pixels in the three dimensional space to produce a representative model. To start the computation of the densification, simply change the _YAML_ configuration line type :
+
+    type: sparse
+
+to :
+
+    type: dense
+
+and use the same command as for the computation of the odometry. The densification is performed using the third-party optical flow library, which consumes memory and takes time. At the end of the densification process, the following model should be obtained :
+
+<br />
+<p align="center">
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/dense-1.jpg?raw=true" width="384">
+&nbsp;
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/dense-2.jpg?raw=true" width="384">
+<br />
+<i>Example of dense model obtain with a sequence of five spherical images</i>
+</p>
+<br />
+
 
 # Copyright and License
 
