@@ -17,12 +17,13 @@ Summary of the _ScanVan Project_ codes :
 * [Camera images debayering](https://github.com/ScanVan/ConvertRawToBmp)
 * [Panoramic images computation](https://github.com/ScanVan/Equirectangular-CPP)
 * [Structure from spheres pipeline](https://github.com/ScanVan/sfs-framework)
+* [Spherical dataset example](https://github.com/ScanVan/sfs-framework-example)
 
 These codes and the physical camera give access to a full city digitization pipeline. Other codes were implemented during the research phase and can be found [here](https://github.com/ScanVan).
 
 # sfs-framework
 
-As an example of the _sfs-framework_ usage, a small set of _spherical images_ is used. These images are produced by the spherical central camera built during the _ScanVan project_. The following illustrations show a summary of the images used for this example :
+As an example of the _sfs-framework_ usage, a small set of _spherical images_ is used. These images are produced by the spherical central camera built during the _ScanVan Project_. The following illustrations show a summary of the images used for this example :
 
 <br />
 <p align="center">
@@ -34,30 +35,37 @@ As an example of the _sfs-framework_ usage, a small set of _spherical images_ is
 </p>
 <br />
 
-The spherical images dataset along with the input configuration and pipeline outputs are accessible in [this repository](empty) as a result of this usage example.
+The following image shows the prototype of the central spherical camera built during the project :
 
-As a first step, a directories structure is created for the images, the mask and the pipeline outputs :
+<br />
+<p align="center">
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/20190319-103833-344893.jpg?raw=true" width="384">
+<i>Central spherical camera prototype</i>
+</p>
+<br />
+
+The used images along with all input configuration and pipeline outputs of the presented example case are available in the [following repository](https://github.com/ScanVan/sfs-framework-example) as a reference.
+
+As a first step, a directories structure is created for the images, the configuration, the mask and the pipeline outputs :
 
     mkdir -p ~/sfs-framework-example/image
     mkdir -p ~/sfs-framework-example/output
 
-Place the spherical images in the _image_ directory. The pipeline uses the alphabetical order to import the images.
+Simply place the spherical images in the _image_ directory. The pipeline uses the alphabetical order to import and process the images.
 
-As the camera acquire almost everything surrounding it, it also capture part of itself and the vehicle on which it is mounted. This is the reason a mask image is provided to the pipeline to indicates the pixel areas to drop during reconstruction process. In the example, the mask is placed as follows :
+As the camera acquire almost everything surrounding it, it also capture part of itself and the vehicle on which it is mounted. A mask image is then provided to the pipeline to indicates the pixel areas to drop during reconstruction process. In the example, the mask is placed as follows :
 
     ~/sfs-framework-example/mask.png
 
-The configuration of the pipeline for this set of image is provided through a _YAML_ file that is placed as follows :
+The configuration of the pipeline for this set of images is provided through a _YAML_ file stored in the main directory. The detail of its content can be found in the _YAML_ file provided with the example dataset.
 
     ~/sfs-framework-example/config.yaml
 
-The next step consists in computed the odometry of the images which produces a sparse model. The computation of the odometry is made to compute the relative rotation and translation that appears between the image. The frame in which this position and orientation are expressed is the frame of the first image. To start the odometry computation, the following command can be used :
+The next step consists in computing the odometry of the images which produces a sparse model. The computation of the odometry is made to compute the relative rotations and translations that appear between the images. The frame in which this position and orientation are expressed is the frame of the first image. To start the odometry computation, the following command can be used :
 
-    bin/sfs-framework ~/sfs-framework-example/config.yaml 2>&1 | tee -a ~/sfs-framework-example/output/logs
+    bin/sfs-framework ~/sfs-framework-example/config.yaml
 
-which allows to print everything on the terminal and in the provided log file.
-
-At the end of the odometry computation process, the following sparse model should be obtained :
+At the end of the odometry computation process, the following sparse model, located in the _output_ directory through the *sparse_structure.xyz* file, should be obtained :
 
 <br />
 <p align="center">
@@ -69,12 +77,10 @@ At the end of the odometry computation process, the following sparse model shoul
 </p>
 <br />
 
-As the images odometry is computed, the dense model can be computed. The densification consists to take advantage of the odometry to place as many images pixels in the three dimensional space to produce a representative model. To start the computation of the densification, simply change the _YAML_ configuration line type :
+As the odometry is computed, the dense model can be computed. The densification takes advantage of the odometry to place as many images pixels in the three dimensional space as possible to produce a representative model. To start the computation of the densification, simply change the _YAML_ configuration line :
 
     type: sparse
-
-to :
-
+    ->
     type: dense
 
 and use the same command as for the computation of the odometry. The densification is performed using the third-party optical flow library, which consumes memory and takes time. At the end of the densification process, the following model should be obtained :
