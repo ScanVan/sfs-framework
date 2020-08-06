@@ -89,6 +89,11 @@ and use the same command as for the computation of the odometry. The densificati
 </p>
 <br />
 
+The proposed pipeline remains experimental. As a first limitation, the pipeline only rely on the image order to performed the reconstruction. It is then a purely sequential process that rely on the order of the images. The pipeline does not check for _loop-closing_ and is not able to establish the full connectivity graph of the provided images, which limits is applicability.
+
+The second limitation comes from the implemented algorithm. Despite the great advantage of its simplicity, it is difficult to establish its stability only on the tests we made. As it relies on the centrality of the camera acquiring the images, it is not clear how far it is able to deal with non-central images. In addition, it is not clear how far it can limits the error drift as more and more images are added to the sequence.
+
+As a conclusion, this approach looks promising and the surprising simplicity of such algorithm to deduce three dimensional model from images sequences is very interesting. Nevertheless, year of research and testing are still required to ensure a reliable and operational spherical pipeline.
 
 # Copyright and License
 
