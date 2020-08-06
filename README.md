@@ -1,7 +1,5 @@
 # Overview
 
-_Note : This framework is under active developments. The master branch contains the current state of the framework._
-
 This framework implements an experimental structure from motion pipeline designed for _true_ spherical image. From an sequence of _true_ spherical images, the pipeline is designed to take advantage of the specificity of such images to compute the 3D structure of the environment captured on the images. It implement a novel optimization algorithm that is able to deduce the pose of the image based on the matching features.
 
 The considered _true_ spherical images are characterized by the centrality of the camera that captured them. A camera able to capture _true_ spherical is then understood as a camera that focus all rays of light on the same and unique focal point, producing parallax-free panoramic images.
@@ -24,19 +22,21 @@ These codes and the physical camera give access to a full city digitization pipe
 
 # sfs-framework
 
-To illustrate the pipeline results, the following spherical image are used. They are produced by the spherical central camera built during the _ScanVan Project_ that is able to produce _true_ spherical images. The following images shows example of such images in equirectangular projection :
+As an example, a small set of _spherical images_ is used here. These images are produced by the spherical central camera built during the _ScanVan project_. The following illustration shows a summary of the images used for this example :
 
 <br />
 <p align="center">
-<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/20200220-155121-476244.jpg?raw=true" width="384">
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/20190319-103833-344893.jpg?raw=true" width="384">
 &nbsp;
-<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/20200220-155121-726279.jpg?raw=true" width="384">
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/20190319-103833-594895.jpg?raw=true" width="384">
 <br />
-<i>Example of central spherical camera images sequence</i>
+<i>Illustration of the spherical images dataset</i>
 </p>
 <br />
 
-As the camera acquire almost everything surrounding it, it also capture part of itself and the vehicle on which it is mounted. This parts have been hidden on the previous images and replaced by extrapolated pixels.
+The spherical images dataset along with the input configuration and pipeline outputs are accessible in the [this repository](empty).
+
+As the camera acquire almost everything surrounding it, it also capture part of itself and the vehicle on which it is mounted. This is the reason a mask image is provided to the pipeline to indicates the pixel areas to drop during reconstruction process.
 
 The pipeline starts by computing a sparse model using traditional features (_AKAZE_) in small amount. This allows to compute the odometry of the camera. In order to improve the performances, the pipeline assumes that the images are acquired in continuous sequence. It is also able to remove _duplicated images_ in order to take into account the effect of traffic and traffic lights during image acquisition.
 
