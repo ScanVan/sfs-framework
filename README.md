@@ -35,7 +35,7 @@ As an example of the _sfs-framework_ usage, a small set of _spherical images_ is
 </p>
 <br />
 
-The following image shows the prototype of the central spherical camera built during the project :
+The images are all expected to be in equirectangular representation. The following image shows the prototype of the central spherical camera built during the project :
 
 <br />
 <p align="center">
@@ -62,7 +62,7 @@ The configuration of the pipeline for this set of images is provided through a _
 
     ~/sfs-framework-example/config.yaml
 
-The next step consists in computing the odometry of the images which produces a sparse model. The computation of the odometry is made to compute the relative rotations and translations that appear between the images. The frame in which this position and orientation are expressed is the frame of the first image. To start the odometry computation, the following command can be used :
+The next step consists in computing the odometry of the images which produces a sparse model. The computation of the odometry is made to compute the relative rotations and translations that appear between the images. The frame in which the position and orientation are expressed is the frame of the first image. To start the odometry computation, the following command can be used :
 
     bin/sfs-framework ~/sfs-framework-example/config.yaml
 
