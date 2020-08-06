@@ -16,7 +16,7 @@ Summary of the _ScanVan Project_ codes :
 * [Camera images acquisition](https://github.com/ScanVan/CameraImageAcquisition-CPP)
 * [Camera images debayering](https://github.com/ScanVan/ConvertRawToBmp)
 * [Panoramic images computation](https://github.com/ScanVan/Equirectangular-CPP)
-* [Structure from spheres pipeline](https://github.com/ScanVan/sfs-framework)
+* [Structure from spheres framework](https://github.com/ScanVan/sfs-framework)
 * [Spherical dataset example](https://github.com/ScanVan/sfs-framework-example)
 
 These codes and the physical camera give access to a full city digitization pipeline. Other codes were implemented during the research phase and can be found [here](https://github.com/ScanVan).
