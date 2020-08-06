@@ -22,7 +22,7 @@ These codes and the physical camera give access to a full city digitization pipe
 
 # sfs-framework
 
-As an example, a small set of _spherical images_ is used here. These images are produced by the spherical central camera built during the _ScanVan project_. The following illustration shows a summary of the images used for this example :
+As an example of the _sfs-framework_ usage, a small set of _spherical images_ is used. These images are produced by the spherical central camera built during the _ScanVan project_. The following illustrations show a summary of the images used for this example :
 
 <br />
 <p align="center">
@@ -34,41 +34,41 @@ As an example, a small set of _spherical images_ is used here. These images are 
 </p>
 <br />
 
-The spherical images dataset along with the input configuration and pipeline outputs are accessible in the [this repository](empty).
+The spherical images dataset along with the input configuration and pipeline outputs are accessible in [this repository](empty) as a result of this usage example.
 
-As the camera acquire almost everything surrounding it, it also capture part of itself and the vehicle on which it is mounted. This is the reason a mask image is provided to the pipeline to indicates the pixel areas to drop during reconstruction process.
+As a first step, a directories structure is created for the images, the mask and the pipeline outputs :
 
-The pipeline starts by computing a sparse model using traditional features (_AKAZE_) in small amount. This allows to compute the odometry of the camera. In order to improve the performances, the pipeline assumes that the images are acquired in continuous sequence. It is also able to remove _duplicated images_ in order to take into account the effect of traffic and traffic lights during image acquisition.
+    mkdir -p ~/sfs-framework-example/image
+    mkdir -p ~/sfs-framework-example/output
 
-The following images gives an example of a computed odometry and its sparse model on a small sequence of images :
+Place the spherical images in the _image_ directory. The pipeline uses the alphabetical order to import the images.
+
+As the camera acquire almost everything surrounding it, it also capture part of itself and the vehicle on which it is mounted. This is the reason a mask image is provided to the pipeline to indicates the pixel areas to drop during reconstruction process. In the example, the mask is placed as follows :
+
+    ~/sfs-framework-example/mask.png
+
+The configuration of the pipeline for this set of image is provided through a _YAML_ file that is placed as follows :
+
+    ~/sfs-framework-example/config.yaml
+
+The next step consists in computed the odometry of the images which produces a sparse model. The computation of the odometry is made to compute the relative rotation and translation that appears between the image. The frame in which this position and orientation are expressed is the frame of the first image. To start the odometry computation, the following command can be used :
+
+    bin/sfs-framework ~/sfs-framework-example/config.yaml 2>&1 | tee -a ~/sfs-framework-example/output/logs
+
+which allows to print everything on the terminal and in the provided log file.
+
+At the end of the odometry computation process, the following sparse model should be obtained :
 
 <br />
 <p align="center">
-<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/sparse-1.png?raw=true" width="384">
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/sparse-1.jpg?raw=true" width="384">
 &nbsp;
-<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/sparse-2.png?raw=true" width="384">
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/sparse-2.jpg?raw=true" width="384">
 <br />
-<i>Example of sparse model obtain with a 20 image sequence</i>
+<i>Example of sparse model obtain with a sequence of five spherical images</i>
 </p>
 <br />
 
-The blue dots are associated to the computed camera position while the other points are colored according to the quality of the constraint that led to their placement in the 3D space.
-
-Based on the computed odometry, the pipeline is able to produce dense model using _optical flow_ to derive dense matching between the connected images. As the odometry is known, this allows to place the dense matches in the 3D space with limited computation. The following images gives an illustration of the obtained result on the previous example :
-
-<br />
-<p align="center">
-<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/dense-1.png?raw=true" width="384">
-&nbsp;
-<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/dense-2.png?raw=true" width="384">
-<br />
-<i>Example of dense model obtain with a 20 image sequence</i>
-</p>
-<br />
-
-The color are assigned in the same way as for the sparse model.
-
-The _following page (in preparation)_ gives you the detailed instructions to use the pipeline on a set of spherical images.
 
 # Copyright and License
 
