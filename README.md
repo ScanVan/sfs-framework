@@ -39,7 +39,8 @@ The following image shows the prototype of the central spherical camera built du
 
 <br />
 <p align="center">
-<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/20190319-103833-344893.jpg?raw=true" width="384">
+<img src="https://github.com/ScanVan/sfs-framework/blob/master/doc/camera.jpg?raw=true" width="384">
+<br />
 <i>Central spherical camera prototype</i>
 </p>
 <br />
